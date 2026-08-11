@@ -1,0 +1,15 @@
+.root {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.search {
+  flex: 1;
+  min-width: 14rem;
+}
+
+.select {
+  min-width: 10rem;
+}

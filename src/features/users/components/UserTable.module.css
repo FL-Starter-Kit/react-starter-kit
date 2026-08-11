@@ -1,0 +1,71 @@
+.scroll {
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.table {
+  font-size: var(--text-sm);
+  min-width: 40rem;
+}
+
+.table th,
+.table td {
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+}
+
+.table thead th {
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-subtle);
+  background-color: var(--color-bg-subtle);
+}
+
+.table tbody tr:last-child th,
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: var(--color-surface-hover);
+}
+
+.caption {
+  caption-side: top;
+  text-align: left;
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+
+.name {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.actions {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.action {
+  padding: var(--space-1-5) var(--space-2-5);
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-link);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  cursor: pointer;
+}
+
+.action:hover {
+  text-decoration: underline;
+}
+
+.danger {
+  color: var(--color-danger);
+}

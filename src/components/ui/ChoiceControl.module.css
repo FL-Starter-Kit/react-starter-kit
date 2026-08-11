@@ -1,0 +1,114 @@
+/* Checkbox + Radio + Switch shared styles */
+
+.control {
+  width: 1.125rem;
+  height: 1.125rem;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.control:focus-visible {
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.group {
+  border: none;
+  margin: 0;
+  padding: 0;
+}
+
+.legend {
+  margin-bottom: var(--space-2);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text);
+}
+
+.option {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2-5);
+  padding: var(--space-2) 0;
+  cursor: pointer;
+}
+
+.option:has(.radio:focus-visible) {
+  border-radius: var(--radius-sm);
+  outline: var(--focus-outline-width) solid var(--color-focus-ring);
+  outline-offset: var(--focus-outline-offset);
+}
+
+.radio {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-top: 0.15rem;
+  accent-color: var(--color-primary);
+}
+
+.optionText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+  font-size: var(--text-sm);
+}
+
+.hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-faint);
+}
+
+.invalidOption {
+  color: var(--color-danger);
+}
+
+/* ---- Switch ---- */
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: 2.75rem;
+  height: 1.5rem;
+  padding: 0;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface-hover);
+  cursor: pointer;
+  transition:
+    background-color var(--transition-fast) var(--ease-out),
+    border-color var(--transition-fast) var(--ease-out);
+}
+
+.switch:hover:not(:disabled) {
+  border-color: var(--color-text-faint);
+}
+
+.switch:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.switchOn {
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+.switchOn:hover:not(:disabled) {
+  background-color: var(--color-primary-hover);
+}
+
+.switchThumb {
+  display: block;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-left: 2px;
+  border-radius: var(--radius-full);
+  background-color: var(--color-surface);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--transition-fast) var(--ease-out);
+}
+
+.switchOn .switchThumb {
+  transform: translateX(1.25rem);
+}

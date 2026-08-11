@@ -1,0 +1,206 @@
+/* ==========================================================================
+   Design tokens — the single source of truth for all visual decisions.
+   Use these variables in components; never hard-code raw values.
+   Light theme is the default on :root; dark theme via [data-theme="dark"].
+   ========================================================================== */
+
+:root {
+  /* ---- Color: semantic primitives (light) ---- */
+  --color-bg: #ffffff;
+  --color-bg-subtle: #f4f5f7;
+  --color-surface: #ffffff;
+  --color-surface-hover: #eef0f3;
+  --color-border: #d0d5dc;
+  --color-border-strong: #98a2b3;
+
+  --color-text: #101828;
+  --color-text-subtle: #475467;
+  --color-text-faint: #667085;
+
+  --color-primary: #1d4ed8;
+  --color-primary-hover: #1e40af;
+  --color-primary-active: #1e3a8a;
+  --color-on-primary: #ffffff;
+
+  --color-secondary: #475467;
+  --color-secondary-hover: #344054;
+
+  --color-success: #067647;
+  --color-success-bg: #ecfdf3;
+  --color-success-border: #abefc6;
+
+  --color-warning: #b54708;
+  --color-warning-bg: #fffaeb;
+  --color-warning-border: #fedf89;
+
+  --color-danger: #b42318;
+  --color-danger-hover: #912018;
+  --color-danger-bg: #fef3f2;
+  --color-danger-border: #fecdca;
+  --color-on-danger: #ffffff;
+
+  --color-info: #175cd3;
+  --color-info-bg: #eff8ff;
+  --color-info-border: #b2ddff;
+
+  --color-focus-ring: #1d4ed8;
+  --color-link: #175cd3;
+  --color-link-hover: #1849a9;
+
+  --color-overlay: rgb(16 24 40 / 0.5);
+
+  /* ---- Spacing scale (4px base) ---- */
+  --space-0: 0;
+  --space-0-5: 0.125rem;
+  --space-1: 0.25rem;
+  --space-1-5: 0.375rem;
+  --space-2: 0.5rem;
+  --space-2-5: 0.625rem;
+  --space-3: 0.75rem;
+  --space-3-5: 0.875rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-8: 2rem;
+  --space-10: 2.5rem;
+  --space-12: 3rem;
+  --space-16: 4rem;
+  --space-20: 5rem;
+  --space-24: 6rem;
+
+  /* ---- Typography ---- */
+  --font-sans: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, Consolas, monospace;
+
+  --text-xs: 0.75rem;
+  --text-sm: 0.875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.625;
+
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* ---- Border radius ---- */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-full: 9999px;
+
+  /* ---- Shadows ---- */
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.1);
+  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.1), 0 4px 6px -4px rgb(16 24 40 / 0.1);
+  --shadow-focus: 0 0 0 3px rgb(29 78 216 / 0.35);
+
+  /* ---- Z-index scale ---- */
+  --z-sticky: 100;
+  --z-header: 200;
+  --z-drawer: 300;
+  --z-dialog: 400;
+  --z-toast: 500;
+  --z-skip-link: 600;
+
+  /* ---- Breakpoints (min-width) ---- */
+  --bp-sm: 640px;
+  --bp-md: 768px;
+  --bp-lg: 1024px;
+  --bp-xl: 1280px;
+  --bp-2xl: 1536px;
+
+  /* ---- Transitions ---- */
+  --transition-fast: 120ms;
+  --transition-base: 200ms;
+  --transition-slow: 320ms;
+  --ease-out: cubic-bezier(0.2, 0, 0, 1);
+  --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* ---- Focus ---- */
+  --focus-outline-width: 2px;
+  --focus-outline-offset: 2px;
+
+  /* ---- Layout ---- */
+  --container-max-width: 1200px;
+  --header-height: 4rem;
+}
+
+/* ---- Dark theme ---- */
+[data-theme='dark'] {
+  --color-bg: #0f1115;
+  --color-bg-subtle: #161a20;
+  --color-surface: #1a1f26;
+  --color-surface-hover: #232933;
+  --color-border: #333b46;
+  --color-border-strong: #4a5462;
+
+  --color-text: #f0f2f5;
+  --color-text-subtle: #b6bec9;
+  --color-text-faint: #8b95a3;
+
+  --color-primary: #60a5fa;
+  --color-primary-hover: #93c5fd;
+  --color-primary-active: #3b82f6;
+  --color-on-primary: #0b1220;
+
+  --color-secondary: #9aa4b2;
+  --color-secondary-hover: #b6bec9;
+
+  --color-success: #6ce9a6;
+  --color-success-bg: #0d2b1c;
+  --color-success-border: #1d5c3c;
+
+  --color-warning: #fcd34d;
+  --color-warning-bg: #33290a;
+  --color-warning-border: #6b5510;
+
+  --color-danger: #fda29b;
+  --color-danger-hover: #fecaca;
+  --color-danger-bg: #3d1512;
+  --color-danger-border: #7a271a;
+  --color-on-danger: #1a0807;
+
+  --color-info: #7ab7ff;
+  --color-info-bg: #10243c;
+  --color-info-border: #1e4d7a;
+
+  --color-focus-ring: #60a5fa;
+  --color-link: #7ab7ff;
+  --color-link-hover: #a5ccff;
+
+  --color-overlay: rgb(0 0 0 / 0.6);
+
+  --shadow-xs: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-sm: 0 1px 3px rgb(0 0 0 / 0.5), 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 8px -2px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 12px 16px -4px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.4);
+  --shadow-focus: 0 0 0 3px rgb(96 165 250 / 0.4);
+}
+
+/* ---- High contrast (when the user requests it) ---- */
+@media (prefers-contrast: more) {
+  :root {
+    --color-border: #667085;
+    --color-border-strong: #475467;
+    --color-text-subtle: #1f2937;
+    --color-focus-ring: var(--color-text);
+  }
+
+  [data-theme='dark'] {
+    --color-border: #b6bec9;
+    --color-border-strong: #d0d5dc;
+    --color-text-subtle: #e4e7eb;
+    --color-focus-ring: var(--color-text);
+  }
+}

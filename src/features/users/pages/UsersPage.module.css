@@ -1,0 +1,21 @@
+.inlineAlert {
+  margin-bottom: var(--space-4);
+}
+
+.results {
+  margin-top: var(--space-6);
+}
+
+.skeletonTable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding: var(--space-4);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background-color: var(--color-surface);
+}
+
+.pagination {
+  margin-top: var(--space-5);
+}

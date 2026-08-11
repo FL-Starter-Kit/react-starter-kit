@@ -1,0 +1,38 @@
+.trigger {
+  position: relative;
+  display: inline-flex;
+}
+
+.tooltip {
+  position: absolute;
+  bottom: calc(100% + var(--space-1-5));
+  left: 50%;
+  transform: translateX(-50%) translateY(2px);
+  max-width: 16rem;
+  padding: var(--space-1-5) var(--space-2-5);
+  background-color: var(--color-text);
+  color: var(--color-bg);
+  border-radius: var(--radius-sm);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+  box-shadow: var(--shadow-md);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--transition-fast) var(--ease-out),
+    transform var(--transition-fast) var(--ease-out),
+    visibility var(--transition-fast);
+  pointer-events: none;
+  z-index: var(--z-sticky);
+  white-space: nowrap;
+}
+
+.tooltip:hover {
+  pointer-events: auto;
+}
+
+.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(-50%) translateY(0);
+}
