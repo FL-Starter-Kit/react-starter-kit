@@ -11,21 +11,8 @@
  * refresh-token httpOnly cookie — never localStorage. The rest of the
  * auth flow (`refreshSession`, single-flight refresh, retry-on-401) is
  * storage-agnostic.
+ *
+ * NOTE: mock-session handling lives in the mock backend
+ * (src/tests/mocks/handlers.ts), not here — production auth is storage
+ * agnostic and knows nothing about the mock session store.
  */
-
-import { sessionStorageSafe } from '@/lib/storage/safeStorage';
-
-const MOCK_SESSION_KEY = 'auth.mockSession';
-
-/** Flag used by the dev mock backend to remember the signed-in session. */
-export function getMockSession(): string | null {
-  return sessionStorageSafe.get(MOCK_SESSION_KEY);
-}
-
-export function setMockSession(userId: string): void {
-  sessionStorageSafe.set(MOCK_SESSION_KEY, userId);
-}
-
-export function clearMockSession(): void {
-  sessionStorageSafe.remove(MOCK_SESSION_KEY);
-}

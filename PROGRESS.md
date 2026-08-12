@@ -1,17 +1,28 @@
 # Enterprise React Starter — Build Progress
 
-Tracking file so work can be stopped and resumed at any time. Last updated: 2026-08-11 (5th
+Tracking file so work can be stopped and resumed at any time. Last updated: 2026-08-12 (6th
 session).
 
 **Resume here:** run `npm install` if `node_modules` is missing, then continue from the next
 unfinished phase below. After each phase, run `npm run check` (`typecheck` + `lint` + `test` +
 `build`) before moving on.
 
-**Current status (5th session):** **E2E suite fully green** — 16/16 Playwright tests (auth journey,
-users CRUD, @a11y axe scans) passing consistently, plus **223 Vitest tests across 25 files**;
-`tsc --noEmit`, `eslint .` all clean. Fixed the login return-path regression (StrictMode
-double-mount), a rapid-filter race in UsersPage, MSW browser cookie emulation, and an axe critical
-on the showcase page. Next up: husky hook init (`npm run prepare`-style) + final `npm run check`.
+**Current status (6th session):** **249 Vitest tests across 26 files green**; `tsc --noEmit` and
+`eslint .` clean. Added a second P0 pass on the issues review:
+- Router now uses route-level `lazy` (no `React.lazy` + Suspense gaps); root `HydrateFallback`
+  covers the initial chunk load.
+- Retry ownership consolidated: the HTTP client is the single retry owner (TanStack Query
+  `retry: false`). Client now honors `Retry-After` (delta-seconds and HTTP-date forms), and the
+  retry backoff is cancellation-aware (abort during a retry delay surfaces `ErrorCode.Aborted`).
+- Response validation failures now throw `ResponseContractError` (`ErrorCode.ResponseInvalid`,
+  always `retryable: false`).
+- Auth refresh passes the refreshed user straight into auth state (no `/me` round trip) and is
+  guarded by a session generation so a refresh can't resurrect a session after logout (or wipe a
+  fresh login).
+- AuthProvider no longer touches mock-session storage — the mock backend owns its session lifecycle.
+- Logger sanitize extended to `Set-Cookie`, `access_token`, `refresh_token`, `csrf`/`xsrf`-shaped
+  keys (pattern-matched), with automated tests.
+- E2E (16/16) unverified this session — run `npm run test:e2e` before cutting a release.
 
 ---
 

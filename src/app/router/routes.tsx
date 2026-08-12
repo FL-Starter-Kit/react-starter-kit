@@ -1,4 +1,4 @@
-import { lazy } from 'react';
+import { Outlet } from 'react-router';
 import type { RouteObject } from 'react-router';
 
 import { AppErrorBoundary } from '@/app/errors/AppErrorBoundary';
@@ -6,21 +6,30 @@ import { RouteErrorScreen } from '@/app/errors/RouteErrorScreen';
 import { ProtectedRoute } from '@/app/guards/guards';
 import { AuthLayout } from '@/app/layouts/AuthLayout';
 import { RootLayout } from '@/app/layouts/RootLayout';
+import { Spinner } from '@/components/ui/Spinner';
 
-// The `lazy()` page components are part of a static route table — fast
-// refresh does not apply to route configuration, so the rule is disabled.
-/* eslint-disable react-refresh/only-export-components */
+/* eslint-disable react-refresh/only-export-components -- the route table mixes
+   non-component exports with the HydrateFallback component. */
 
-const HomePage = lazy(() => import('@/features/home/pages/HomePage'));
-const LoginPage = lazy(() => import('@/features/auth/pages/LoginPage'));
-const UsersPage = lazy(() => import('@/features/users/pages/UsersPage'));
-const ComponentsPage = lazy(() => import('@/features/docs/pages/ComponentsPage'));
-const NotFoundPage = lazy(() => import('@/features/errors/pages/NotFoundPage'));
-const UnauthorizedPage = lazy(() => import('@/features/errors/pages/UnauthorizedPage'));
+/** Shown while the router loads the first lazy route chunk. */
+export function AppRouteFallback() {
+  return (
+    <div
+      role="status"
+      aria-label="Loading"
+      style={{ display: 'grid', placeItems: 'center', minHeight: '60dvh' }}
+    >
+      <Spinner size="lg" />
+    </div>
+  );
+}
 
 /**
  * Route table. Conventions:
- *  - pages are lazy-loaded (route-level code splitting)
+ *  - pages are loaded via React Router's route-level `lazy` API (proper
+ *    router-integrated code splitting — the router owns the loading
+ *    states, so no manual Suspense boundary is needed; the root route's
+ *    HydrateFallback covers the initial chunk load)
  *  - every page that needs a session is wrapped in <ProtectedRoute>
  *  - `handle.crumb` feeds the breadcrumbs (see useRouteBreadcrumbs)
  *  - route-level error elements give localized error UI
@@ -28,6 +37,7 @@ const UnauthorizedPage = lazy(() => import('@/features/errors/pages/Unauthorized
 export const routes: readonly RouteObject[] = [
   {
     path: '/',
+    HydrateFallback: AppRouteFallback,
     element: (
       <AppErrorBoundary>
         <RootLayout />
@@ -36,36 +46,48 @@ export const routes: readonly RouteObject[] = [
     children: [
       {
         index: true,
-        element: <HomePage />,
+        lazy: () => import('@/features/home/pages/HomePage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Home' },
       },
       {
         path: 'users',
         element: (
           <ProtectedRoute>
-            <UsersPage />
+            <Outlet />
           </ProtectedRoute>
         ),
         errorElement: <RouteErrorScreen />,
         handle: { crumb: 'Users' },
+        children: [
+          {
+            index: true,
+            lazy: () => import('@/features/users/pages/UsersPage').then((m) => ({ Component: m.default })),
+          },
+        ],
       },
       {
         path: 'components',
         element: (
           <ProtectedRoute>
-            <ComponentsPage />
+            <Outlet />
           </ProtectedRoute>
         ),
         handle: { crumb: 'Components' },
+        children: [
+          {
+            index: true,
+            lazy: () => import('@/features/docs/pages/ComponentsPage').then((m) => ({ Component: m.default })),
+          },
+        ],
       },
       {
         path: 'unauthorized',
-        element: <UnauthorizedPage />,
+        lazy: () => import('@/features/errors/pages/UnauthorizedPage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Access denied' },
       },
       {
         path: '*',
-        element: <NotFoundPage />,
+        lazy: () => import('@/features/errors/pages/NotFoundPage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Not found' },
       },
     ],
@@ -76,7 +98,7 @@ export const routes: readonly RouteObject[] = [
     children: [
       {
         index: true,
-        element: <LoginPage />,
+        lazy: () => import('@/features/auth/pages/LoginPage').then((m) => ({ Component: m.default })),
       },
     ],
   },

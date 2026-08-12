@@ -6,17 +6,24 @@
  *
  * Responsibilities:
  *  - request/response interceptors (logging, correlation IDs)
- *  - timeout + cancellation (external AbortSignal support)
+ *  - timeout + cancellation (external AbortSignal support, including the
+ *    retry backoff — cancellation is never ignored while waiting)
  *  - retry with exponential backoff for network failures and retryable
- *    statuses (408/429/5xx), honoring `Retry-After`
+ *    statuses (408/429/5xx), honoring `Retry-After` — THE single retry
+ *    owner; TanStack Query is configured with retry disabled
  *  - single-flight session refresh on 401 via `setUnauthorizedHandler`
  *  - runtime validation of responses (Zod) so untrusted server data is
- *    never used untyped
+ *    never used untyped; contract violations surface as
+ *    `ResponseContractError` and are never retried
  *  - normalized, typed errors (ApiError) — see errors.ts
  */
 
 import { ErrorCode, isAbortError, isRetryableStatus, isTimeoutError } from '@/lib/http/errors';
-import { ApiError, type ErrorEnvelope } from '@/lib/http/errors';
+import {
+  ApiError,
+  ResponseContractError,
+  type ErrorEnvelope,
+} from '@/lib/http/errors';
 import { logger } from '@/lib/logging/logger';
 
 export interface HttpClientConfig {
@@ -166,16 +173,16 @@ export function createHttpClient(config: HttpClientConfig) {
             return options.validate(data);
           } catch (error) {
             // The server violated its contract — fail loudly for developers,
-            // expose a generic message to users.
+            // expose a generic message to users. Never retried: a contract
+            // mismatch is not transient (see ResponseContractError).
             requestLogger.error(
               'Response failed runtime validation',
               { status: response.status },
               error,
             );
             const responseRequestId = response.headers.get('x-request-id');
-            throw new ApiError({
+            throw new ResponseContractError({
               status: response.status,
-              code: ErrorCode.Unknown,
               message: 'Received an unexpected response from the server.',
               ...(responseRequestId !== null ? { requestId: responseRequestId } : {}),
               cause: error,
@@ -218,9 +225,21 @@ export function createHttpClient(config: HttpClientConfig) {
         const canRetry = apiError.retryable || isNetworkError(error);
         if (canRetry && attempt < retries) {
           attempt += 1;
-          const delay = backoffDelay(attempt, apiError.status);
+          // Retry-After (when sent) wins over the generic backoff delay.
+          // ResponseContractError is retryable:false, so a server contract
+          // mismatch never reaches this branch.
+          const delay = apiError.retryAfterMs ?? backoffDelay(attempt, apiError.status);
           requestLogger.warn('Retrying request', { attempt, delayMs: delay });
-          await sleep(delay);
+          try {
+            await sleep(delay, options.signal);
+          } catch (sleepError) {
+            // Cancelled while waiting on the backoff — surface an abort error
+            // instead of lingering past the query's lifecycle.
+            if (options.signal?.aborted) {
+              throw new ApiError({ status: 0, code: ErrorCode.Aborted, message: 'Request aborted.' });
+            }
+            throw sleepError;
+          }
           continue;
         }
         throw apiError;
@@ -373,14 +392,38 @@ async function normalizeErrorResponse(
     new ApiError({ status: response.status, code, message }),
   );
 
+  const retryAfterMs = parseRetryAfter(response.headers.get('retry-after'));
+
   return new ApiError({
     status: response.status,
     code,
     message,
     fieldErrors,
     ...(requestId !== undefined ? { requestId } : {}),
+    ...(retryAfterMs !== undefined ? { retryAfterMs } : {}),
     retryable: isRetryableStatus(response.status),
   });
+}
+
+/**
+ * Parse a `Retry-After` response header into milliseconds. Supports both
+ * allowed forms: delta-seconds (e.g. `120`) and an HTTP-date
+ * (e.g. `Wed, 21 Oct 2015 07:28:00 GMT`). Returns undefined for malformed
+ * values so callers fall back to their own backoff.
+ */
+function parseRetryAfter(value: string | null): number | undefined {
+  if (value === null) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (/^\d+$/.test(trimmed)) {
+    return Number(trimmed) * 1000;
+  }
+  const dateMs = Date.parse(trimmed);
+  if (Number.isFinite(dateMs)) {
+    return Math.max(0, dateMs - Date.now());
+  }
+  return undefined;
 }
 
 function normalizeUnknownError(error: unknown): ApiError {
@@ -451,6 +494,8 @@ function defaultMessageForStatus(code: ApiError['code']): string {
       return 'Something went wrong on our end. Please try again later.';
     case ErrorCode.BadRequest:
       return 'The request could not be processed.';
+    case ErrorCode.ResponseInvalid:
+      return 'Received an unexpected response from the server.';
     case ErrorCode.Unknown:
       return 'The request could not be completed.';
   }
@@ -507,6 +552,28 @@ function backoffDelay(attempt: number, status: number): number {
   return Math.min(base * 2 ** (attempt - 1) + jitter, 3000);
 }
 
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
+/**
+ * Resolve after `ms`, or reject with an AbortError as soon as the given
+ * signal aborts — so a cancelled query never lingers in a retry delay.
+ */
+function sleep(ms: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) {
+      reject(new DOMException('Aborted', 'AbortError'));
+      return;
+    }
+    const cleanup = () => {
+      signal?.removeEventListener('abort', onAbort);
+    };
+    const onAbort = () => {
+      clearTimeout(timer);
+      cleanup();
+      reject(new DOMException('Aborted', 'AbortError'));
+    };
+    const timer = setTimeout(() => {
+      cleanup();
+      resolve();
+    }, ms);
+    signal?.addEventListener('abort', onAbort, { once: true });
+  });
 }

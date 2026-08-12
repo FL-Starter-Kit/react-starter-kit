@@ -13,6 +13,8 @@ export interface ApiErrorLike {
   readonly requestId?: string;
   /** True when a retry could succeed (network failure, 429, 5xx). */
   readonly retryable: boolean;
+  /** Server-instructed wait before retrying (`Retry-After` header), if any. */
+  readonly retryAfterMs?: number;
   readonly cause?: unknown;
 }
 
@@ -28,6 +30,7 @@ export class ApiError extends Error implements ApiErrorLike {
   readonly fieldErrors: Readonly<Record<string, readonly string[]>>;
   readonly requestId?: string;
   readonly retryable: boolean;
+  readonly retryAfterMs?: number;
   override readonly cause?: unknown;
 
   constructor(init: ApiErrorInit) {
@@ -40,9 +43,25 @@ export class ApiError extends Error implements ApiErrorLike {
     if (init.requestId !== undefined) {
       this.requestId = init.requestId;
     }
+    if (init.retryAfterMs !== undefined) {
+      this.retryAfterMs = init.retryAfterMs;
+    }
     if (init.cause !== undefined) {
       this.cause = init.cause;
     }
+  }
+}
+
+/**
+ * The server responded with a payload that violated its contract (runtime
+ * Zod validation failed). Always non-retryable: a contract mismatch is not
+ * transient, so repeating the request can only delay the failure.
+ */
+export class ResponseContractError extends ApiError {
+  override readonly name = 'ResponseContractError';
+
+  constructor(init: Omit<ApiErrorInit, 'code' | 'retryable'>) {
+    super({ ...init, code: ErrorCode.ResponseInvalid, retryable: false });
   }
 }
 
@@ -66,6 +85,8 @@ function getDefaultMessage(code: ErrorCodeValue): string {
       return 'The change conflicts with the current data. Please refresh and try again.';
     case ErrorCode.RateLimited:
       return 'Too many requests. Please wait and try again.';
+    case ErrorCode.ResponseInvalid:
+      return 'Received an unexpected response from the server.';
     case ErrorCode.Server:
       return 'Something went wrong on our end. Please try again later.';
     case ErrorCode.BadRequest:

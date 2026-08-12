@@ -57,4 +57,53 @@ describe('sanitize', () => {
     const result = sanitize({ PASSWORD: 'x', Token: 'y' });
     expect(result).toEqual({ PASSWORD: '[REDACTED]', Token: '[REDACTED]' });
   });
+
+  it('redacts headers-style credential keys', () => {
+    const result = sanitize({
+      headers: {
+        Authorization: 'Bearer abc123',
+        Cookie: 'sid=1',
+        'Set-Cookie': 'refresh_token=xyz',
+        'X-CSRF-Token': 'csrf-42',
+      },
+      Cookies: 'session=abc',
+    });
+    expect(result).toEqual({
+      headers: {
+        Authorization: '[REDACTED]',
+        Cookie: '[REDACTED]',
+        'Set-Cookie': '[REDACTED]',
+        'X-CSRF-Token': '[REDACTED]',
+      },
+      Cookies: '[REDACTED]',
+    });
+  });
+
+  it('redacts snake-cased and dashed token keys', () => {
+    const result = sanitize({
+      access_token: 'a',
+      refresh_token: 'r',
+      csrf: 'c',
+      csrf_token: 'c2',
+      set_cookie: 'x',
+      ok_field: 'keep',
+    });
+    expect(result).toEqual({
+      access_token: '[REDACTED]',
+      refresh_token: '[REDACTED]',
+      csrf: '[REDACTED]',
+      csrf_token: '[REDACTED]',
+      set_cookie: '[REDACTED]',
+      ok_field: 'keep',
+    });
+  });
+
+  it('redacts credential keys inside nested headers objects', () => {
+    const result = sanitize({
+      meta: { nested: { headers: { Authorization: 'Bearer z', id: 1 } } },
+    });
+    expect(result).toEqual({
+      meta: { nested: { headers: { Authorization: '[REDACTED]', id: 1 } } },
+    });
+  });
 });

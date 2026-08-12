@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { z } from 'zod';
 
 import { createHttpClient, setUnauthorizedHandler } from '@/lib/http/client';
-import { ApiError, ErrorCode } from '@/lib/http/errors';
+import { ApiError, ErrorCode, ResponseContractError } from '@/lib/http/errors';
 
 function jsonResponse(
   status: number,
@@ -125,11 +125,28 @@ describe('createHttpClient', () => {
       .get('/api/user', { validate: (raw) => schema.parse(raw) })
       .catch((e: unknown) => e);
 
-    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toBeInstanceOf(ResponseContractError);
     if (error instanceof ApiError) {
-      expect(error.code).toBe(ErrorCode.Unknown);
+      expect(error.code).toBe(ErrorCode.ResponseInvalid);
       expect(error.status).toBe(200);
       expect(error.message).toBe('Received an unexpected response from the server.');
+      expect(error.retryable).toBe(false);
+    }
+  });
+
+  it('never retries a response contract failure', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(200, { id: 'not-a-number' })));
+    vi.stubGlobal('fetch', fetchMock);
+    const client = createClient({ defaultRetries: 2 });
+    const schema = z.object({ id: z.number() });
+    const error = await client
+      .get('/api/user', { validate: (raw) => schema.parse(raw) })
+      .catch((e: unknown) => e);
+
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+    if (error instanceof ApiError) {
+      expect(error.code).toBe(ErrorCode.ResponseInvalid);
+      expect(error.retryable).toBe(false);
     }
   });
 
@@ -232,6 +249,104 @@ describe('createHttpClient', () => {
     expect(fetchMock).toHaveBeenCalledTimes(3);
     if (error instanceof ApiError) {
       expect(error.code).toBe(ErrorCode.Server);
+    }
+  });
+
+  it('honors a delta-seconds Retry-After header instead of the backoff delay', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(429, {}, { 'Retry-After': '5' }))
+        .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+      vi.stubGlobal('fetch', fetchMock);
+      const client = createClient({ defaultRetries: 2 });
+
+      const promise = client.get('/api/throttled');
+      await vi.advanceTimersByTimeAsync(4999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      const result = await promise;
+
+      expect(result).toEqual({ ok: true });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('honors an HTTP-date Retry-After header', async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(Date.parse('2026-01-01T00:00:00Z'));
+    try {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(503, {}, { 'Retry-After': 'Wed, 01 Jan 2026 00:00:02 GMT' }))
+        .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+      vi.stubGlobal('fetch', fetchMock);
+      const client = createClient({ defaultRetries: 1 });
+
+      const promise = client.get('/api/maintenance');
+      await vi.advanceTimersByTimeAsync(1999);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      await vi.advanceTimersByTimeAsync(1);
+      const result = await promise;
+
+      expect(result).toEqual({ ok: true });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('ignores malformed Retry-After values (falls back to backoff)', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock
+        .mockResolvedValueOnce(jsonResponse(429, {}, { 'Retry-After': 'soon-ish' }))
+        .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
+      vi.stubGlobal('fetch', fetchMock);
+      const client = createClient({ defaultRetries: 1 });
+
+      const promise = client.get('/api/throttled');
+      // Backoff for 429 attempt 1 is 1000ms.
+      await vi.advanceTimersByTimeAsync(1000);
+      const result = await promise;
+
+      expect(result).toEqual({ ok: true });
+      expect(fetchMock).toHaveBeenCalledTimes(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('aborts the retry backoff when the external signal is cancelled', async () => {
+    vi.useFakeTimers();
+    try {
+      fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(503, {})));
+      vi.stubGlobal('fetch', fetchMock);
+      const client = createClient({ defaultRetries: 2 });
+      const controller = new AbortController();
+
+      const promise = client.get('/api/slow', { signal: controller.signal });
+      // Handle the rejection before aborting so the abort is never flagged
+      // as an unhandled rejection.
+      const resultPromise = promise.then(
+        () => undefined,
+        (error: unknown) => error,
+      );
+      await vi.advanceTimersByTimeAsync(0);
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+
+      controller.abort();
+      await vi.advanceTimersByTimeAsync(10_000);
+      const error = await resultPromise;
+
+      expect(error).toBeInstanceOf(ApiError);
+      if (error instanceof ApiError) {
+        expect(error.code).toBe(ErrorCode.Aborted);
+      }
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+    } finally {
+      vi.useRealTimers();
     }
   });
 

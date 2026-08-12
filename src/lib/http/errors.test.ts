@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import {
   ApiError,
   ErrorCode,
+  ResponseContractError,
   isAbortError,
   isRetryableStatus,
   isTimeoutError,
@@ -46,6 +47,32 @@ describe('ApiError', () => {
     expect(error.fieldErrors).toEqual({ email: ['taken'] });
     expect(error.retryable).toBe(false);
     expect(error.name).toBe('ApiError');
+  });
+
+  it('retains a Retry-After delay when provided', () => {
+    const error = new ApiError({ status: 429, code: ErrorCode.RateLimited, retryAfterMs: 5000 });
+    expect(error.retryAfterMs).toBe(5000);
+    expect(new ApiError({ status: 429, code: ErrorCode.RateLimited }).retryAfterMs).toBeUndefined();
+  });
+});
+
+describe('ResponseContractError', () => {
+  it('is an ApiError with the ResponseInvalid code', () => {
+    const error = new ResponseContractError({ status: 200, message: 'bad shape' });
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error.name).toBe('ResponseContractError');
+    expect(error.code).toBe(ErrorCode.ResponseInvalid);
+    expect(error.message).toBe('bad shape');
+  });
+
+  it('is never retryable — even on retryable statuses', () => {
+    const error = new ResponseContractError({ status: 500, message: 'bad shape' });
+    expect(error.retryable).toBe(false);
+  });
+
+  it('defaults its message when not provided', () => {
+    const error = new ResponseContractError({ status: 200 });
+    expect(error.message).toBe('Received an unexpected response from the server.');
   });
 });
 

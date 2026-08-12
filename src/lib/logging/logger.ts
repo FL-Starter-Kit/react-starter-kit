@@ -31,10 +31,26 @@ const SENSITIVE_KEYS = new Set([
   'token',
   'accesstoken',
   'refreshtoken',
+  'access_token',
+  'refresh_token',
   'authorization',
   'cookie',
+  'cookies',
+  'set-cookie',
+  'setcookie',
+  'set_cookie',
   'secret',
 ]);
+
+/**
+ * Exact-key match plus CSRF-pattern matching. CSRF tokens travel under
+ * many header names (`X-CSRF-Token`, `X-XSRF-TOKEN`, ...), so any key
+ * containing "csrf" or "xsrf" is treated as sensitive.
+ */
+function isSensitiveKey(key: string): boolean {
+  const normalized = key.toLowerCase();
+  return SENSITIVE_KEYS.has(normalized) || normalized.includes('csrf') || normalized.includes('xsrf');
+}
 
 const LEVEL_ORDER: Record<LogLevel, number> = {
   debug: 10,
@@ -128,7 +144,7 @@ export function sanitize<T>(value: T): T {
   }
   const out: Record<string, unknown> = {};
   for (const [key, item] of Object.entries(value)) {
-    if (SENSITIVE_KEYS.has(key.toLowerCase())) {
+    if (isSensitiveKey(key)) {
       out[key] = '[REDACTED]';
     } else if (typeof item === 'object') {
       out[key] = sanitize(item);

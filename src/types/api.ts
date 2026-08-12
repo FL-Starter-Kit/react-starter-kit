@@ -26,6 +26,7 @@ export const ErrorCode = {
   RateLimited: 'RATE_LIMITED',
   Server: 'SERVER_ERROR',
   BadRequest: 'BAD_REQUEST',
+  ResponseInvalid: 'RESPONSE_INVALID',
   Unknown: 'UNKNOWN_ERROR',
 } as const;
 
