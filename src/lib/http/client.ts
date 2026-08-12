@@ -19,11 +19,7 @@
  */
 
 import { ErrorCode, isAbortError, isRetryableStatus, isTimeoutError } from '@/lib/http/errors';
-import {
-  ApiError,
-  ResponseContractError,
-  type ErrorEnvelope,
-} from '@/lib/http/errors';
+import { ApiError, ResponseContractError, type ErrorEnvelope } from '@/lib/http/errors';
 import { logger } from '@/lib/logging/logger';
 
 export interface HttpClientConfig {
@@ -236,7 +232,11 @@ export function createHttpClient(config: HttpClientConfig) {
             // Cancelled while waiting on the backoff — surface an abort error
             // instead of lingering past the query's lifecycle.
             if (options.signal?.aborted) {
-              throw new ApiError({ status: 0, code: ErrorCode.Aborted, message: 'Request aborted.' });
+              throw new ApiError({
+                status: 0,
+                code: ErrorCode.Aborted,
+                message: 'Request aborted.',
+              });
             }
             throw sleepError;
           }

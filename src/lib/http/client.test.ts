@@ -279,7 +279,9 @@ describe('createHttpClient', () => {
     vi.setSystemTime(Date.parse('2026-01-01T00:00:00Z'));
     try {
       fetchMock
-        .mockResolvedValueOnce(jsonResponse(503, {}, { 'Retry-After': 'Wed, 01 Jan 2026 00:00:02 GMT' }))
+        .mockResolvedValueOnce(
+          jsonResponse(503, {}, { 'Retry-After': 'Wed, 01 Jan 2026 00:00:02 GMT' }),
+        )
         .mockResolvedValueOnce(jsonResponse(200, { ok: true }));
       vi.stubGlobal('fetch', fetchMock);
       const client = createClient({ defaultRetries: 1 });

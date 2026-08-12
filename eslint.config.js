@@ -5,7 +5,27 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import jsxA11y from 'eslint-plugin-jsx-a11y';
 import importX, { createNodeResolver } from 'eslint-plugin-import-x';
 import { createTypeScriptImportResolver } from 'eslint-import-resolver-typescript';
-import prettier from 'eslint-config-prettier';
+import prettierPlugin from 'eslint-plugin-prettier';
+
+/**
+ * Single source of truth for formatting. Prettier imports these options from
+ * `prettier.config.js`, so the rules defined here determine prettier's behavior.
+ */
+export const prettierOptions = {
+  semi: true,
+  singleQuote: true,
+  printWidth: 100,
+  trailingComma: 'all',
+  tabWidth: 2,
+  arrowParens: 'always',
+  endOfLine: 'lf',
+  overrides: [
+    {
+      files: '*.md',
+      options: { proseWrap: 'always' },
+    },
+  ],
+};
 
 /**
  * Dependency boundaries enforced by this configuration:
@@ -37,9 +57,15 @@ export default tseslint.config(
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
   {
+    files: ['prettier.config.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+  },
+  {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          allowDefaultProject: ['prettier.config.js'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
@@ -173,5 +199,10 @@ export default tseslint.config(
       ],
     },
   },
-  prettier,
+  {
+    plugins: { prettier: prettierPlugin },
+    rules: {
+      'prettier/prettier': ['error', prettierOptions, { usePrettierrc: false }],
+    },
+  },
 );

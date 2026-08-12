@@ -9,6 +9,7 @@ unfinished phase below. After each phase, run `npm run check` (`typecheck` + `li
 
 **Current status (6th session):** **249 Vitest tests across 26 files green**; `tsc --noEmit` and
 `eslint .` clean. Added a second P0 pass on the issues review:
+
 - Router now uses route-level `lazy` (no `React.lazy` + Suspense gaps); root `HydrateFallback`
   covers the initial chunk load.
 - Retry ownership consolidated: the HTTP client is the single retry owner (TanStack Query

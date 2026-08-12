@@ -18,14 +18,7 @@
  * own theirs via httpOnly cookies.
  */
 
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 
 import { authApi } from '@/lib/auth/authApi';
 import { AuthContext } from '@/lib/auth/context';
@@ -135,10 +128,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setStatus('authenticated');
   }, []);
 
-  const can = useCallback((permission: Parameters<typeof hasPermission>[1]) => hasPermission(user, permission), [user]);
+  const can = useCallback(
+    (permission: Parameters<typeof hasPermission>[1]) => hasPermission(user, permission),
+    [user],
+  );
 
   const value = useMemo<AuthState>(
-    () => ({ status, user, login, logout, refreshSession, can, hasRole: (...roles) => hasRole(user, ...roles) }),
+    () => ({
+      status,
+      user,
+      login,
+      logout,
+      refreshSession,
+      can,
+      hasRole: (...roles) => hasRole(user, ...roles),
+    }),
     [status, user, login, logout, refreshSession, can],
   );
 

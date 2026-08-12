@@ -86,8 +86,11 @@ Flat config in `eslint.config.js`. Beyond the defaults:
 
 ## 6. Formatting
 
-- Prettier (`npm run format`). Enforced in CI via `format:check` and in pre-commit via lint-staged.
-- 2-space indent, single quotes, trailing commas, 120-char print width (see `.prettierrc.json`).
+- Prettier (`npm run format`). Enforced by ESLint via the `prettier/prettier` rule, in CI via
+  `format:check`, and in pre-commit via lint-staged.
+- 2-space indent, single quotes, trailing commas, 100-char print width. Prettier options are defined
+  in `eslint.config.js` (`prettierOptions`) and imported by `prettier.config.js`, so ESLint
+  determines prettier's rules.
 
 ## 7. Naming
 

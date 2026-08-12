@@ -46,7 +46,8 @@ export const routes: readonly RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: () => import('@/features/home/pages/HomePage').then((m) => ({ Component: m.default })),
+        lazy: () =>
+          import('@/features/home/pages/HomePage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Home' },
       },
       {
@@ -61,7 +62,8 @@ export const routes: readonly RouteObject[] = [
         children: [
           {
             index: true,
-            lazy: () => import('@/features/users/pages/UsersPage').then((m) => ({ Component: m.default })),
+            lazy: () =>
+              import('@/features/users/pages/UsersPage').then((m) => ({ Component: m.default })),
           },
         ],
       },
@@ -76,18 +78,25 @@ export const routes: readonly RouteObject[] = [
         children: [
           {
             index: true,
-            lazy: () => import('@/features/docs/pages/ComponentsPage').then((m) => ({ Component: m.default })),
+            lazy: () =>
+              import('@/features/docs/pages/ComponentsPage').then((m) => ({
+                Component: m.default,
+              })),
           },
         ],
       },
       {
         path: 'unauthorized',
-        lazy: () => import('@/features/errors/pages/UnauthorizedPage').then((m) => ({ Component: m.default })),
+        lazy: () =>
+          import('@/features/errors/pages/UnauthorizedPage').then((m) => ({
+            Component: m.default,
+          })),
         handle: { crumb: 'Access denied' },
       },
       {
         path: '*',
-        lazy: () => import('@/features/errors/pages/NotFoundPage').then((m) => ({ Component: m.default })),
+        lazy: () =>
+          import('@/features/errors/pages/NotFoundPage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Not found' },
       },
     ],
@@ -98,7 +107,8 @@ export const routes: readonly RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: () => import('@/features/auth/pages/LoginPage').then((m) => ({ Component: m.default })),
+        lazy: () =>
+          import('@/features/auth/pages/LoginPage').then((m) => ({ Component: m.default })),
       },
     ],
   },

@@ -49,7 +49,9 @@ const SENSITIVE_KEYS = new Set([
  */
 function isSensitiveKey(key: string): boolean {
   const normalized = key.toLowerCase();
-  return SENSITIVE_KEYS.has(normalized) || normalized.includes('csrf') || normalized.includes('xsrf');
+  return (
+    SENSITIVE_KEYS.has(normalized) || normalized.includes('csrf') || normalized.includes('xsrf')
+  );
 }
 
 const LEVEL_ORDER: Record<LogLevel, number> = {

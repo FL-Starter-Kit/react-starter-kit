@@ -570,8 +570,8 @@ This makes UI behavior consistent.
 
 **Status:** implemented as a single normalized `ApiError` class + stable `ErrorCode` enum
 (`src/lib/http/errors.ts`, `src/types/api.ts`) covering every leaf type above (incl. Network,
-Timeout, Aborted, BadRequest), with per-code user-safe default messages and field-error
-envelopes — documented in `docs/ARCHITECTURE.md` §6 ("Normalized errors").
+Timeout, Aborted, BadRequest), with per-code user-safe default messages and field-error envelopes —
+documented in `docs/ARCHITECTURE.md` §6 ("Normalized errors").
 
 **Priority:** P1
 
@@ -1147,7 +1147,8 @@ COMPLEX FLOW  → State Machine when justified
 - [ ] Popover
 - [ ] Combobox/Autocomplete
 - [ ] FileUpload
-- [x] Error taxonomy — explicit via `ApiError` + `ErrorCode` (src/lib/http/errors.ts, docs/ARCHITECTURE.md §6)
+- [x] Error taxonomy — explicit via `ApiError` + `ErrorCode` (src/lib/http/errors.ts,
+      docs/ARCHITECTURE.md §6)
 - [x] Telemetry abstraction — vendor-neutral via `logger.setTransport` (src/lib/logging/logger.ts)
 - [ ] Dependency automation
 - [ ] Code generators
@@ -1194,13 +1195,13 @@ the intent diverges from the codebase's actual model:
 
 The suggested model was a class hierarchy (`AppError` → `ApiError` → `Unauthorized`/`Forbidden`/...,
 plus `NetworkError`/`ValidationError`/`UnexpectedError`). The codebase instead implements a flat
-**single `ApiError` class + stable `ErrorCode` enum** (`src/lib/http/errors.ts`,
-`src/types/api.ts`) with normalized defaults and field-error envelopes.
+**single `ApiError` class + stable `ErrorCode` enum** (`src/lib/http/errors.ts`, `src/types/api.ts`)
+with normalized defaults and field-error envelopes.
 
 - Equivalent outcome: an explicit, exhaustive taxonomy with consistent UI behavior — but errors are
   distinguished by `error.code` (e.g. `ErrorCode.Unauthorized`), not by `instanceof` subclasses.
-- If `instanceof`-based handling (or typed subclasses that can carry extra data) is ever needed,
-  the enum model would need to be revisited.
+- If `instanceof`-based handling (or typed subclasses that can carry extra data) is ever needed, the
+  enum model would need to be revisited.
 
 ## Telemetry abstraction (#19)
 
