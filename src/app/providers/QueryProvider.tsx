@@ -1,5 +1,5 @@
 import { QueryCache, QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 
 import { ApiError } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
@@ -40,6 +40,6 @@ function createQueryClient(): QueryClient {
 }
 
 export function QueryProvider({ children }: { children: ReactNode }) {
-  const client = createQueryClient();
+  const [client] = useState(createQueryClient);
   return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
 }

@@ -1,16 +1,17 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router';
+import { useLocation, useNavigate } from 'react-router';
 import { z } from 'zod';
 
 import { Alert } from '@/components/feedback/Alert';
 import { Button } from '@/components/ui/Button';
 import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
-import { useAuthContext, getReturnPath, clearReturnPath } from '@/lib/auth';
+import { useAuthContext } from '@/lib/auth';
 import { ApiError, ErrorCode } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
+import { readRedirectTarget } from '@/utils/url';
 
 import styles from './LoginPage.module.css';
 
@@ -23,21 +24,24 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { status, login } = useAuthContext();
   const [formError, setFormError] = useState<string | null>(null);
 
-  // Send authenticated visitors back to the route they were on. The
-  // read+clear must happen in an effect: run during render it would run
-  // twice under StrictMode's double render, and the second read (after
-  // the path was cleared) would fall back to "/".
+  // The route the visitor was on, carried here as navigation state by
+  // ProtectedRoute. Read-only during render (no storage, no clearing) —
+  // an unvalidated or absent target falls back to "/".
+  const returnPath = readRedirectTarget(location.state) ?? '/';
+
+  // Send authenticated visitors back. The navigation must happen in an
+  // effect: navigating during render would be a render side effect, and
+  // the status flip arrives via context re-render.
   useEffect(() => {
     if (status !== 'authenticated') {
       return;
     }
-    const returnPath = getReturnPath();
-    clearReturnPath();
     void navigate(returnPath, { replace: true });
-  }, [status, navigate]);
+  }, [status, navigate, returnPath]);
 
   const {
     register,
@@ -76,12 +80,18 @@ export default function LoginPage() {
     <div className={styles.root}>
       <h1 className={styles.title}>Sign in</h1>
       <p className={styles.subtitle}>
-        Demo credentials — <code>admin@example.com</code> / <code>admin123</code> (or viewer@example.com).
+        Demo credentials — <code>admin@example.com</code> / <code>admin123</code> (or
+        viewer@example.com).
       </p>
 
       {formError !== null && <Alert variant="danger">{formError}</Alert>}
 
-      <form onSubmit={(event) => { void submitForm(event); }} noValidate>
+      <form
+        onSubmit={(event) => {
+          void submitForm(event);
+        }}
+        noValidate
+      >
         <FormField name="email" label="Email" error={errors.email?.message} required>
           {(fieldId, describedById) => (
             <Input
@@ -109,7 +119,13 @@ export default function LoginPage() {
           )}
         </FormField>
 
-        <Button type="submit" fullWidth loading={isSubmitting} loadingLabel="Signing in" className={styles.submit}>
+        <Button
+          type="submit"
+          fullWidth
+          loading={isSubmitting}
+          loadingLabel="Signing in"
+          className={styles.submit}
+        >
           Sign in
         </Button>
       </form>

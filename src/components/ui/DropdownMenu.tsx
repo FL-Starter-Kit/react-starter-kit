@@ -34,7 +34,9 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
   const menuRef = useRef<HTMLUListElement>(null);
   const menuId = useId();
 
-  const enabledIndices = items.map((item, index) => ({ item, index })).filter((entry) => !entry.item.disabled);
+  const enabledIndices = items
+    .map((item, index) => ({ item, index }))
+    .filter((entry) => !entry.item.disabled);
 
   const close = () => {
     setOpen(false);
@@ -52,13 +54,18 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
       return;
     }
     const onPointerDown = (event: PointerEvent) => {
-      if (menuRef.current?.contains(event.target as Node) || triggerRef.current?.contains(event.target as Node)) {
+      if (
+        menuRef.current?.contains(event.target as Node) ||
+        triggerRef.current?.contains(event.target as Node)
+      ) {
         return;
       }
       close();
     };
     document.addEventListener('pointerdown', onPointerDown);
-    return () => { document.removeEventListener('pointerdown', onPointerDown); };
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+    };
   }, [open]);
 
   useEffect(() => {
@@ -78,7 +85,8 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
         return current;
       }
       const position = enabledIndices.findIndex((entry) => entry.index === current);
-      const next = enabledIndices[(position + delta + enabledIndices.length) % enabledIndices.length];
+      const next =
+        enabledIndices[(position + delta + enabledIndices.length) % enabledIndices.length];
       return next?.index ?? current;
     });
   };
@@ -122,7 +130,13 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
         aria-haspopup="menu"
         aria-expanded={open}
         aria-controls={menuId}
-        onClick={() => { if (open) { close(); } else { openMenu(); } }}
+        onClick={() => {
+          if (open) {
+            close();
+          } else {
+            openMenu();
+          }
+        }}
         onKeyDown={(event) => {
           if ((event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') && !open) {
             event.preventDefault();
@@ -136,7 +150,14 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
         </span>
       </button>
       {open && (
-        <ul id={menuId} ref={menuRef} role="menu" aria-label={menuLabel ?? triggerLabel} className={styles.menu} onKeyDown={onKeyDown}>
+        <ul
+          id={menuId}
+          ref={menuRef}
+          role="menu"
+          aria-label={menuLabel ?? triggerLabel}
+          className={styles.menu}
+          onKeyDown={onKeyDown}
+        >
           {items.map((item, index) => (
             <li key={index} role="none">
               <button
@@ -145,7 +166,9 @@ export function DropdownMenu({ triggerLabel, items, menuLabel }: DropdownMenuPro
                 data-item-index={index}
                 disabled={item.disabled}
                 className={cn(styles.item, item.destructive && styles.destructive)}
-                onPointerEnter={() => { setFocusedIndex(index); }}
+                onPointerEnter={() => {
+                  setFocusedIndex(index);
+                }}
                 onClick={() => {
                   item.onSelect();
                   close();

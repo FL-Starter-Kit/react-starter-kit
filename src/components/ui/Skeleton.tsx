@@ -17,10 +17,6 @@ interface SkeletonProps {
  */
 export function Skeleton({ className, height = '1rem', width = '100%' }: SkeletonProps) {
   return (
-    <span
-      className={cn(styles.skeleton, className)}
-      style={{ height, width }}
-      aria-hidden="true"
-    />
+    <span className={cn(styles.skeleton, className)} style={{ height, width }} aria-hidden="true" />
   );
 }

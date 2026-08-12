@@ -224,8 +224,12 @@ describe('UsersPage integration', () => {
       await screen.findByText('Ada Lovelace');
 
       // user-1 is the signed-in admin; the UI hides delete for it.
-      expect(within(row('Ada Lovelace')).queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
-      expect(within(row('Alan Turing')).getByRole('button', { name: 'Delete' })).toBeInTheDocument();
+      expect(
+        within(row('Ada Lovelace')).queryByRole('button', { name: 'Delete' }),
+      ).not.toBeInTheDocument();
+      expect(
+        within(row('Alan Turing')).getByRole('button', { name: 'Delete' }),
+      ).toBeInTheDocument();
     });
   });
 });

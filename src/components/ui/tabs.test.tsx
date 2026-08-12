@@ -13,7 +13,12 @@ const items = [
 describe('Tabs', () => {
   it('renders a tablist with labelled tabs and the active panel', () => {
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={() => undefined} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={() => undefined}
+      />,
     );
 
     expect(screen.getByRole('tablist', { name: 'Profile' })).toBeInTheDocument();
@@ -27,7 +32,12 @@ describe('Tabs', () => {
     const user = userEvent.setup();
     const onActiveTabChange = vi.fn();
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={onActiveTabChange} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={onActiveTabChange}
+      />,
     );
 
     await user.click(screen.getByRole('tab', { name: 'Settings' }));
@@ -36,7 +46,12 @@ describe('Tabs', () => {
 
   it('links panels to their tabs via aria-labelledby and aria-controls', () => {
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={() => undefined} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={() => undefined}
+      />,
     );
     const tab = screen.getByRole('tab', { name: 'Overview' });
     const panel = screen.getByRole('tabpanel');
@@ -46,7 +61,12 @@ describe('Tabs', () => {
 
   it('disables inactive tabs with roving tabindex', () => {
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={() => undefined} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={() => undefined}
+      />,
     );
     expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('tabindex', '0');
     expect(screen.getByRole('tab', { name: 'Settings' })).toHaveAttribute('tabindex', '-1');
@@ -56,7 +76,12 @@ describe('Tabs', () => {
     const user = userEvent.setup();
     const onActiveTabChange = vi.fn();
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={onActiveTabChange} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={onActiveTabChange}
+      />,
     );
 
     await user.click(screen.getByRole('tab', { name: 'Overview' }));
@@ -67,8 +92,63 @@ describe('Tabs', () => {
 
   it('does not activate disabled tabs', () => {
     render(
-      <Tabs aria-label="Profile" items={items} activeTabId="overview" onActiveTabChange={() => undefined} />,
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={() => undefined}
+      />,
     );
     expect(screen.getByRole('tab', { name: 'Activity' })).toBeDisabled();
+  });
+
+  it('does not make the tablist itself a keyboard stop', () => {
+    render(
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="overview"
+        onActiveTabChange={() => undefined}
+      />,
+    );
+    // tabindex=-1 keeps the element script-focusable but removes it from
+    // the Tab sequence; only the selected tab is a Tab stop.
+    expect(screen.getByRole('tablist')).toHaveAttribute('tabindex', '-1');
+  });
+
+  it('skips disabled tabs when jumping with Home and End', async () => {
+    const user = userEvent.setup();
+    const onActiveTabChange = vi.fn();
+    render(
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="settings"
+        onActiveTabChange={onActiveTabChange}
+      />,
+    );
+
+    await user.click(screen.getByRole('tab', { name: 'Settings' }));
+    await user.keyboard('{Home}');
+    expect(onActiveTabChange).toHaveBeenLastCalledWith('overview');
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveFocus();
+
+    await user.keyboard('{End}');
+    expect(onActiveTabChange).toHaveBeenLastCalledWith('settings');
+    expect(screen.getByRole('tab', { name: 'Settings' })).toHaveFocus();
+  });
+
+  it('falls back to the first enabled tab when the controlled id is disabled', () => {
+    render(
+      <Tabs
+        aria-label="Profile"
+        items={items}
+        activeTabId="activity"
+        onActiveTabChange={() => undefined}
+      />,
+    );
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('aria-selected', 'true');
+    expect(screen.getByRole('tab', { name: 'Overview' })).toHaveAttribute('tabindex', '0');
+    expect(screen.getByRole('tab', { name: 'Activity' })).toHaveAttribute('tabindex', '-1');
   });
 });

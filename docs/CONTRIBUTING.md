@@ -67,14 +67,13 @@ Copy the shape of `features/users/` — it is the reference feature:
 1. `models/` — types + constants.
 2. `schemas/` — Zod schemas (runtime validation + form schemas).
 3. `api/` — endpoints through `httpClient`.
-4. `services/` — pure business logic (labels, permissions, helpers).
+4. `utils/` — pure helpers (labels, permissions, display logic). Colocate with models when trivial.
 5. `hooks/` — TanStack Query hooks with centralized query keys.
 6. `components/` — feature UI; `pages/` — page composition.
 7. Wire the route in `src/app/router/routes.tsx` (lazy), with guards and a breadcrumb.
 8. Add MSW handlers for the new endpoints in `src/tests/mocks/handlers.ts` and register them with
    both the node server and the browser worker.
-9. Tests: unit (services/schemas) + component + integration against MSW; `@a11y` E2E for the main
-   page.
+9. Tests: unit (utils/schemas) + component + integration against MSW; `@a11y` E2E for the main page.
 
 ## 7. Gotchas worth re-reading before you start
 

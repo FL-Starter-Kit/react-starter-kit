@@ -6,15 +6,47 @@
 import { UserRole, UserStatus, type User } from '@/features/users/models/user';
 
 const NAMES = [
-  'Ada Lovelace', 'Alan Turing', 'Grace Hopper', 'Edsger Dijkstra', 'Margaret Hamilton',
-  'Tim Berners-Lee', 'Barbara Liskov', 'Linus Torvalds', 'Radia Perlman', 'Guido van Rossum',
-  'Katherine Johnson', 'James Gosling', 'Dorothy Vaughan', 'Bjarne Stroustrup', 'Mary Jackson',
-  'Dennis Ritchie', 'Frances Allen', 'Ken Thompson', 'Brendan Eich', 'Donald Knuth',
-  'Mary Wilkes', 'Anders Hejlsberg', 'Joan Clarke', 'Niklaus Wirth', 'Sophie Wilson',
+  'Ada Lovelace',
+  'Alan Turing',
+  'Grace Hopper',
+  'Edsger Dijkstra',
+  'Margaret Hamilton',
+  'Tim Berners-Lee',
+  'Barbara Liskov',
+  'Linus Torvalds',
+  'Radia Perlman',
+  'Guido van Rossum',
+  'Katherine Johnson',
+  'James Gosling',
+  'Dorothy Vaughan',
+  'Bjarne Stroustrup',
+  'Mary Jackson',
+  'Dennis Ritchie',
+  'Frances Allen',
+  'Ken Thompson',
+  'Brendan Eich',
+  'Donald Knuth',
+  'Mary Wilkes',
+  'Anders Hejlsberg',
+  'Joan Clarke',
+  'Niklaus Wirth',
+  'Sophie Wilson',
 ];
 
-const ROLES: readonly User['role'][] = [UserRole.Admin, UserRole.Editor, UserRole.Viewer, UserRole.Viewer, UserRole.Editor];
-const STATUSES: readonly User['status'][] = [UserStatus.Active, UserStatus.Active, UserStatus.Active, UserStatus.Invited, UserStatus.Disabled];
+const ROLES: readonly User['role'][] = [
+  UserRole.Admin,
+  UserRole.Editor,
+  UserRole.Viewer,
+  UserRole.Viewer,
+  UserRole.Editor,
+];
+const STATUSES: readonly User['status'][] = [
+  UserStatus.Active,
+  UserStatus.Active,
+  UserStatus.Active,
+  UserStatus.Invited,
+  UserStatus.Disabled,
+];
 
 function createSeedUsers(): User[] {
   return NAMES.map((name, index) => {
@@ -40,8 +72,18 @@ let users: User[] = createSeedUsers();
  */
 export const demoAccounts = {
   admin: { id: 'user-1', email: 'admin@example.com', password: 'admin123', role: UserRole.Admin },
-  editor: { id: 'user-2', email: 'editor@example.com', password: 'editor123', role: UserRole.Editor },
-  viewer: { id: 'user-3', email: 'viewer@example.com', password: 'viewer123', role: UserRole.Viewer },
+  editor: {
+    id: 'user-2',
+    email: 'editor@example.com',
+    password: 'editor123',
+    role: UserRole.Editor,
+  },
+  viewer: {
+    id: 'user-3',
+    email: 'viewer@example.com',
+    password: 'viewer123',
+    role: UserRole.Viewer,
+  },
 };
 
 export function getMockUsers(): readonly User[] {

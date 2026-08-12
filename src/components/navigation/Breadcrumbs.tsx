@@ -19,7 +19,12 @@ export interface BreadcrumbsProps extends ComponentPropsWithoutRef<'nav'> {
 }
 
 /** Breadcrumb navigation. Each crumb is a link; the last is current. */
-export function Breadcrumbs({ items, 'aria-label': ariaLabel = 'Breadcrumb', className, ...rest }: BreadcrumbsProps) {
+export function Breadcrumbs({
+  items,
+  'aria-label': ariaLabel = 'Breadcrumb',
+  className,
+  ...rest
+}: BreadcrumbsProps) {
   return (
     <nav aria-label={ariaLabel} className={cn(styles.root, className)} {...rest}>
       <ol className={styles.list}>

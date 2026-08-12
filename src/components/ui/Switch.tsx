@@ -16,7 +16,14 @@ export interface SwitchProps extends ComponentPropsWithoutRef<'button'> {
  * Keyboard operable (Space/Enter) out of the box. Pair with a Label via
  * the standard `htmlFor`/`id` mechanism (or wrap in a labeled fieldset).
  */
-export function Switch({ checked, onCheckedChange, invalid = false, className, ref, ...rest }: SwitchProps) {
+export function Switch({
+  checked,
+  onCheckedChange,
+  invalid = false,
+  className,
+  ref,
+  ...rest
+}: SwitchProps) {
   return (
     <button
       ref={ref}
@@ -25,7 +32,9 @@ export function Switch({ checked, onCheckedChange, invalid = false, className, r
       aria-checked={checked}
       aria-invalid={invalid || undefined}
       className={cn(styles.switch, checked && styles.switchOn, className)}
-      onClick={() => { onCheckedChange(!checked); }}
+      onClick={() => {
+        onCheckedChange(!checked);
+      }}
       {...rest}
     >
       <span className={styles.switchThumb} aria-hidden="true" />

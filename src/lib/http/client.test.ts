@@ -4,7 +4,11 @@ import { z } from 'zod';
 import { createHttpClient, setUnauthorizedHandler } from '@/lib/http/client';
 import { ApiError, ErrorCode } from '@/lib/http/errors';
 
-function jsonResponse(status: number, body: unknown, headers: Record<string, string> = {}): Response {
+function jsonResponse(
+  status: number,
+  body: unknown,
+  headers: Record<string, string> = {},
+): Response {
   return new Response(body === undefined ? null : JSON.stringify(body), {
     status,
     headers: { 'Content-Type': 'application/json', ...headers },
@@ -14,7 +18,9 @@ function jsonResponse(status: number, body: unknown, headers: Record<string, str
 describe('createHttpClient', () => {
   const fetchMock = vi.fn<typeof fetch>();
 
-  function createClient(options: Partial<{ defaultRetries: number; defaultTimeoutMs: number; baseUrl: string }> = {}) {
+  function createClient(
+    options: Partial<{ defaultRetries: number; defaultTimeoutMs: number; baseUrl: string }> = {},
+  ) {
     return createHttpClient({
       baseUrl: options.baseUrl ?? 'https://api.example.com',
       defaultTimeoutMs: options.defaultTimeoutMs ?? 15_000,
@@ -115,7 +121,9 @@ describe('createHttpClient', () => {
     vi.stubGlobal('fetch', fetchMock.mockResolvedValue(jsonResponse(200, { id: 'not-a-number' })));
     const client = createClient();
     const schema = z.object({ id: z.number() });
-    const error = await client.get('/api/user', { validate: (raw) => schema.parse(raw) }).catch((e: unknown) => e);
+    const error = await client
+      .get('/api/user', { validate: (raw) => schema.parse(raw) })
+      .catch((e: unknown) => e);
 
     expect(error).toBeInstanceOf(ApiError);
     if (error instanceof ApiError) {
@@ -275,7 +283,10 @@ describe('createHttpClient', () => {
   it('setConfig merges config and getConfig returns the merged result', () => {
     const client = createClient({ baseUrl: 'https://a.example.com' });
     client.setConfig({ baseUrl: 'https://b.example.com' });
-    expect(client.getConfig()).toMatchObject({ baseUrl: 'https://b.example.com', defaultRetries: 0 });
+    expect(client.getConfig()).toMatchObject({
+      baseUrl: 'https://b.example.com',
+      defaultRetries: 0,
+    });
   });
 
   it('sends a correlation request id header on every request', async () => {
@@ -293,5 +304,56 @@ describe('createHttpClient', () => {
     await client.get('/api/users', { headers: { 'X-CSRF': 'abc' } });
     const [, init] = fetchMock.mock.calls[0] ?? [];
     expect(init?.headers).toMatchObject({ Accept: 'application/json', 'X-CSRF': 'abc' });
+  });
+
+  it('attaches the CSRF token to state-changing requests only', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(201, {})));
+    vi.stubGlobal('fetch', fetchMock);
+    const getToken = vi.fn().mockResolvedValue('csrf-token-123');
+    const client = createClient();
+    client.setConfig({ csrf: { getToken } });
+
+    await client.post('/api/users', { name: 'Ada' });
+    const [, postInit] = fetchMock.mock.calls[0] ?? [];
+    expect(postInit?.headers).toMatchObject({ 'X-CSRF-Token': 'csrf-token-123' });
+
+    await client.get('/api/users');
+    const [, getInit] = fetchMock.mock.calls[1] ?? [];
+    expect(getInit?.headers).not.toHaveProperty('X-CSRF-Token');
+    expect(getToken).toHaveBeenCalledTimes(1);
+  });
+
+  it('honors a custom CSRF header name and skips when no token is returned', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(201, {})));
+    vi.stubGlobal('fetch', fetchMock);
+    const getToken = vi.fn().mockResolvedValue(null);
+    const client = createClient();
+    client.setConfig({ csrf: { headerName: 'X-XSRF-TOKEN', getToken } });
+
+    await client.post('/api/users', { name: 'Ada' });
+    const [, init] = fetchMock.mock.calls[0] ?? [];
+    expect(init?.headers).not.toHaveProperty('X-XSRF-TOKEN');
+
+    getToken.mockResolvedValue('tok');
+    await client.post('/api/users', { name: 'Ada' });
+    const [, secondInit] = fetchMock.mock.calls[1] ?? [];
+    expect(secondInit?.headers).toMatchObject({ 'X-XSRF-TOKEN': 'tok' });
+  });
+
+  it('does not overwrite a per-request CSRF header with the provider token', async () => {
+    fetchMock.mockImplementation(() => Promise.resolve(jsonResponse(201, {})));
+    vi.stubGlobal('fetch', fetchMock);
+    const getToken = vi.fn().mockResolvedValue('provider-token');
+    const client = createClient();
+    client.setConfig({ csrf: { getToken } });
+
+    await client.post(
+      '/api/users',
+      { name: 'Ada' },
+      { headers: { 'X-CSRF-Token': 'explicit-token' } },
+    );
+    const [, init] = fetchMock.mock.calls[0] ?? [];
+    expect(init?.headers).toMatchObject({ 'X-CSRF-Token': 'explicit-token' });
+    expect(getToken).not.toHaveBeenCalled();
   });
 });

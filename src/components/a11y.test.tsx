@@ -89,7 +89,10 @@ describe('UI primitives axe scans', () => {
   });
 
   it('Switch is accessible', async () => {
-    await renderAndCheckA11y(<Switch checked aria-label="Notifications" onCheckedChange={() => undefined} />, axeOptions);
+    await renderAndCheckA11y(
+      <Switch checked aria-label="Notifications" onCheckedChange={() => undefined} />,
+      axeOptions,
+    );
   });
 
   it('Dialog is accessible', async () => {
@@ -102,7 +105,13 @@ describe('UI primitives axe scans', () => {
   });
 
   it('DropdownMenu closed is accessible', async () => {
-    await renderAndCheckA11y(<DropdownMenu triggerLabel="Actions" items={[{ label: 'Edit', onSelect: () => undefined }]} />, axeOptions);
+    await renderAndCheckA11y(
+      <DropdownMenu
+        triggerLabel="Actions"
+        items={[{ label: 'Edit', onSelect: () => undefined }]}
+      />,
+      axeOptions,
+    );
   });
 
   it('Tabs are accessible', async () => {
@@ -125,7 +134,10 @@ describe('UI primitives axe scans', () => {
   });
 
   it('Pagination is accessible', async () => {
-    await renderAndCheckA11y(<Pagination page={1} totalPages={5} onPageChange={() => undefined} />, axeOptions);
+    await renderAndCheckA11y(
+      <Pagination page={1} totalPages={5} onPageChange={() => undefined} />,
+      axeOptions,
+    );
   });
 
   it('Alert danger uses role=alert without violations', async () => {
@@ -134,7 +146,10 @@ describe('UI primitives axe scans', () => {
   });
 
   it('EmptyState is accessible', async () => {
-    await renderAndCheckA11y(<EmptyState title="Nothing here" description="Try again" />, axeOptions);
+    await renderAndCheckA11y(
+      <EmptyState title="Nothing here" description="Try again" />,
+      axeOptions,
+    );
   });
 
   it('ErrorState is accessible', async () => {
@@ -165,8 +180,12 @@ describe('UI primitives axe scans', () => {
 function TooltipHarness() {
   return (
     <span>
-      <button type="button" aria-describedby="tooltip-hint">Info</button>
-      <span id="tooltip-hint" role="tooltip">More info</span>
+      <button type="button" aria-describedby="tooltip-hint">
+        Info
+      </button>
+      <span id="tooltip-hint" role="tooltip">
+        More info
+      </span>
     </span>
   );
 }

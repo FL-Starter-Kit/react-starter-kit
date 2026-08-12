@@ -85,7 +85,9 @@ describe('Tooltip', () => {
   it('preserves an existing aria-describedby on the trigger', () => {
     render(
       <Tooltip label="Extra hint">
-        <button type="button" aria-describedby="other-hint">Save</button>
+        <button type="button" aria-describedby="other-hint">
+          Save
+        </button>
       </Tooltip>,
     );
     const trigger = screen.getByRole('button', { name: 'Save' });

@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
+import { scenario } from '@/tests/mocks/scenario';
 import { renderApp } from '@/tests/renderApp';
 
 describe('Login flow', () => {
@@ -83,5 +84,43 @@ describe('Login flow', () => {
 
     expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(screen.getByLabelText(/Email/)).toBeInTheDocument();
+  });
+});
+
+describe('Session lifecycle', () => {
+  it('silently refreshes an expired session and stays signed in', async () => {
+    scenario.auth.expireNextRequest = true;
+    await renderApp({ initialEntries: ['/users'], sessionUserId: 'user-1' });
+
+    // The 401 is absorbed by the silent refresh; the user never notices.
+    expect(await screen.findByRole('heading', { name: 'Users', level: 1 })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument();
+  });
+
+  it('transitions to the login page when the silent refresh fails', async () => {
+    scenario.auth.expireNextRequest = true;
+    scenario.auth.failNextRefresh = true;
+    await renderApp({ initialEntries: ['/users'], sessionUserId: 'user-1' });
+
+    // Single authoritative transition: authenticated → 401 → refresh → FAIL → unauthenticated → login.
+    expect(await screen.findByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
+    expect(screen.queryByRole('heading', { name: 'Users', level: 1 })).not.toBeInTheDocument();
+  });
+
+  it('can sign back in after an expired session', async () => {
+    const user = userEvent.setup();
+    scenario.auth.expireNextRequest = true;
+    scenario.auth.failNextRefresh = true;
+    await renderApp({ initialEntries: ['/users'], sessionUserId: 'user-1' });
+
+    await screen.findByRole('heading', { name: 'Sign in' });
+
+    await user.type(screen.getByLabelText(/Email/), 'admin@example.com');
+    await user.type(screen.getByLabelText(/Password/), 'admin123');
+    await user.click(screen.getByRole('button', { name: 'Sign in' }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('heading', { name: 'Users', level: 1 })).toBeInTheDocument();
+    });
   });
 });

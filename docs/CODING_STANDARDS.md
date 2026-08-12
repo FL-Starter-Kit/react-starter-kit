@@ -36,7 +36,8 @@ are human-checked.
     render.
 - Server state lives in TanStack Query hooks, never in component state; mutations invalidate their
   query keys.
-- URL state (filters, pagination, return paths) lives in search params.
+- URL state (filters, pagination) lives in search params; the pre-login route travels as navigation
+  state.
 - Fast-refresh rules: non-component exports (contexts, hooks, route tables) live in sibling files,
   not in component files (`react-refresh/only-export-components`).
 - Accessibility first (see `docs/ACCESSIBILITY.md`): native elements, accessible names, keyboard
@@ -92,10 +93,9 @@ Flat config in `eslint.config.js`. Beyond the defaults:
 
 - Files: `PascalCase.tsx` for components, `camelCase.ts` for modules, `.test.tsx` for tests,
   `*Schemas.ts` for form schemas.
-- Components: `useXxx` hooks, `XxxProps` interfaces, `XxxApi`/`XxxService`/`XxxQueryKeys` layer
-  objects.
+- Components: `useXxx` hooks, `XxxProps` interfaces, `XxxApi`/`XxxQueryKeys` layer objects.
 - CSS Modules match their component: `Button.module.css`.
-- States/actions in feature folders: `models/`, `schemas/`, `api/`, `services/`, `hooks/`,
+- States/actions in feature folders: `models/`, `schemas/`, `api/`, `utils/`, `hooks/`,
   `components/`, `pages/`.
 
 ## 8. Comments

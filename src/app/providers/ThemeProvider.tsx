@@ -14,7 +14,8 @@ function readStoredMode(): ThemeMode {
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [mode, setModeState] = useState<ThemeMode>(readStoredMode);
   const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)');
-  const resolvedTheme: 'light' | 'dark' = mode === 'system' ? (systemPrefersDark ? 'dark' : 'light') : mode;
+  const resolvedTheme: 'light' | 'dark' =
+    mode === 'system' ? (systemPrefersDark ? 'dark' : 'light') : mode;
 
   useEffect(() => {
     const root = document.documentElement;

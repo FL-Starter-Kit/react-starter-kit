@@ -62,11 +62,17 @@ export function AppHeader() {
       <IconButton
         aria-label={`Theme: ${mode}. Activate to switch.`}
         variant="ghost"
-        onClick={() => { setMode(THEME_CYCLE[mode]); }}
+        onClick={() => {
+          setMode(THEME_CYCLE[mode]);
+        }}
       >
         <span aria-hidden="true">{mode === 'dark' ? '◐' : '◑'}</span>
       </IconButton>
-      <DropdownMenu triggerLabel={user?.name ?? 'Account'} menuLabel="User menu" items={userMenuItems} />
+      <DropdownMenu
+        triggerLabel={user?.name ?? 'Account'}
+        menuLabel="User menu"
+        items={userMenuItems}
+      />
     </header>
   );
 }

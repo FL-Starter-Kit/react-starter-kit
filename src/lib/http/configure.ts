@@ -7,9 +7,16 @@
  * (the app imports this module, not the other way around).
  */
 
-import { httpClient } from '@/lib/http/client';
+import { httpClient, type HttpClientConfig } from '@/lib/http/client';
 
-/** Apply config-dependent HTTP settings (base URL, timeouts). */
-export function configureHttpClient(config: { baseUrl: string; defaultTimeoutMs: number }): void {
+export interface HttpClientConfigValues {
+  baseUrl: string;
+  defaultTimeoutMs: number;
+  /** Optional CSRF provider (see HttpClientConfig.csrf). */
+  csrf?: NonNullable<HttpClientConfig['csrf']>;
+}
+
+/** Apply config-dependent HTTP settings (base URL, timeouts, CSRF provider). */
+export function configureHttpClient(config: HttpClientConfigValues): void {
   httpClient.setConfig(config);
 }

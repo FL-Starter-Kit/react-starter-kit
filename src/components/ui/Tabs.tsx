@@ -24,9 +24,27 @@ export interface TabsProps extends ComponentPropsWithoutRef<'div'> {
  * Tabs with roving-tabindex keyboard navigation (← →, Home, End).
  * Follows the WAI-ARIA tabs pattern; panels are labelled by their tab.
  */
-export function Tabs({ items, activeTabId, onActiveTabChange, className, 'aria-label': ariaLabel, ...rest }: TabsProps) {
+export function Tabs({
+  items,
+  activeTabId,
+  onActiveTabChange,
+  className,
+  'aria-label': ariaLabel,
+  ...rest
+}: TabsProps) {
   const baseId = useId();
-  const activeTab = items.find((item) => item.id === activeTabId) ?? items.find((item) => !item.disabled);
+
+  // Effective active tab: fall back to the first enabled tab when the
+  // controlled id is absent or points at a disabled tab, so the roving
+  // tabindex and aria-selected stay consistent.
+  const effectiveActiveTab = (() => {
+    const controlled = items.find((item) => item.id === activeTabId);
+    if (controlled !== undefined && !controlled.disabled) {
+      return controlled;
+    }
+    return items.find((item) => !item.disabled);
+  })();
+  const active = effectiveActiveTab?.id;
 
   const focusTab = (index: number) => {
     const next = items[index];
@@ -37,7 +55,7 @@ export function Tabs({ items, activeTabId, onActiveTabChange, className, 'aria-l
   };
 
   const moveFocus = (direction: -1 | 1) => {
-    const currentIndex = items.findIndex((item) => item.id === activeTabId);
+    const currentIndex = items.findIndex((item) => item.id === active);
     const start = currentIndex === -1 ? 0 : currentIndex;
     let index = start;
     let steps = 0;
@@ -64,22 +82,35 @@ export function Tabs({ items, activeTabId, onActiveTabChange, className, 'aria-l
         break;
       case 'Home':
         event.preventDefault();
-        focusTab(0);
+        focusTab(items.findIndex((item) => !item.disabled));
         break;
       case 'End':
         event.preventDefault();
-        focusTab(items.length - 1);
+        for (let i = items.length - 1; i >= 0; i -= 1) {
+          const candidate = items[i];
+          if (candidate !== undefined && !candidate.disabled) {
+            focusTab(i);
+            break;
+          }
+        }
         break;
       default:
         break;
     }
   };
 
-  const active = activeTab?.id;
-
   return (
     <div className={className} {...rest}>
-      <div role="tablist" aria-label={ariaLabel} tabIndex={0} className={styles.tablist} onKeyDown={onKeyDown}>
+      {/* The tablist is not a Tab-key stop (tabIndex=-1 is script focus
+          only); the selected tab receives tab focus and keyboard events
+          bubble here from the focused tab button. */}
+      <div
+        role="tablist"
+        aria-label={ariaLabel}
+        tabIndex={-1}
+        className={styles.tablist}
+        onKeyDown={onKeyDown}
+      >
         {items.map((item) => {
           const selected = item.id === active;
           return (
@@ -93,7 +124,9 @@ export function Tabs({ items, activeTabId, onActiveTabChange, className, 'aria-l
               tabIndex={selected ? 0 : -1}
               disabled={item.disabled}
               className={cn(styles.tab, selected && styles.active)}
-              onClick={() => { onActiveTabChange(item.id); }}
+              onClick={() => {
+                onActiveTabChange(item.id);
+              }}
             >
               {item.label}
             </button>

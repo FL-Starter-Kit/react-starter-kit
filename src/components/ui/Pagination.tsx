@@ -79,7 +79,9 @@ export function Pagination({
           <select
             id="pagination-page-size"
             value={pageSize}
-            onChange={(event) => { onPageSizeChange(Number(event.target.value)); }}
+            onChange={(event) => {
+              onPageSizeChange(Number(event.target.value));
+            }}
             className={styles.pageSizeSelect}
           >
             {pageSizes.map((size) => (
@@ -97,7 +99,9 @@ export function Pagination({
             className={styles.control}
             disabled={!canGoPrevious}
             aria-label="Previous page"
-            onClick={() => { onPageChange(page - 1); }}
+            onClick={() => {
+              onPageChange(page - 1);
+            }}
           >
             ‹
           </button>
@@ -115,7 +119,9 @@ export function Pagination({
                 type="button"
                 className={cn(styles.control, entry === page && styles.current)}
                 aria-current={entry === page ? 'page' : undefined}
-                onClick={() => { onPageChange(entry); }}
+                onClick={() => {
+                  onPageChange(entry);
+                }}
               >
                 {entry}
               </button>
@@ -128,7 +134,9 @@ export function Pagination({
             className={styles.control}
             disabled={!canGoNext}
             aria-label="Next page"
-            onClick={() => { onPageChange(page + 1); }}
+            onClick={() => {
+              onPageChange(page + 1);
+            }}
           >
             ›
           </button>

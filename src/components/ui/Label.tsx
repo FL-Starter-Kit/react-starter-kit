@@ -16,5 +16,10 @@ export interface LabelProps extends ComponentPropsWithoutRef<'label'> {
  */
 /* eslint-disable jsx-a11y/label-has-associated-control */
 export function Label({ className, hideVisually = false, ...rest }: LabelProps) {
-  return <label className={cn(!hideVisually && styles.label, hideVisually && 'visually-hidden', className)} {...rest} />;
+  return (
+    <label
+      className={cn(!hideVisually && styles.label, hideVisually && 'visually-hidden', className)}
+      {...rest}
+    />
+  );
 }

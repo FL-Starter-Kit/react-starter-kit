@@ -9,7 +9,12 @@
 
 import { z } from 'zod';
 
-import { UserRole, UserStatus } from '@/features/users/models/user';
+import {
+  DEFAULT_PAGE_SIZE,
+  PAGE_SIZE_OPTIONS,
+  UserRole,
+  UserStatus,
+} from '@/features/users/models/user';
 
 const timestampSchema = z.iso.datetime();
 
@@ -44,3 +49,25 @@ export const userInputSchema = z.object({
 });
 
 export type ValidatedUserInput = z.infer<typeof userInputSchema>;
+
+/**
+ * URL search-param state for the users list page. Every field has a
+ * deterministic fallback so malformed URLs (e.g. `?page=abc`) degrade to
+ * safe defaults instead of NaN/unexpected values. Parsed via
+ * `parseQueryParams` (src/utils/url.ts).
+ */
+export const userListQuerySchema = z.object({
+  page: z.coerce.number().int().positive().catch(1),
+  pageSize: z.coerce
+    .number()
+    .refine((value) => (PAGE_SIZE_OPTIONS as readonly number[]).includes(value))
+    .catch(DEFAULT_PAGE_SIZE),
+  search: z.string().min(1).optional().catch(undefined),
+  role: z.enum([UserRole.Admin, UserRole.Editor, UserRole.Viewer]).optional().catch(undefined),
+  status: z
+    .enum([UserStatus.Active, UserStatus.Invited, UserStatus.Disabled])
+    .optional()
+    .catch(undefined),
+});
+
+export type ValidatedUserListQuery = z.infer<typeof userListQuerySchema>;

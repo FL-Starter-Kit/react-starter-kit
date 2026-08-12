@@ -39,7 +39,9 @@ export function formatCurrency(value: number, currency = 'USD', locale = default
 
 /** Compact number for large figures, e.g. "1.2M". */
 export function formatCompactNumber(value: number, locale = defaultLocale): string {
-  return new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(value);
+  return new Intl.NumberFormat(locale, { notation: 'compact', maximumFractionDigits: 1 }).format(
+    value,
+  );
 }
 
 function toUtcDate(value: string | Date): Date {

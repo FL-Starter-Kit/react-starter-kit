@@ -14,9 +14,7 @@ interface KeyedErrorBoundaryProps {
  */
 export function AppErrorBoundary({ children }: KeyedErrorBoundaryProps) {
   const location = useLocation();
-  return (
-    <GlobalErrorBoundary key={location.key}>{children}</GlobalErrorBoundary>
-  );
+  return <GlobalErrorBoundary key={location.key}>{children}</GlobalErrorBoundary>;
 }
 
 /**
@@ -40,7 +38,9 @@ export class GlobalErrorBoundary extends Component<KeyedErrorBoundaryProps, { ha
         <ErrorState
           title="Something went wrong"
           description="An unexpected error occurred. Please try again."
-          onRetry={() => { this.setState({ hasError: false }); }}
+          onRetry={() => {
+            this.setState({ hasError: false });
+          }}
         />
       );
     }

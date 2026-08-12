@@ -3,7 +3,9 @@ import { useSyncExternalStore } from 'react';
 function subscribeToQuery(query: string, onChange: () => void): () => void {
   const mediaQuery = window.matchMedia(query);
   mediaQuery.addEventListener('change', onChange);
-  return () => { mediaQuery.removeEventListener('change', onChange); };
+  return () => {
+    mediaQuery.removeEventListener('change', onChange);
+  };
 }
 
 function getQuerySnapshot(query: string): boolean {

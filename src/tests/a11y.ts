@@ -25,8 +25,14 @@ export interface AxeTestOptions {
 export async function expectNoAxeViolations(options: AxeTestOptions = {}): Promise<void> {
   const results = await axe.run(document.body, {
     rules: {
-      ...(options.disabledRules?.reduce((acc, rule) => ({ ...acc, [rule]: { enabled: false } }), {}) ?? {}),
-      ...(options.includedRules?.reduce((acc, rule) => ({ ...acc, [rule]: { enabled: true } }), {}) ?? {}),
+      ...(options.disabledRules?.reduce(
+        (acc, rule) => ({ ...acc, [rule]: { enabled: false } }),
+        {},
+      ) ?? {}),
+      ...(options.includedRules?.reduce(
+        (acc, rule) => ({ ...acc, [rule]: { enabled: true } }),
+        {},
+      ) ?? {}),
     },
   });
 
@@ -45,7 +51,10 @@ export async function expectNoAxeViolations(options: AxeTestOptions = {}): Promi
 }
 
 /** Render an element and run an axe scan against it in one call. */
-export async function renderAndCheckA11y(ui: ReactElement, options: AxeTestOptions = {}): Promise<ReturnType<typeof render>> {
+export async function renderAndCheckA11y(
+  ui: ReactElement,
+  options: AxeTestOptions = {},
+): Promise<ReturnType<typeof render>> {
   // Render inside a <main> landmark so axe's `region` rule does not fire on
   // standalone component fixtures.
   const utils = render(createElement('main', null, ui));

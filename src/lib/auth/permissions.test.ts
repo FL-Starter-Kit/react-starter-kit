@@ -4,8 +4,18 @@ import { hasPermission, hasRole, ROLE_PERMISSIONS } from '@/lib/auth/permissions
 import { Permission, Role, type SessionUser } from '@/lib/auth/types';
 
 const admin: SessionUser = { id: '1', name: 'Admin', email: 'admin@example.com', role: Role.Admin };
-const editor: SessionUser = { id: '2', name: 'Editor', email: 'editor@example.com', role: Role.Editor };
-const viewer: SessionUser = { id: '3', name: 'Viewer', email: 'viewer@example.com', role: Role.Viewer };
+const editor: SessionUser = {
+  id: '2',
+  name: 'Editor',
+  email: 'editor@example.com',
+  role: Role.Editor,
+};
+const viewer: SessionUser = {
+  id: '3',
+  name: 'Viewer',
+  email: 'viewer@example.com',
+  role: Role.Viewer,
+};
 
 describe('ROLE_PERMISSIONS', () => {
   it('gives admin every user permission', () => {

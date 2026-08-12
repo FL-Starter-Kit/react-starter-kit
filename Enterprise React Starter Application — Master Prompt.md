@@ -1,12 +1,17 @@
 # Enterprise React Starter Application — Master Prompt
 
-You are a **senior/staff-level frontend architect** specializing in React, TypeScript, accessibility, frontend architecture, security, testing, performance, and enterprise-scale applications.
+You are a **senior/staff-level frontend architect** specializing in React, TypeScript,
+accessibility, frontend architecture, security, testing, performance, and enterprise-scale
+applications.
 
-Your task is to design and implement a **production-ready React starter application** that will serve as the foundation for building large enterprise applications.
+Your task is to design and implement a **production-ready React starter application** that will
+serve as the foundation for building large enterprise applications.
 
 This is **NOT a demo application, tutorial, toy project, or CRUD example**.
 
-The resulting codebase should be designed to support a large team, multiple feature teams, hundreds of components, complex business workflows, strict accessibility requirements, automated testing, long-term maintainability, and incremental scaling.
+The resulting codebase should be designed to support a large team, multiple feature teams, hundreds
+of components, complex business workflows, strict accessibility requirements, automated testing,
+long-term maintainability, and incremental scaling.
 
 ---
 
@@ -96,57 +101,32 @@ Do not introduce a large UI component library simply to demonstrate components.
 
 # 3. Architecture
 
-Use a **feature-oriented architecture** rather than organizing the entire application by technical type.
+Use a **feature-oriented architecture** rather than organizing the entire application by technical
+type.
 
 Prefer a structure similar to:
 
-src/
-  app/
-    router/
-    providers/
-    layouts/
-    config/
-    bootstrap/
+src/ app/ router/ providers/ layouts/ config/ bootstrap/
 
-  features/
-    example/
-      components/
-      hooks/
-      services/
-      api/
-      models/
-      schemas/
-      pages/
-      utils/
-      __tests__/
+features/ example/ components/ hooks/ services/ api/ models/ schemas/ pages/ utils/ **tests**/
 
-  components/
-    ui/
-    layout/
-    feedback/
-    navigation/
+components/ ui/ layout/ feedback/ navigation/
 
-  lib/
-    http/
-    auth/
-    logging/
-    analytics/
-    accessibility/
-    storage/
+lib/ http/ auth/ logging/ analytics/ accessibility/ storage/
 
-  hooks/
+hooks/
 
-  services/
+services/
 
-  types/
+types/
 
-  utils/
+utils/
 
-  styles/
+styles/
 
-  assets/
+assets/
 
-  tests/
+tests/
 
 Explain which responsibilities belong in each directory.
 
@@ -160,13 +140,7 @@ Establish clear dependency boundaries.
 
 For example:
 
-UI components
-    ↓
-Feature components
-    ↓
-Feature services/API
-    ↓
-Infrastructure
+UI components ↓ Feature components ↓ Feature services/API ↓ Infrastructure
 
 Do not allow:
 
@@ -245,15 +219,7 @@ Do NOT scatter raw `fetch()` calls throughout components.
 
 Example:
 
-Component
-   ↓
-Feature hook
-   ↓
-Feature API/service
-   ↓
-HTTP client
-   ↓
-Backend
+Component ↓ Feature hook ↓ Feature API/service ↓ HTTP client ↓ Backend
 
 API responses should be validated at runtime where appropriate.
 
@@ -281,11 +247,9 @@ Prefer secure browser/session mechanisms appropriate for the backend architectur
 
 Clearly separate:
 
-Authentication:
-"Who is the user?"
+Authentication: "Who is the user?"
 
-Authorization:
-"What is the user allowed to do?"
+Authorization: "What is the user allowed to do?"
 
 Create reusable authorization primitives such as:
 
@@ -301,7 +265,8 @@ The backend remains the final authority.
 
 # 8. Accessibility
 
-Treat accessibility as a **first-class architectural requirement**, not a checklist added at the end.
+Treat accessibility as a **first-class architectural requirement**, not a checklist added at the
+end.
 
 Target:
 
@@ -815,7 +780,7 @@ Support:
 Never scatter:
 
 ```ts
-import.meta.env
+import.meta.env;
 ```
 
 throughout the application.
@@ -1166,15 +1131,15 @@ Explain the proposed architecture.
 
 Provide a table:
 
-| Area | Choice | Reason |
-|---|---|---|
-| Build | ... | ... |
-| Routing | ... | ... |
-| Server state | ... | ... |
-| Forms | ... | ... |
-| Styling | ... | ... |
-| Testing | ... | ... |
-| Accessibility | ... | ... |
+| Area          | Choice | Reason |
+| ------------- | ------ | ------ |
+| Build         | ...    | ...    |
+| Routing       | ...    | ...    |
+| Server state  | ...    | ...    |
+| Forms         | ...    | ...    |
+| Styling       | ...    | ...    |
+| Testing       | ...    | ...    |
+| Accessibility | ...    | ...    |
 
 ## C. Folder structure
 
@@ -1215,6 +1180,8 @@ Design accordingly.
 
 At the same time, **do not over-engineer the initial application**.
 
-The starter should be small enough that a developer can understand the architecture within a few hours, while having clear extension points for future complexity.
+The starter should be small enough that a developer can understand the architecture within a few
+hours, while having clear extension points for future complexity.
 
-Your final implementation should feel like a **professional enterprise frontend platform**, not a generated React tutorial.
+Your final implementation should feel like a **professional enterprise frontend platform**, not a
+generated React tutorial.

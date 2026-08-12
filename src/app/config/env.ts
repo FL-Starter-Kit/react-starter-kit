@@ -70,8 +70,12 @@ export function loadConfig(): AppConfig {
 
   const result = envSchema.safeParse(raw);
   if (!result.success) {
-    const issues = result.error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join('\n  ');
-    throw new Error(`Invalid environment configuration:\n  ${issues}\nSee .env.example for supported variables.`);
+    const issues = result.error.issues
+      .map((issue) => `${issue.path.join('.')}: ${issue.message}`)
+      .join('\n  ');
+    throw new Error(
+      `Invalid environment configuration:\n  ${issues}\nSee .env.example for supported variables.`,
+    );
   }
 
   config = {
@@ -98,7 +102,9 @@ export function loadConfig(): AppConfig {
 /** Read-only accessor for the loaded configuration. */
 export function getConfig(): AppConfig {
   if (config === null) {
-    throw new Error('Config accessed before loadConfig() was called. Call loadConfig() in bootstrap.');
+    throw new Error(
+      'Config accessed before loadConfig() was called. Call loadConfig() in bootstrap.',
+    );
   }
   return config;
 }

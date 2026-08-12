@@ -28,16 +28,21 @@ export default function HomePage() {
         <div className={styles.cards}>
           <Link to="/users" className={styles.card}>
             <span className={styles.cardTitle}>Users</span>
-            <span className={styles.cardBody}>Pagination, filtering, forms and permissions — the reference feature.</span>
+            <span className={styles.cardBody}>
+              Pagination, filtering, forms and permissions — the reference feature.
+            </span>
           </Link>
           <Link to="/components" className={styles.card}>
             <span className={styles.cardTitle}>Components</span>
-            <span className={styles.cardBody}>The accessible UI primitives, live, with a theme switcher.</span>
+            <span className={styles.cardBody}>
+              The accessible UI primitives, live, with a theme switcher.
+            </span>
           </Link>
           <div className={styles.card}>
             <span className={styles.cardTitle}>Session</span>
             <span className={styles.cardBody}>
-              You are signed in as <Badge>{user?.role ?? 'unknown'}</Badge>. Sign out via the user menu in the header.
+              You are signed in as <Badge>{user?.role ?? 'unknown'}</Badge>. Sign out via the user
+              menu in the header.
             </span>
           </div>
         </div>

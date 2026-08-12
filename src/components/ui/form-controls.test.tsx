@@ -109,9 +109,7 @@ describe('Switch', () => {
   it('is a button with role=switch and aria-checked', async () => {
     const user = userEvent.setup();
     const onCheckedChange = vi.fn();
-    render(
-      <Switch checked={false} onCheckedChange={onCheckedChange} aria-label="Notifications" />,
-    );
+    render(<Switch checked={false} onCheckedChange={onCheckedChange} aria-label="Notifications" />);
 
     const toggle = screen.getByRole('switch', { name: 'Notifications' });
     expect(toggle).toHaveAttribute('aria-checked', 'false');
@@ -124,7 +122,11 @@ describe('Label', () => {
   it('renders a label and hides it visually when requested', () => {
     const { rerender } = render(<Label htmlFor="x">Name</Label>);
     expect(screen.getByText('Name')).not.toHaveClass('visually-hidden');
-    rerender(<Label htmlFor="x" hideVisually>Name</Label>);
+    rerender(
+      <Label htmlFor="x" hideVisually>
+        Name
+      </Label>,
+    );
     expect(screen.getByText('Name')).toHaveClass('visually-hidden');
   });
 });
@@ -133,9 +135,7 @@ describe('FormField', () => {
   it('associates label, control, and hint via ids', () => {
     render(
       <FormField name="email" label="Email" hint="Work email only">
-        {(fieldId, describedById) => (
-          <Input id={fieldId} aria-describedby={describedById} />
-        )}
+        {(fieldId, describedById) => <Input id={fieldId} aria-describedby={describedById} />}
       </FormField>,
     );
 

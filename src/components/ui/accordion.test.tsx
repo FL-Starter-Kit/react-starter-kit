@@ -6,22 +6,14 @@ import { AccordionItem } from '@/components/ui/Accordion';
 
 describe('AccordionItem', () => {
   it('renders a summary and collapsed content', () => {
-    render(
-      <AccordionItem summary="Frequently asked">
-        Answer text
-      </AccordionItem>,
-    );
+    render(<AccordionItem summary="Frequently asked">Answer text</AccordionItem>);
     expect(screen.getByText('Frequently asked')).toBeInTheDocument();
     expect(screen.getByText('Answer text')).not.toBeVisible();
   });
 
   it('expands and collapses on summary click', async () => {
     const user = userEvent.setup();
-    render(
-      <AccordionItem summary="Frequently asked">
-        Answer text
-      </AccordionItem>,
-    );
+    render(<AccordionItem summary="Frequently asked">Answer text</AccordionItem>);
     await user.click(screen.getByText('Frequently asked'));
     expect(screen.getByText('Answer text')).toBeInTheDocument();
   });

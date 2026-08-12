@@ -25,7 +25,13 @@ export function RouteErrorScreen() {
           title="Page not found"
           description="The page you are looking for does not exist or has been moved."
           action={
-            <Button onClick={() => { window.history.back(); }}>Go back</Button>
+            <Button
+              onClick={() => {
+                window.history.back();
+              }}
+            >
+              Go back
+            </Button>
           }
         />
       );
@@ -44,7 +50,9 @@ export function RouteErrorScreen() {
     <ErrorState
       title="Something went wrong"
       description="An unexpected error occurred while loading this page. Please try again."
-      onRetry={() => { window.location.reload(); }}
+      onRetry={() => {
+        window.location.reload();
+      }}
     />
   );
 }

@@ -3,7 +3,13 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
-import { UserRole, UserStatus, type UserListQuery, type UserRoleValue, type UserStatusValue } from '@/features/users/models/user';
+import {
+  UserRole,
+  UserStatus,
+  type UserListQuery,
+  type UserRoleValue,
+  type UserStatusValue,
+} from '@/features/users/models/user';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 import styles from './UserFilters.module.css';
@@ -54,7 +60,9 @@ export function UserFilters({ query, onQueryChange }: UserFiltersProps) {
           type="search"
           placeholder="Search by name or email…"
           value={searchInput}
-          onChange={(event) => { setSearchInput(event.target.value); }}
+          onChange={(event) => {
+            setSearchInput(event.target.value);
+          }}
         />
       </div>
 
@@ -65,9 +73,12 @@ export function UserFilters({ query, onQueryChange }: UserFiltersProps) {
         <Select
           id="user-role-filter"
           value={query.role ?? ''}
-          onChange={(event) =>
-            { onQueryChange({ role: (event.target.value || undefined) as UserRoleValue | undefined, page: 1 }); }
-          }
+          onChange={(event) => {
+            onQueryChange({
+              role: (event.target.value || undefined) as UserRoleValue | undefined,
+              page: 1,
+            });
+          }}
         >
           <option value="">All roles</option>
           <option value={UserRole.Admin}>Admin</option>
@@ -83,9 +94,12 @@ export function UserFilters({ query, onQueryChange }: UserFiltersProps) {
         <Select
           id="user-status-filter"
           value={query.status ?? ''}
-          onChange={(event) =>
-            { onQueryChange({ status: (event.target.value || undefined) as UserStatusValue | undefined, page: 1 }); }
-          }
+          onChange={(event) => {
+            onQueryChange({
+              status: (event.target.value || undefined) as UserStatusValue | undefined,
+              page: 1,
+            });
+          }}
         >
           <option value="">All statuses</option>
           <option value={UserStatus.Active}>Active</option>

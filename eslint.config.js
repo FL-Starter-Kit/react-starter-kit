@@ -11,18 +11,28 @@ import prettier from 'eslint-config-prettier';
  * Dependency boundaries enforced by this configuration:
  *
  *   app/ ──────── can import: features, components, lib, hooks, utils, services
- *   features/<feature>/ ─ can import: components (ui), lib, hooks, utils, services, types
+ *   features/<feature>/ ─ can import: components (ui), lib, hooks, utils, types
  *                 CANNOT import: app/, other features
  *   components/ ─ CANNOT import: features/ (UI must stay feature-agnostic)
  *   lib/ ──────── CANNOT import: features/, components/, hooks/ (infrastructure stays leaf)
  *   hooks/ ────── CANNOT import: features/, components/
  *   utils/ ────── CANNOT import: anything but types/ and other utils
- *   services/ ── CANNOT import: features/, components/
  *
  * See docs/ARCHITECTURE.md#dependency-rules for the full dependency matrix.
  */
 export default tseslint.config(
-  { ignores: ['dist', 'node_modules', 'test-results', 'playwright-report', 'coverage', 'public/mockServiceWorker.js', '.agents', 'eslint.config.js'] },
+  {
+    ignores: [
+      'dist',
+      'node_modules',
+      'test-results',
+      'playwright-report',
+      'coverage',
+      'public/mockServiceWorker.js',
+      '.agents',
+      'eslint.config.js',
+    ],
+  },
   js.configs.recommended,
   ...tseslint.configs.recommendedTypeChecked,
   ...tseslint.configs.stylisticTypeChecked,
@@ -34,7 +44,10 @@ export default tseslint.config(
       },
     },
     rules: {
-      '@typescript-eslint/consistent-type-imports': ['error', { prefer: 'type-imports', fixStyle: 'inline-type-imports' }],
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { prefer: 'type-imports', fixStyle: 'inline-type-imports' },
+      ],
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
@@ -130,13 +143,15 @@ export default tseslint.config(
               target: './src/features/users',
               from: './src/features',
               except: ['./users'],
-              message: 'Features must not import from another feature. Extract shared code to lib/ or components/.',
+              message:
+                'Features must not import from another feature. Extract shared code to lib/ or components/.',
             },
             {
               target: './src/features/auth',
               from: './src/features',
               except: ['./auth'],
-              message: 'Features must not import from another feature. Extract shared code to lib/ or components/.',
+              message:
+                'Features must not import from another feature. Extract shared code to lib/ or components/.',
             },
             {
               target: './src/lib',
@@ -152,11 +167,6 @@ export default tseslint.config(
               target: './src/utils',
               from: ['./src/features', './src/components', './src/hooks', './src/lib', './src/app'],
               message: 'Utilities must be dependency-free.',
-            },
-            {
-              target: './src/services',
-              from: ['./src/features', './src/components', './src/app'],
-              message: 'Services must not import from higher layers.',
             },
           ],
         },

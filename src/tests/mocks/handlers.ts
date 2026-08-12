@@ -2,7 +2,13 @@ import { HttpResponse, delay, http } from 'msw';
 import type { JsonBodyType } from 'msw';
 
 import type { User } from '@/features/users/models/user';
-import { demoAccounts, getMockUsers, isEmailTaken, resetMockDb, setMockUsers } from '@/tests/mocks/db';
+import {
+  demoAccounts,
+  getMockUsers,
+  isEmailTaken,
+  resetMockDb,
+  setMockUsers,
+} from '@/tests/mocks/db';
 import { resetScenario, scenario } from '@/tests/mocks/scenario';
 
 const SESSION_COOKIE = 'starter_session';
@@ -116,6 +122,10 @@ export const authHandlers = [
   }),
 
   http.post('/api/auth/refresh', ({ request }) => {
+    if (scenario.auth.failNextRefresh) {
+      scenario.auth.failNextRefresh = false;
+      return unauthorized();
+    }
     const userId = sessionUserId(request);
     if (userId === null) {
       return unauthorized();
@@ -136,7 +146,12 @@ export const authHandlers = [
   }),
 ];
 
-function createApiError(status: number, code: string, message: string, fieldErrors?: Record<string, string[]>): HttpResponse<JsonBodyType> {
+function createApiError(
+  status: number,
+  code: string,
+  message: string,
+  fieldErrors?: Record<string, string[]>,
+): HttpResponse<JsonBodyType> {
   return HttpResponse.json({ code, message, fieldErrors }, { status });
 }
 
@@ -144,7 +159,9 @@ function createApiError(status: number, code: string, message: string, fieldErro
 function validateUserInput(
   body: unknown,
   excludeId?: string,
-): { ok: true; value: { name: string; email: string; role: User['role']; status: User['status'] } } | { ok: false; response: HttpResponse<JsonBodyType> } {
+):
+  | { ok: true; value: { name: string; email: string; role: User['role']; status: User['status'] } }
+  | { ok: false; response: HttpResponse<JsonBodyType> } {
   const { name, email, role, status } = (body ?? {}) as Record<string, unknown>;
   const fieldErrors: Record<string, string[]> = {};
 

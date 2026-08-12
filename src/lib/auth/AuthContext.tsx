@@ -40,10 +40,20 @@ export function AuthProvider({ children }: AuthProviderProps) {
       });
   }, []);
 
+  /** Silent refresh failed — the session is dead. Single authoritative transition. */
+  const expireSession = useCallback(() => {
+    clearMockSession();
+    setUser(null);
+    setStatus('unauthenticated');
+  }, []);
+
   useEffect(() => {
     let cancelled = false;
 
-    const unsubscribe = installUnauthorizedRefresher(notifySessionRestored);
+    const unsubscribe = installUnauthorizedRefresher({
+      onSessionRestored: notifySessionRestored,
+      onSessionExpired: expireSession,
+    });
 
     authApi
       .getCurrentUser()
@@ -64,7 +74,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
       cancelled = true;
       unsubscribe();
     };
-  }, [notifySessionRestored]);
+  }, [notifySessionRestored, expireSession]);
 
   const login = useCallback(async (credentials: LoginCredentials) => {
     const sessionUser = await authApi.login(credentials);
@@ -90,10 +100,21 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setStatus('authenticated');
   }, []);
 
-  const can = useCallback((permission: Parameters<typeof hasPermission>[1]) => hasPermission(user, permission), [user]);
+  const can = useCallback(
+    (permission: Parameters<typeof hasPermission>[1]) => hasPermission(user, permission),
+    [user],
+  );
 
   const value = useMemo<AuthState>(
-    () => ({ status, user, login, logout, refreshSession, can, hasRole: (...roles) => hasRole(user, ...roles) }),
+    () => ({
+      status,
+      user,
+      login,
+      logout,
+      refreshSession,
+      can,
+      hasRole: (...roles) => hasRole(user, ...roles),
+    }),
     [status, user, login, logout, refreshSession, can],
   );
 

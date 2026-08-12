@@ -14,46 +14,26 @@ import { UserFilters, type UserListQueryUpdate } from '@/features/users/componen
 import { UserFormDialog } from '@/features/users/components/UserFormDialog';
 import { UserTable } from '@/features/users/components/UserTable';
 import { useDeleteUser, useUsers } from '@/features/users/hooks/useUsers';
-import {
-  DEFAULT_PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
-  type User,
-  type UserListQuery,
-  type UserRoleValue,
-  type UserStatusValue,
-} from '@/features/users/models/user';
+import { PAGE_SIZE_OPTIONS, type User } from '@/features/users/models/user';
+import { userListQuerySchema } from '@/features/users/schemas/userSchemas';
 import { announce } from '@/lib/accessibility/liveRegion';
 import { useAuthContext } from '@/lib/auth';
 import { ApiError, ErrorCode } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
+import { parseQueryParams } from '@/utils/url';
 
 import styles from './UsersPage.module.css';
-
-function parseSearchParams(params: URLSearchParams): UserListQuery {
-  const page = Number(params.get('page') ?? '1');
-  const pageSize = PAGE_SIZE_OPTIONS.includes(Number(params.get('pageSize')) as (typeof PAGE_SIZE_OPTIONS)[number])
-    ? Number(params.get('pageSize'))
-    : DEFAULT_PAGE_SIZE;
-  const search = params.get('search') ?? undefined;
-  const role = params.get('role') as UserRoleValue | null;
-  const status = params.get('status') as UserStatusValue | null;
-  return {
-    page: Number.isFinite(page) && page > 0 ? page : 1,
-    pageSize,
-    search: search && search.length > 0 ? search : undefined,
-    role: role === 'admin' || role === 'editor' || role === 'viewer' ? role : undefined,
-    status: status === 'active' || status === 'invited' || status === 'disabled' ? status : undefined,
-  };
-}
 
 /**
  * Users list page — the reference feature.
  * URL search params are the source of truth for the query state
  * (page/search/role/status), so filters survive reloads and deep links.
+ * Params are parsed through a Zod schema (userListQuerySchema) with
+ * deterministic fallbacks — `?page=abc` safely becomes page 1.
  */
 export default function UsersPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const query = useMemo(() => parseSearchParams(searchParams), [searchParams]);
+  const query = useMemo(() => parseQueryParams(searchParams, userListQuerySchema), [searchParams]);
   const usersQuery = useUsers(query);
 
   // Mirror of the latest query so updates issued in the same tick build on
@@ -67,7 +47,10 @@ export default function UsersPage() {
 
   const { user: currentUser, can } = useAuthContext();
   const deleteMutation = useDeleteUser();
-  const [formDialog, setFormDialog] = useState<{ open: boolean; user: User | null }>({ open: false, user: null });
+  const [formDialog, setFormDialog] = useState<{ open: boolean; user: User | null }>({
+    open: false,
+    user: null,
+  });
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
@@ -125,11 +108,27 @@ export default function UsersPage() {
         eyebrow="Reference feature"
         title="Users"
         description="A complete feature demonstrating server state, URL state, forms, permissions, loading/error/empty states and accessible UI."
-        actions={canCreate && <Button onClick={() => { setFormDialog({ open: true, user: null }); }}>Create user</Button>}
+        actions={
+          canCreate && (
+            <Button
+              onClick={() => {
+                setFormDialog({ open: true, user: null });
+              }}
+            >
+              Create user
+            </Button>
+          )
+        }
       />
 
       {actionError !== null && (
-        <Alert variant="danger" onDismiss={() => { setActionError(null); }} className={styles.inlineAlert}>
+        <Alert
+          variant="danger"
+          onDismiss={() => {
+            setActionError(null);
+          }}
+          className={styles.inlineAlert}
+        >
           {actionError}
         </Alert>
       )}
@@ -152,10 +151,20 @@ export default function UsersPage() {
         ) : usersQuery.data.items.length === 0 ? (
           <EmptyState
             title="No users found"
-            description={query.search !== undefined ? 'No users match your search. Try different filters.' : 'Get started by creating the first user.'}
+            description={
+              query.search !== undefined
+                ? 'No users match your search. Try different filters.'
+                : 'Get started by creating the first user.'
+            }
             action={
               canCreate ? (
-                <Button onClick={() => { setFormDialog({ open: true, user: null }); }}>Create user</Button>
+                <Button
+                  onClick={() => {
+                    setFormDialog({ open: true, user: null });
+                  }}
+                >
+                  Create user
+                </Button>
               ) : undefined
             }
           />
@@ -166,17 +175,23 @@ export default function UsersPage() {
               canUpdate={canUpdate}
               canDelete={canDelete}
               currentUserId={currentUser?.id}
-              onEdit={(user) => { setFormDialog({ open: true, user }); }}
+              onEdit={(user) => {
+                setFormDialog({ open: true, user });
+              }}
               onDelete={setDeleteTarget}
             />
             <Pagination
               className={styles.pagination}
               page={query.page}
               totalPages={usersQuery.data.totalPages}
-              onPageChange={(page) => { updateQuery({ page }); }}
+              onPageChange={(page) => {
+                updateQuery({ page });
+              }}
               pageSize={query.pageSize}
               pageSizes={PAGE_SIZE_OPTIONS}
-              onPageSizeChange={(pageSize) => { updateQuery({ pageSize, page: 1 }); }}
+              onPageSizeChange={(pageSize) => {
+                updateQuery({ pageSize, page: 1 });
+              }}
             />
           </>
         )}
@@ -185,7 +200,9 @@ export default function UsersPage() {
       <UserFormDialog
         open={formDialog.open}
         user={formDialog.user}
-        onOpenChange={(open) => { setFormDialog((current) => ({ ...current, open })); }}
+        onOpenChange={(open) => {
+          setFormDialog((current) => ({ ...current, open }));
+        }}
         onSaved={handleSaved}
       />
 
@@ -200,10 +217,21 @@ export default function UsersPage() {
         size="sm"
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setDeleteTarget(null); }} disabled={deleteMutation.isPending}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setDeleteTarget(null);
+              }}
+              disabled={deleteMutation.isPending}
+            >
               Cancel
             </Button>
-            <Button variant="danger" onClick={() => void handleDelete()} loading={deleteMutation.isPending} loadingLabel="Deleting user">
+            <Button
+              variant="danger"
+              onClick={() => void handleDelete()}
+              loading={deleteMutation.isPending}
+              loadingLabel="Deleting user"
+            >
               Delete
             </Button>
           </>

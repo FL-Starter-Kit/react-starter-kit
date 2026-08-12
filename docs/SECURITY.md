@@ -24,9 +24,11 @@ Assets worth protecting:
 - **Single-flight refresh.** On a 401 (excluding auth endpoints), one silent refresh runs and all
   concurrent failures await it, then the original request retries once. See `lib/http/client.ts` +
   `lib/auth/refreshSession.ts`.
-- **CSRF**: the auth layer is designed to use SameSite cookies plus a backend-issued anti-CSRF token
-  attached via the HTTP client's `defaultHeaders` when the backend requires it (hook exists, backend
-  not part of this repo). Do not weaken SameSite settings for convenience.
+- **CSRF**: the HTTP client exposes a first-class `csrf` extension point
+  (`configureHttpClient({ csrf: { headerName, getToken } })` in `lib/http/configure.ts`): provide a
+  token source (e.g. read from the backend's `XSRF-TOKEN` cookie) and the token is attached to every
+  state-changing request. Backends without CSRF needs simply omit the option. Do not weaken SameSite
+  settings for convenience.
 - **Session source of truth** is the backend (`GET /api/auth/me`). Never cache permissions across
   sessions; re-evaluate on every login and on refresh.
 - **Logout** invalidates the session server-side before clearing client state.
@@ -36,7 +38,8 @@ Assets worth protecting:
 - React escapes text content by default — never use `dangerouslySetInnerHTML` (ESLint-banning via
   `no-restricted-syntax` is in place where practical; keep it that way).
 - URLs from the server or user input go through the guarded helpers in `src/utils/url.ts`
-  (open-redirect protection for `returnPath` handling). `javascript:` URLs are rejected.
+  (open-redirect protection for the pre-login redirect target in router navigation state).
+  `javascript:` URLs are rejected.
 - No user input is ever concatenated into HTML, CSS, or SVG.
 - Runtime-validate server payloads (Zod) before rendering — a malformed/unexpected payload must fail
   loudly for developers, not render garbage (see `lib/http/client.ts` validation).
@@ -55,19 +58,81 @@ secrecy.
   upgrade blindly — record any change in `PROGRESS.md`.
 - `npm audit` failures block the PR.
 
-## 6. CSP (production checklist)
+## 6. Security headers and CSP — the deployment contract
 
-The production server must emit a Content-Security-Policy that at minimum:
+Vite cannot emit response headers; the **deployment layer** (reverse proxy, CDN, or platform
+ingress) owns them. The application ships no inline scripts and CSS Modules build to external files,
+so a strict policy is achievable without app changes. Treat the following as the production
+contract:
 
-- `default-src 'self'`
-- `script-src 'self'` (no unsafe-inline; the app ships no inline scripts)
-- `style-src 'self' 'unsafe-inline'` only if inline styles cannot be eliminated (CSS Modules ship as
-  external files)
-- `connect-src 'self' <VITE_API_BASE_URL>`
-- `frame-ancestors 'none'`, `base-uri 'self'`, `object-src 'none'`
+| Header                      | Recommended value                              | Rationale                                   |
+| --------------------------- | ---------------------------------------------- | ------------------------------------------- |
+| `Content-Security-Policy`   | See the default policy below                   | Defense in depth against XSS/injection      |
+| `Strict-Transport-Security` | `max-age=63072000; includeSubDomains; preload` | Enforce HTTPS for one year+ (only over TLS) |
+| `X-Content-Type-Options`    | `nosniff`                                      | Prevent MIME sniffing                       |
+| `Referrer-Policy`           | `strict-origin-when-cross-origin`              | Minimal referrer leakage                    |
+| `Permissions-Policy`        | Least privilege, per app needs                 | Disable unused browser features             |
+| `frame-ancestors`           | `'none'` (inside CSP)                          | The app is not embeddable                   |
 
-`VITE_PUBLIC_URL` is available for canonical URLs. The mock worker (`public/mockServiceWorker.js`)
-is dev-only and must not be served in production builds.
+Recommended default CSP (mirrors `docs/SECURITY.md` §6 requirements; adjust `connect-src` to match
+`VITE_API_BASE_URL` — it must equal the API origin):
+
+```text
+default-src 'self';
+script-src 'self';
+style-src 'self';
+connect-src 'self' https://api.example.com;
+img-src 'self' data:;
+font-src 'self';
+base-uri 'self';
+object-src 'none';
+frame-ancestors 'none'
+```
+
+### Nginx reference
+
+```nginx
+# Serve the built SPA (dist/) — place headers on the location that
+# serves index.html and assets, plus cache/redirect rules as needed.
+location / {
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+    add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'self' https://api.example.com; img-src 'self' data:; font-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'" always;
+}
+```
+
+### CDN / cloud hosting
+
+- **CDN (CloudFront, Cloudflare, Fastly):** set the same headers in the response-headers policy /
+  transform rules; revalidate or purge cached copies any time the CSP changes.
+- **Hosting platforms (Vercel, Netlify, Fly.io, etc.):** use the platform's header configuration
+  (`_headers` file, `vercel.json`, etc.) — see each platform's docs; do not assume defaults are
+  secure.
+- **WebSocket / SSE:** if the app uses `wss://`, add the origin to `connect-src` alongside the API
+  URL.
+- **Staging vs production:** CSP `report-uri`/`report-to` may be used on staging to gather
+  violations before hardening production (see §6.1).
+
+### App-side responsibilities (what this repository does)
+
+- No inline scripts/styles in `index.html` (so `script-src 'self'` holds).
+- The mock worker (`public/mockServiceWorker.js`) is dev-only and must not be deployed (it is served
+  from `public/` — exclude it from production hosting or verify it is unreachable).
+- Runtime data is validated with Zod, URL targets are guarded (see §2), and dynamic URLs in CSP
+  (`connect-src`) are documented in the deployment checklist below.
+
+## 6.1 CSP reporting (optional)
+
+To adopt a strict policy without breaking production, deploy in report-only mode first:
+
+```text
+Content-Security-Policy-Report-Only: default-src 'self'; ... ; report-uri /csp-report
+```
+
+Collect violations, fix offenders, then switch to enforcement. The application itself never needs
+`unsafe-inline` in `script-src`.
 
 ## 7. Logging and data handling
 

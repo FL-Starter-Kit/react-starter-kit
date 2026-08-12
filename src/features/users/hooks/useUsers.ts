@@ -57,7 +57,8 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const { invalidateList, setDetail } = useInvalidateUsers();
   return useMutation({
-    mutationFn: ({ id, input }: { id: string; input: ValidatedUserInput }) => usersApi.update(id, input),
+    mutationFn: ({ id, input }: { id: string; input: ValidatedUserInput }) =>
+      usersApi.update(id, input),
     onSuccess: (user) => {
       setDetail(user);
       void invalidateList();

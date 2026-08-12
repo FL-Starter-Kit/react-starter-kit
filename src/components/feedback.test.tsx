@@ -20,7 +20,11 @@ describe('Alert', () => {
   });
 
   it('renders the optional title', () => {
-    render(<Alert variant="warning" title="Heads up">Details</Alert>);
+    render(
+      <Alert variant="warning" title="Heads up">
+        Details
+      </Alert>,
+    );
     expect(screen.getByText('Heads up')).toBeInTheDocument();
   });
 
@@ -52,12 +56,7 @@ describe('EmptyState', () => {
   });
 
   it('hides the illustration from assistive technology', () => {
-    render(
-      <EmptyState
-        title="Empty"
-        illustration={<span>🔍</span>}
-      />,
-    );
+    render(<EmptyState title="Empty" illustration={<span>🔍</span>} />);
     expect(screen.getByText('🔍').parentElement).toHaveAttribute('aria-hidden', 'true');
   });
 });

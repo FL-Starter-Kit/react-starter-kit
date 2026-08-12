@@ -20,20 +20,29 @@ export interface AlertProps extends Omit<ComponentPropsWithoutRef<'div'>, 'title
  * - `danger`: role="alert" (assertive announcement)
  * - others: role="status" (polite announcement)
  */
-export function Alert({ variant = 'info', title, children, onDismiss, dismissLabel = 'Dismiss', className, ...rest }: AlertProps) {
+export function Alert({
+  variant = 'info',
+  title,
+  children,
+  onDismiss,
+  dismissLabel = 'Dismiss',
+  className,
+  ...rest
+}: AlertProps) {
   const role = variant === 'danger' ? 'alert' : 'status';
   return (
-    <div
-      role={role}
-      className={cn(styles.alert, styles[variant], className)}
-      {...rest}
-    >
+    <div role={role} className={cn(styles.alert, styles[variant], className)} {...rest}>
       <div className={styles.content}>
         {title !== undefined && <p className={styles.title}>{title}</p>}
         <div className={styles.body}>{children}</div>
       </div>
       {onDismiss !== undefined && (
-        <button type="button" className={styles.dismiss} onClick={onDismiss} aria-label={dismissLabel}>
+        <button
+          type="button"
+          className={styles.dismiss}
+          onClick={onDismiss}
+          aria-label={dismissLabel}
+        >
           <span aria-hidden="true">✕</span>
         </button>
       )}

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { formatCompactNumber, formatCurrency, formatDate, formatDateTime, formatNumber } from '@/utils/format';
+import {
+  formatCompactNumber,
+  formatCurrency,
+  formatDate,
+  formatDateTime,
+  formatNumber,
+} from '@/utils/format';
 
 describe('formatNumber', () => {
   it('formats with thousands separators', () => {
@@ -36,28 +42,38 @@ describe('formatDate', () => {
   it('formats an ISO timestamp as a date', () => {
     // 2026-01-01 09:00 UTC
     const date = new Date('2026-01-01T09:00:00Z');
-    expect(formatDate('2026-01-01T09:00:00Z')).toBe(new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date));
+    expect(formatDate('2026-01-01T09:00:00Z')).toBe(
+      new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date),
+    );
   });
 
   it('appends UTC to naive timestamps', () => {
     const date = new Date('2026-01-01T09:00:00Z');
-    expect(formatDate('2026-01-01T09:00:00')).toBe(new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date));
+    expect(formatDate('2026-01-01T09:00:00')).toBe(
+      new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date),
+    );
   });
 
   it('accepts Date objects', () => {
     const date = new Date('2026-05-05T00:00:00Z');
-    expect(formatDate(date)).toBe(new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date));
+    expect(formatDate(date)).toBe(
+      new Intl.DateTimeFormat('en-US', { dateStyle: 'medium' }).format(date),
+    );
   });
 });
 
 describe('formatDateTime', () => {
   it('formats an ISO timestamp with time', () => {
     const date = new Date('2026-01-01T09:00:00Z');
-    expect(formatDateTime('2026-01-01T09:00:00Z')).toBe(new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(date));
+    expect(formatDateTime('2026-01-01T09:00:00Z')).toBe(
+      new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(date),
+    );
   });
 
   it('does not misparse timestamps with explicit offsets', () => {
     const date = new Date('2026-01-01T09:00:00+02:00');
-    expect(formatDateTime('2026-01-01T09:00:00+02:00')).toBe(new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(date));
+    expect(formatDateTime('2026-01-01T09:00:00+02:00')).toBe(
+      new Intl.DateTimeFormat('en-US', { dateStyle: 'medium', timeStyle: 'short' }).format(date),
+    );
   });
 });

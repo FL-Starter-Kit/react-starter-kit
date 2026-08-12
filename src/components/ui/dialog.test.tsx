@@ -23,7 +23,12 @@ describe('Dialog', () => {
 
   it('renders the dialog title and content when open', () => {
     render(
-      <Dialog open onOpenChange={() => undefined} title="Confirm deletion" description="This cannot be undone">
+      <Dialog
+        open
+        onOpenChange={() => undefined}
+        title="Confirm deletion"
+        description="This cannot be undone"
+      >
         Delete this item?
       </Dialog>,
     );

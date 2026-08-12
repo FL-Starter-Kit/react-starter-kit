@@ -11,7 +11,15 @@ export default function NotFoundPage() {
       <EmptyState
         title="Page not found"
         description="The page you are looking for does not exist or has been moved."
-        action={<Button onClick={() => { void navigate('/'); }}>Go to home</Button>}
+        action={
+          <Button
+            onClick={() => {
+              void navigate('/');
+            }}
+          >
+            Go to home
+          </Button>
+        }
       />
     </Container>
   );

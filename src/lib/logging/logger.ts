@@ -19,9 +19,22 @@ export interface LogContext {
   [key: string]: unknown;
 }
 
-export type LogTransport = (level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: LogContext, error?: unknown) => void;
+export type LogTransport = (
+  level: 'debug' | 'info' | 'warn' | 'error',
+  message: string,
+  context?: LogContext,
+  error?: unknown,
+) => void;
 
-const SENSITIVE_KEYS = new Set(['password', 'token', 'accesstoken', 'refreshtoken', 'authorization', 'cookie', 'secret']);
+const SENSITIVE_KEYS = new Set([
+  'password',
+  'token',
+  'accesstoken',
+  'refreshtoken',
+  'authorization',
+  'cookie',
+  'secret',
+]);
 
 const LEVEL_ORDER: Record<LogLevel, number> = {
   debug: 10,
@@ -75,7 +88,12 @@ class Logger {
     this.write('error', message, context, error);
   }
 
-  private write(level: 'debug' | 'info' | 'warn' | 'error', message: string, context?: LogContext, error?: unknown): void {
+  private write(
+    level: 'debug' | 'info' | 'warn' | 'error',
+    message: string,
+    context?: LogContext,
+    error?: unknown,
+  ): void {
     if (LEVEL_ORDER[level] < LEVEL_ORDER[this.level]) {
       return;
     }

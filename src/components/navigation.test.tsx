@@ -9,11 +9,7 @@ describe('Breadcrumbs', () => {
   it('renders links for all but the last crumb', () => {
     renderWithProviders(
       <Breadcrumbs
-        items={[
-          { label: 'Home', to: '/' },
-          { label: 'Users', to: '/users' },
-          { label: 'Details' },
-        ]}
+        items={[{ label: 'Home', to: '/' }, { label: 'Users', to: '/users' }, { label: 'Details' }]}
       />,
     );
 
@@ -36,7 +32,12 @@ describe('Breadcrumbs', () => {
 describe('MainNav', () => {
   it('renders nav links with the active one marked', () => {
     renderWithProviders(
-      <MainNav items={[{ label: 'Home', to: '/', end: true }, { label: 'Users', to: '/users' }]} />,
+      <MainNav
+        items={[
+          { label: 'Home', to: '/', end: true },
+          { label: 'Users', to: '/users' },
+        ]}
+      />,
       { initialEntries: ['/users'] },
     );
 

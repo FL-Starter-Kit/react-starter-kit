@@ -13,9 +13,10 @@ Accepted
   queries use `keepPreviousData` so pagination never flashes skeletons. Query-client tuning lives in
   `app/providers/QueryProvider` (production) and `tests/render.tsx` (deterministic test client:
   `retry: false`, `staleTime: Infinity`).
-- **URL-filterable state → the URL.** List filters, pagination, and return paths live in search
-  params (`useSearchParams`), making them deep-linkable and refresh-safe. Components derive from the
-  URL; they never keep a parallel copy.
+- **URL-filterable state → the URL.** List filters and pagination live in search params
+  (`useSearchParams`), making them deep-linkable and refresh-safe. The pre-login route travels as
+  router navigation state (no persistent storage). Components derive from the URL; they never keep a
+  parallel copy.
 - **Transient UI state → local `useState`.** Dialog open state and similar ephemeral state stays in
   the owning component.
 - **Global UI state → context, sparingly.** Theme, session. Persisted theme uses `safeStorage`

@@ -1,6 +1,12 @@
 import { describe, expect, it } from 'vitest';
 
-import { ApiError, ErrorCode, isAbortError, isRetryableStatus, isTimeoutError } from '@/lib/http/errors';
+import {
+  ApiError,
+  ErrorCode,
+  isAbortError,
+  isRetryableStatus,
+  isTimeoutError,
+} from '@/lib/http/errors';
 
 describe('ApiError', () => {
   it('defaults message from the code', () => {

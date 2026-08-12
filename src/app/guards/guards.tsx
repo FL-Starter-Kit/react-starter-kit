@@ -16,7 +16,6 @@ import { Navigate, useLocation } from 'react-router';
 
 import { Spinner } from '@/components/ui/Spinner';
 import { useAuthContext } from '@/lib/auth/context';
-import { setReturnPath } from '@/lib/auth/tokenStorage';
 import type { PermissionValue, RoleValue } from '@/lib/auth/types';
 
 interface ProtectedRouteProps {
@@ -26,7 +25,11 @@ interface ProtectedRouteProps {
 /** Full-screen loading state used while the session is being restored. */
 export function SessionLoader() {
   return (
-    <div role="status" aria-label="Loading your session" style={{ display: 'grid', placeItems: 'center', minHeight: '60dvh' }}>
+    <div
+      role="status"
+      aria-label="Loading your session"
+      style={{ display: 'grid', placeItems: 'center', minHeight: '60dvh' }}
+    >
       <Spinner size="lg" />
     </div>
   );
@@ -41,8 +44,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
 
   if (status === 'unauthenticated') {
-    setReturnPath(location.pathname + location.search);
-    return <Navigate to="/login" replace />;
+    // The attempted route travels as navigation state (no storage write
+    // during render); LoginPage restores it after a successful login.
+    return <Navigate to="/login" replace state={{ from: location.pathname + location.search }} />;
   }
 
   return children;

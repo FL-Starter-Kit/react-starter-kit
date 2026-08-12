@@ -24,7 +24,17 @@ export interface FormFieldProps extends Omit<ComponentPropsWithoutRef<'div'>, 'c
  * Wraps a form control with an associated label, hint and error message.
  * All three are correctly linked with `id`/`htmlFor`/`aria-describedby`.
  */
-export function FormField({ name, label, hint, error, hideLabel = false, children, required = false, className, ...rest }: FormFieldProps) {
+export function FormField({
+  name,
+  label,
+  hint,
+  error,
+  hideLabel = false,
+  children,
+  required = false,
+  className,
+  ...rest
+}: FormFieldProps) {
   const autoId = useId();
   const fieldId = `${name}-${autoId}`;
   const hintId = `${fieldId}-hint`;

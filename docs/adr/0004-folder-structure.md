@@ -9,7 +9,7 @@ Accepted
 ## Decision
 
 - Code is organized by **feature** (`src/features/<name>/`) with internal layers: `models/`,
-  `schemas/`, `api/`, `services/`, `hooks/`, `components/`, `pages/`. Shared infrastructure lives
+  `schemas/`, `api/`, `utils/`, `hooks/`, `components/`, `pages/`. Shared infrastructure lives
   outside features: `app/` (shell), `components/` (primitives), `lib/` (framework-agnostic
   libraries), `hooks/`, `utils/`, `types/`.
 - Dependency direction is bottom-up and **enforced by ESLint** `no-restricted-paths` zones:
@@ -35,3 +35,6 @@ decays into a dependency swamp in any codebase this size.
   the rules stable.
 - Known evolution pressure: "shared feature code" (e.g. two features needing a common widget)
   belongs in `components/` or `lib/`, decided by layer, not by convenience.
+- A feature-level `services/` layer was considered and rejected: pure domain helpers (labels,
+  initials, permissions) are `utils/`; endpoint orchestration lives in `api/` + `hooks/` — a named
+  "service" layer invites god-object accumulation (see `PR 0004` review feedback).

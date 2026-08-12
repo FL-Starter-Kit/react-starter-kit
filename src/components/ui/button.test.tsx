@@ -23,7 +23,11 @@ describe('Button', () => {
   });
 
   it('disables and shows a loading state when loading', () => {
-    render(<Button loading loadingLabel="Saving…">Save</Button>);
+    render(
+      <Button loading loadingLabel="Saving…">
+        Save
+      </Button>,
+    );
     const button = screen.getByRole('button');
     expect(button).toBeDisabled();
     expect(button).toHaveAttribute('aria-busy', 'true');
@@ -37,7 +41,11 @@ describe('Button', () => {
   });
 
   it('combines custom classes with variant classes', () => {
-    render(<Button className="custom" variant="danger">Save</Button>);
+    render(
+      <Button className="custom" variant="danger">
+        Save
+      </Button>,
+    );
     expect(screen.getByRole('button')).toHaveClass('custom');
     expect(screen.getByRole('button')).toHaveClass('danger');
   });
@@ -47,7 +55,11 @@ describe('IconButton', () => {
   it('requires and applies an aria-label', async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
-    render(<IconButton aria-label="Delete row" onClick={onClick}>×</IconButton>);
+    render(
+      <IconButton aria-label="Delete row" onClick={onClick}>
+        ×
+      </IconButton>,
+    );
 
     const button = screen.getByRole('button', { name: 'Delete row' });
     await user.click(button);
@@ -60,7 +72,11 @@ describe('IconButton', () => {
   });
 
   it('disables while loading', () => {
-    render(<IconButton aria-label="Refresh" loading>↻</IconButton>);
+    render(
+      <IconButton aria-label="Refresh" loading>
+        ↻
+      </IconButton>,
+    );
     expect(screen.getByRole('button')).toBeDisabled();
     expect(screen.getByRole('button')).toHaveAttribute('aria-busy', 'true');
   });

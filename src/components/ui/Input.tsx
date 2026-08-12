@@ -11,5 +11,12 @@ export interface InputProps extends ComponentPropsWithoutRef<'input'> {
 
 /** Text input. Use with FormField for label/error association. */
 export function Input({ invalid = false, className, ref, ...rest }: InputProps) {
-  return <input ref={ref} aria-invalid={invalid || undefined} className={cn(styles.control, invalid && styles.invalid, className)} {...rest} />;
+  return (
+    <input
+      ref={ref}
+      aria-invalid={invalid || undefined}
+      className={cn(styles.control, invalid && styles.invalid, className)}
+      {...rest}
+    />
+  );
 }

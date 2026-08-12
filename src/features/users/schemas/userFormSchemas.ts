@@ -15,7 +15,9 @@ export const userFormSchema = z.object({
     .max(80, 'Name must be at most 80 characters.'),
   email: z.string().trim().min(1, 'Email is required.').email('Enter a valid email address.'),
   role: z.enum([UserRole.Admin, UserRole.Editor, UserRole.Viewer], { message: 'Select a role.' }),
-  status: z.enum([UserStatus.Active, UserStatus.Invited, UserStatus.Disabled], { message: 'Select a status.' }),
+  status: z.enum([UserStatus.Active, UserStatus.Invited, UserStatus.Disabled], {
+    message: 'Select a status.',
+  }),
 });
 
 export type UserFormValues = z.infer<typeof userFormSchema>;

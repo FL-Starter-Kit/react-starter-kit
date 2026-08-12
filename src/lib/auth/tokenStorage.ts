@@ -14,32 +14,8 @@
  */
 
 import { sessionStorageSafe } from '@/lib/storage/safeStorage';
-import { isSafeRedirectPath } from '@/utils/url';
 
-const RETURN_PATH_KEY = 'auth.returnPath';
 const MOCK_SESSION_KEY = 'auth.mockSession';
-
-/**
- * Where the app should send the user after login. Stored in session
- * storage (not localStorage) and validated against open-redirect attacks.
- */
-export function getReturnPath(): string {
-  const stored = sessionStorageSafe.get(RETURN_PATH_KEY);
-  if (isSafeRedirectPath(stored)) {
-    return stored;
-  }
-  return '/';
-}
-
-export function setReturnPath(path: string): void {
-  if (isSafeRedirectPath(path)) {
-    sessionStorageSafe.set(RETURN_PATH_KEY, path);
-  }
-}
-
-export function clearReturnPath(): void {
-  sessionStorageSafe.remove(RETURN_PATH_KEY);
-}
 
 /** Flag used by the dev mock backend to remember the signed-in session. */
 export function getMockSession(): string | null {

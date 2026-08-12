@@ -1,6 +1,6 @@
 import { UserStatusBadge } from '@/features/users/components/UserStatusBadge';
 import type { User } from '@/features/users/models/user';
-import { usersService } from '@/features/users/services/usersService';
+import { canDelete as isDeletable, roleLabel } from '@/features/users/utils/userDisplay';
 
 import styles from './UserTable.module.css';
 
@@ -15,7 +15,14 @@ export interface UserTableProps {
 }
 
 /** Accessible data table for the user list. */
-export function UserTable({ users, canUpdate, canDelete, currentUserId, onEdit, onDelete }: UserTableProps) {
+export function UserTable({
+  users,
+  canUpdate,
+  canDelete,
+  currentUserId,
+  onEdit,
+  onDelete,
+}: UserTableProps) {
   return (
     <div className={styles.scroll}>
       <table className={styles.table}>
@@ -35,20 +42,26 @@ export function UserTable({ users, canUpdate, canDelete, currentUserId, onEdit, 
         </thead>
         <tbody>
           {users.map((user) => {
-            const deletable = canDelete && usersService.canDelete(user, currentUserId);
+            const deletable = canDelete && isDeletable(user, currentUserId);
             return (
               <tr key={user.id}>
                 <th scope="row" className={styles.name}>
                   {user.name}
                 </th>
                 <td>{user.email}</td>
-                <td>{usersService.roleLabel(user.role)}</td>
+                <td>{roleLabel(user.role)}</td>
                 <td>
                   <UserStatusBadge status={user.status} />
                 </td>
                 <td className={styles.actions}>
                   {canUpdate && (
-                    <button type="button" className={styles.action} onClick={() => { onEdit(user); }}>
+                    <button
+                      type="button"
+                      className={styles.action}
+                      onClick={() => {
+                        onEdit(user);
+                      }}
+                    >
                       Edit
                     </button>
                   )}
@@ -56,7 +69,9 @@ export function UserTable({ users, canUpdate, canDelete, currentUserId, onEdit, 
                     <button
                       type="button"
                       className={`${styles.action} ${styles.danger}`}
-                      onClick={() => { onDelete(user); }}
+                      onClick={() => {
+                        onDelete(user);
+                      }}
                     >
                       Delete
                     </button>

@@ -27,10 +27,6 @@
   white-space: nowrap;
 }
 
-.tooltip:hover {
-  pointer-events: auto;
-}
-
 .visible {
   opacity: 1;
   visibility: visible;

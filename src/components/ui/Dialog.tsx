@@ -64,7 +64,9 @@ export function Dialog({
       onOpenChange(false);
     };
     dialog.addEventListener('cancel', onCancel);
-    return () => { dialog.removeEventListener('cancel', onCancel); };
+    return () => {
+      dialog.removeEventListener('cancel', onCancel);
+    };
   }, [onOpenChange]);
 
   const dialog = (
@@ -73,14 +75,22 @@ export function Dialog({
       aria-labelledby={titleId}
       aria-describedby={description !== undefined ? descriptionId : undefined}
       className={cn(styles.dialog, styles[size])}
-      onClose={() => { onOpenChange(false); }}
+      onClose={() => {
+        onOpenChange(false);
+      }}
     >
       <div className={styles.header}>
         <h2 id={titleId} className={styles.title}>
           {title}
         </h2>
         {showCloseButton && (
-          <IconButton aria-label="Close dialog" variant="ghost" onClick={() => { onOpenChange(false); }}>
+          <IconButton
+            aria-label="Close dialog"
+            variant="ghost"
+            onClick={() => {
+              onOpenChange(false);
+            }}
+          >
             <span aria-hidden="true">✕</span>
           </IconButton>
         )}

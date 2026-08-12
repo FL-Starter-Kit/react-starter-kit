@@ -23,8 +23,24 @@ export interface HttpClientConfig {
   baseUrl: string;
   defaultTimeoutMs: number;
   defaultRetries: number;
-  /** Attach extra headers to every request (e.g. CSRF tokens). */
+  /** Attach extra headers to every request (e.g. correlation metadata). */
   defaultHeaders?: Record<string, string>;
+  /**
+   * CSRF protection extension point. Cookie-based session backends often
+   * require an anti-CSRF token on state-changing requests.
+   *
+   * `getToken` is invoked per state-changing request (POST/PUT/PATCH/DELETE)
+   * and may return the token synchronously or asynchronously (e.g. read
+   * from a `XSRF-TOKEN` cookie). Returning null/'' skips the header, and an
+   * explicitly provided per-request header always wins. Backends using
+   * Bearer tokens, BFFs or no CSRF at all simply omit this option — the
+   * HTTP layer is never rewritten per backend pattern.
+   */
+  csrf?: {
+    /** Header that carries the token (default `X-CSRF-Token`). */
+    headerName?: string;
+    getToken: () => string | null | undefined | Promise<string | null | undefined>;
+  };
 }
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -70,7 +86,10 @@ interface InternalRequestOptions extends HttpRequestOptions<unknown> {
   isUnauthorizedRetry?: boolean;
 }
 
-export type UnauthorizedHandler = () => Promise<void>;let unauthorizedHandler: UnauthorizedHandler | null = null;
+export type UnauthorizedHandler = () => Promise<void>;
+let unauthorizedHandler: UnauthorizedHandler | null = null;
+
+const DEFAULT_CSRF_HEADER_NAME = 'X-CSRF-Token';
 
 /**
  * Register a handler invoked once per failed request when the backend
@@ -103,7 +122,11 @@ export function createHttpClient(config: HttpClientConfig) {
   async function requestInternal(options: InternalRequestOptions): Promise<unknown> {
     const retries = options.retries ?? currentConfig.defaultRetries;
     const requestId = createRequestId();
-    const requestLogger = logger.withContext({ requestId, method: options.method, url: options.url });
+    const requestLogger = logger.withContext({
+      requestId,
+      method: options.method,
+      url: options.url,
+    });
     const timeoutMs = options.timeoutMs ?? defaultTimeoutMs;
 
     let attempt = 0;
@@ -111,7 +134,9 @@ export function createHttpClient(config: HttpClientConfig) {
     while (true) {
       const controller = new AbortController();
       let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
-      const onExternalAbort = () => { controller.abort(options.signal?.reason); };
+      const onExternalAbort = () => {
+        controller.abort(options.signal?.reason);
+      };
 
       if (options.signal) {
         if (options.signal.aborted) {
@@ -120,7 +145,9 @@ export function createHttpClient(config: HttpClientConfig) {
         options.signal.addEventListener('abort', onExternalAbort, { once: true });
       }
       if (timeoutMs > 0) {
-        timeoutHandle = setTimeout(() => { controller.abort(createTimeoutReason(timeoutMs)); }, timeoutMs);
+        timeoutHandle = setTimeout(() => {
+          controller.abort(createTimeoutReason(timeoutMs));
+        }, timeoutMs);
       }
 
       try {
@@ -140,7 +167,11 @@ export function createHttpClient(config: HttpClientConfig) {
           } catch (error) {
             // The server violated its contract — fail loudly for developers,
             // expose a generic message to users.
-            requestLogger.error('Response failed runtime validation', { status: response.status }, error);
+            requestLogger.error(
+              'Response failed runtime validation',
+              { status: response.status },
+              error,
+            );
             const responseRequestId = response.headers.get('x-request-id');
             throw new ApiError({
               status: response.status,
@@ -217,6 +248,18 @@ export function createHttpClient(config: HttpClientConfig) {
       ...currentConfig.defaultHeaders,
       ...options.headers,
     };
+
+    const csrf = currentConfig.csrf;
+    if (csrf !== undefined && options.method !== 'GET') {
+      const headerName = csrf.headerName ?? DEFAULT_CSRF_HEADER_NAME;
+      if (headers[headerName] === undefined) {
+        const token = await csrf.getToken();
+        if (token !== null && token !== undefined && token !== '') {
+          headers[headerName] = token;
+        }
+      }
+    }
+
     if (options.body !== undefined && !headers['Content-Type']) {
       headers['Content-Type'] = 'application/json';
     }
@@ -254,19 +297,37 @@ export function createHttpClient(config: HttpClientConfig) {
   }
 
   return {
-    get<TResponse>(url: string, options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>): Promise<TResponse> {
+    get<TResponse>(
+      url: string,
+      options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>,
+    ): Promise<TResponse> {
       return request({ method: 'GET', url, ...options });
     },
-    post<TResponse>(url: string, body?: unknown, options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>): Promise<TResponse> {
+    post<TResponse>(
+      url: string,
+      body?: unknown,
+      options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>,
+    ): Promise<TResponse> {
       return request({ method: 'POST', url, body, ...options });
     },
-    put<TResponse>(url: string, body?: unknown, options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>): Promise<TResponse> {
+    put<TResponse>(
+      url: string,
+      body?: unknown,
+      options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>,
+    ): Promise<TResponse> {
       return request({ method: 'PUT', url, body, ...options });
     },
-    patch<TResponse>(url: string, body?: unknown, options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>): Promise<TResponse> {
+    patch<TResponse>(
+      url: string,
+      body?: unknown,
+      options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>,
+    ): Promise<TResponse> {
       return request({ method: 'PATCH', url, body, ...options });
     },
-    delete<TResponse>(url: string, options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>): Promise<TResponse> {
+    delete<TResponse>(
+      url: string,
+      options?: Omit<HttpRequestOptions<TResponse>, 'method' | 'url' | 'body'>,
+    ): Promise<TResponse> {
       return request({ method: 'DELETE', url, ...options });
     },
     request,
@@ -282,7 +343,10 @@ export const httpClient = createHttpClient({
   defaultRetries: 2,
 });
 
-async function normalizeErrorResponse(response: Response, requestLogger: ReturnType<typeof logger.withContext>): Promise<ApiError> {
+async function normalizeErrorResponse(
+  response: Response,
+  requestLogger: ReturnType<typeof logger.withContext>,
+): Promise<ApiError> {
   const requestId = response.headers.get('x-request-id') ?? undefined;
   let envelope: ErrorEnvelope = {};
   try {
@@ -297,10 +361,17 @@ async function normalizeErrorResponse(response: Response, requestLogger: ReturnT
   const code = mapStatusToCode(response.status, envelope.code);
   const message = envelope.message ?? defaultMessageForStatus(code);
   const fieldErrors = Object.fromEntries(
-    Object.entries(envelope.fieldErrors ?? {}).map(([field, errors]) => [field, errors.map(String)]),
+    Object.entries(envelope.fieldErrors ?? {}).map(([field, errors]) => [
+      field,
+      errors.map(String),
+    ]),
   );
 
-  requestLogger.warn('Request failed', { status: response.status, code }, new ApiError({ status: response.status, code, message }));
+  requestLogger.warn(
+    'Request failed',
+    { status: response.status, code },
+    new ApiError({ status: response.status, code, message }),
+  );
 
   return new ApiError({
     status: response.status,
@@ -314,7 +385,11 @@ async function normalizeErrorResponse(response: Response, requestLogger: ReturnT
 
 function normalizeUnknownError(error: unknown): ApiError {
   if (isTimeoutError(error)) {
-    return new ApiError({ status: 0, code: ErrorCode.Timeout, message: 'The request timed out. Please try again.' });
+    return new ApiError({
+      status: 0,
+      code: ErrorCode.Timeout,
+      message: 'The request timed out. Please try again.',
+    });
   }
   return new ApiError({
     status: 0,

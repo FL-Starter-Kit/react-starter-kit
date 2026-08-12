@@ -5,6 +5,11 @@
  * unauthorized handler. This module ensures that when many requests fail
  * simultaneously (e.g. parallel queries after session expiry) the refresh
  * endpoint is hit exactly once and the others await the same promise.
+ *
+ * The failure path is explicit: when the refresh fails, `onSessionExpired`
+ * fires exactly once so the auth subsystem can transition to
+ * `unauthenticated` authoritatively — no individual query or component
+ * discovers the dead session piecemeal.
  */
 
 import { setUnauthorizedHandler } from '@/lib/http';
@@ -14,8 +19,16 @@ import { authApi } from './authApi';
 
 type SessionChangeListener = () => void;
 
+interface SessionListeners {
+  /** Called once when a silent refresh restores the session. */
+  onSessionRestored: SessionChangeListener;
+  /** Called once when the silent refresh fails — the session is dead. */
+  onSessionExpired: SessionChangeListener;
+}
+
 let refreshPromise: Promise<boolean> | null = null;
 let onSessionRestored: SessionChangeListener | null = null;
+let onSessionExpired: SessionChangeListener | null = null;
 
 async function performRefresh(): Promise<boolean> {
   try {
@@ -25,6 +38,7 @@ async function performRefresh(): Promise<boolean> {
     return true;
   } catch (error) {
     logger.warn('Session refresh failed', {}, error);
+    onSessionExpired?.();
     return false;
   }
 }
@@ -32,10 +46,14 @@ async function performRefresh(): Promise<boolean> {
 /**
  * Install the 401 → refresh → retry pipeline. `onSessionRestored` lets
  * the AuthProvider mark the session as authenticated again after a
- * silent refresh. Returns an unsubscribe function.
+ * silent refresh; `onSessionExpired` lets it transition to
+ * `unauthenticated` when the refresh fails. Both fire exactly once per
+ * refresh attempt (single-flight), no matter how many requests observed
+ * the 401. Returns an unsubscribe function.
  */
-export function installUnauthorizedRefresher(listener: SessionChangeListener): () => void {
-  onSessionRestored = listener;
+export function installUnauthorizedRefresher(listeners: SessionListeners): () => void {
+  onSessionRestored = listeners.onSessionRestored;
+  onSessionExpired = listeners.onSessionExpired;
   return setUnauthorizedHandler(async () => {
     refreshPromise ??= performRefresh().finally(() => {
       refreshPromise = null;

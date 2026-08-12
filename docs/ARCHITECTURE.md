@@ -40,7 +40,7 @@ src/
     layout/       Container, PageHeader
     navigation/   Breadcrumbs, MainNav
   features/       Feature-oriented modules — the unit of ownership
-    users/        models/, schemas/, api/, services/, hooks/, components/, pages/
+    users/        models/, schemas/, api/, utils/, hooks/, components/, pages/
     auth/         pages/ (login)
     docs/         pages/ (live component showcase)
     errors/       pages/ (404, 403)
@@ -69,7 +69,7 @@ features/users/
   models/user.ts       Types + constants (no logic)
   schemas/             Zod runtime schemas + React Hook Form schemas
   api/usersApi.ts      Endpoint definitions using the HTTP client
-  services/            Pure domain logic (labels, initials, permissions)
+  utils/userDisplay.ts Pure presentation helpers (labels, initials, canDelete)
   hooks/useUsers.ts    TanStack Query hooks + query keys + invalidation
   components/          Feature-specific UI (table, filters, form dialog)
   pages/UsersPage.tsx  Page composition + URL state
@@ -79,8 +79,8 @@ Rules for features:
 
 - A feature may import from `app`, `components`, `hooks`, `lib`, `utils`, `types` — and **never from
   another feature** (except its own subfolder).
-- Pages stay thin: they compose components and hook into server state; business logic lives in
-  services and hooks.
+- Pages stay thin: they compose components and hook into server state; business logic lives in utils
+  and hooks.
 - The API layer is the only place that knows the HTTP endpoints of that feature.
 
 ## 4. Dependency rules and enforcement
@@ -105,14 +105,14 @@ Known historical violations and their fixes are documented in `PROGRESS.md`.
 
 ## 5. State management
 
-| State kind              | Mechanism                                                                                  |
-| ----------------------- | ------------------------------------------------------------------------------------------ |
-| Server state            | TanStack Query hooks in `features/<name>/hooks/`; query keys centralized next to the hooks |
-| URL state               | `useSearchParams` — filters, pagination, return paths live in the URL                      |
-| Theme                   | React context (`ThemeProvider`), persisted via `safeStorage`                               |
-| Auth session            | React context fed by `lib/auth`; single source of truth is the backend session             |
-| Local UI state          | `useState` inside the component that owns it (dialog open state, etc.)                     |
-| Server mutation results | `announce()` into an aria-live region, never `alert()`                                     |
+| State kind              | Mechanism                                                                                                          |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| Server state            | TanStack Query hooks in `features/<name>/hooks/`; query keys centralized next to the hooks                         |
+| URL state               | `useSearchParams` — filters and pagination live in the URL; the pre-login route travels as router navigation state |
+| Theme                   | React context (`ThemeProvider`), persisted via `safeStorage`                                                       |
+| Auth session            | React context fed by `lib/auth`; single source of truth is the backend session                                     |
+| Local UI state          | `useState` inside the component that owns it (dialog open state, etc.)                                             |
+| Server mutation results | `announce()` into an aria-live region, never `alert()`                                                             |
 
 Key conventions:
 
@@ -148,7 +148,9 @@ The client is configured once in bootstrap from the validated environment (`lib/
   (`users:create`, `users:update`, `users:delete`). Guards (`ProtectedRoute`, `PermissionGate`,
   `RoleGate`) gate routes and UI.
 - **Refresh**: on any 401 (except auth endpoints), `refreshSession` runs a single-flight silent
-  refresh, then the original request retries once. Failure redirects to `/login?returnPath=...`.
+  refresh, then the original request retries once. Failure flips the session to `unauthenticated`;
+  `ProtectedRoute` sends the user to `/login`, carrying the attempted route as navigation state
+  (`{ from }`) so login can restore it — no persistent storage involved.
 - **Logout** is an API call (invalidates the cookie) followed by a client-side session clear.
 - **Demo accounts** live in `src/tests/mocks/db.ts`; the mock backend emulates cookies in the
   browser and falls back to module state under Node (tests call `setActiveSession('user-1')`).

@@ -10,7 +10,11 @@ import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
 import { useCreateUser, useUpdateUser, toUserInput } from '@/features/users/hooks/useUsers';
 import { UserRole, UserStatus, type User } from '@/features/users/models/user';
-import { emptyUserForm, userFormSchema, type UserFormValues } from '@/features/users/schemas/userFormSchemas';
+import {
+  emptyUserForm,
+  userFormSchema,
+  type UserFormValues,
+} from '@/features/users/schemas/userFormSchemas';
 import { ApiError } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
 
@@ -62,7 +66,7 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
 
   // Clear server errors when the dialog target changes — render-time
   // adjustment instead of an effect (React-sanctioned pattern).
-  const targetKey = !open ? 'closed' : user?.id ?? 'new';
+  const targetKey = !open ? 'closed' : (user?.id ?? 'new');
   const [lastTargetKey, setLastTargetKey] = useState('closed');
   if (targetKey !== lastTargetKey) {
     setLastTargetKey(targetKey);
@@ -103,7 +107,9 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
       return clientError;
     }
     const serverMessages = serverFieldErrors[field];
-    return serverMessages !== undefined && serverMessages.length > 0 ? serverMessages[0] : undefined;
+    return serverMessages !== undefined && serverMessages.length > 0
+      ? serverMessages[0]
+      : undefined;
   };
 
   return (
@@ -114,7 +120,13 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
       description={isEdit ? 'Update the user details below.' : 'Add a new user to the directory.'}
       footer={
         <>
-          <Button variant="secondary" onClick={() => { onOpenChange(false); }} disabled={isSubmitting}>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              onOpenChange(false);
+            }}
+            disabled={isSubmitting}
+          >
             Cancel
           </Button>
           <Button
@@ -131,7 +143,13 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
     >
       {serverError !== null && <Alert variant="danger">{serverError}</Alert>}
 
-      <form id="user-form" onSubmit={(event) => { void submitForm(event); }} noValidate>
+      <form
+        id="user-form"
+        onSubmit={(event) => {
+          void submitForm(event);
+        }}
+        noValidate
+      >
         <FormField name="name" label="Full name" error={fieldError('name')} required>
           {(fieldId, describedById) => (
             <Input
@@ -159,7 +177,12 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
 
         <FormField name="role" label="Role" error={fieldError('role')} required>
           {(fieldId, describedById) => (
-            <Select id={fieldId} invalid={fieldError('role') !== undefined} aria-describedby={describedById} {...register('role')}>
+            <Select
+              id={fieldId}
+              invalid={fieldError('role') !== undefined}
+              aria-describedby={describedById}
+              {...register('role')}
+            >
               <option value={UserRole.Viewer}>Viewer</option>
               <option value={UserRole.Editor}>Editor</option>
               <option value={UserRole.Admin}>Admin</option>
@@ -169,7 +192,12 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
 
         <FormField name="status" label="Status" error={fieldError('status')} required>
           {(fieldId, describedById) => (
-            <Select id={fieldId} invalid={fieldError('status') !== undefined} aria-describedby={describedById} {...register('status')}>
+            <Select
+              id={fieldId}
+              invalid={fieldError('status') !== undefined}
+              aria-describedby={describedById}
+              {...register('status')}
+            >
               <option value={UserStatus.Active}>Active</option>
               <option value={UserStatus.Invited}>Invited</option>
               <option value={UserStatus.Disabled}>Disabled</option>

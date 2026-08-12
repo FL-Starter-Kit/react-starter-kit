@@ -59,7 +59,15 @@ export default function ComponentsPage() {
           Theme
         </h2>
         <div className={styles.row}>
-          <Select id="theme-select" aria-label="Theme" value={mode} onChange={(event) => { setMode(event.target.value as typeof mode); }} className={styles.themeSelect}>
+          <Select
+            id="theme-select"
+            aria-label="Theme"
+            value={mode}
+            onChange={(event) => {
+              setMode(event.target.value as typeof mode);
+            }}
+            className={styles.themeSelect}
+          >
             <option value="light">Light</option>
             <option value="dark">Dark</option>
             <option value="system">System</option>
@@ -104,7 +112,13 @@ export default function ComponentsPage() {
           </FormField>
           <FormField name="demo-email" label="Email" error="Enter a valid email address." required>
             {(fieldId, describedById) => (
-              <Input id={fieldId} type="email" invalid aria-describedby={describedById} placeholder="ada@example.com" />
+              <Input
+                id={fieldId}
+                type="email"
+                invalid
+                aria-describedby={describedById}
+                placeholder="ada@example.com"
+              />
             )}
           </FormField>
           <FormField name="demo-role" label="Role" required>
@@ -124,7 +138,13 @@ export default function ComponentsPage() {
           </Label>
           <RadioGroup legend="Notification frequency">
             <Radio name="demo-frequency" value="daily" label="Daily digest" />
-            <Radio name="demo-frequency" value="weekly" label="Weekly digest" hint="Recommended" defaultChecked />
+            <Radio
+              name="demo-frequency"
+              value="weekly"
+              label="Weekly digest"
+              hint="Recommended"
+              defaultChecked
+            />
           </RadioGroup>
           <Label className={styles.switchRow}>
             <Switch checked={switchOn} onCheckedChange={setSwitchOn} />
@@ -138,8 +158,19 @@ export default function ComponentsPage() {
           Overlays
         </h2>
         <div className={styles.row}>
-          <Button onClick={() => { setDialogOpen(true); }}>Open dialog</Button>
-          <Button variant="secondary" onClick={() => { setDrawerOpen(true); }}>
+          <Button
+            onClick={() => {
+              setDialogOpen(true);
+            }}
+          >
+            Open dialog
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setDrawerOpen(true);
+            }}
+          >
             Open drawer
           </Button>
           <DropdownMenu
@@ -205,12 +236,12 @@ export default function ComponentsPage() {
               content: (
                 <div className={styles.stack}>
                   <AccordionItem summary="Why native elements?">
-                    Native HTML elements ship accessibility behavior (keyboard, screen reader, focus) for free. We
-                    prefer them over ARIA-invented patterns.
+                    Native HTML elements ship accessibility behavior (keyboard, screen reader,
+                    focus) for free. We prefer them over ARIA-invented patterns.
                   </AccordionItem>
                   <AccordionItem summary="What about focus management?">
-                    The Dialog and Drawer use the native <code>&lt;dialog&gt;</code> element, which traps focus and
-                    handles ESC automatically.
+                    The Dialog and Drawer use the native <code>&lt;dialog&gt;</code> element, which
+                    traps focus and handles ESC automatically.
                   </AccordionItem>
                 </div>
               ),
@@ -225,7 +256,10 @@ export default function ComponentsPage() {
               label: 'Empty & error states',
               content: (
                 <div className={styles.stack}>
-                  <EmptyState title="No records yet" description="Create your first record to get started." />
+                  <EmptyState
+                    title="No records yet"
+                    description="Create your first record to get started."
+                  />
                   <ErrorState onRetry={() => undefined} />
                 </div>
               ),
@@ -241,14 +275,28 @@ export default function ComponentsPage() {
         description="A modal built on the native dialog element."
         footer={
           <>
-            <Button variant="secondary" onClick={() => { setDialogOpen(false); }}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setDialogOpen(false);
+              }}
+            >
               Cancel
             </Button>
-            <Button onClick={() => { setDialogOpen(false); }}>Confirm</Button>
+            <Button
+              onClick={() => {
+                setDialogOpen(false);
+              }}
+            >
+              Confirm
+            </Button>
           </>
         }
       >
-        <p>Focus is trapped inside this dialog. ESC and the close button both work. Focus returns to the trigger.</p>
+        <p>
+          Focus is trapped inside this dialog. ESC and the close button both work. Focus returns to
+          the trigger.
+        </p>
       </Dialog>
 
       <Drawer
@@ -257,7 +305,9 @@ export default function ComponentsPage() {
         title="Example drawer"
         description="A side panel with the same modal semantics."
       >
-        <p>Drawers are for secondary content that supports the current page without navigating away.</p>
+        <p>
+          Drawers are for secondary content that supports the current page without navigating away.
+        </p>
       </Drawer>
     </Container>
   );

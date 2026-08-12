@@ -59,8 +59,14 @@ function resolveStorage(storageName: 'localStorage' | 'sessionStorage'): Storage
   return null;
 }
 
-export const localStorageSafe = createSafeStorage(resolveStorage('localStorage'), new Map<string, string>());
-export const sessionStorageSafe = createSafeStorage(resolveStorage('sessionStorage'), new Map<string, string>());
+export const localStorageSafe = createSafeStorage(
+  resolveStorage('localStorage'),
+  new Map<string, string>(),
+);
+export const sessionStorageSafe = createSafeStorage(
+  resolveStorage('sessionStorage'),
+  new Map<string, string>(),
+);
 
 /** JSON helpers over the safe storage wrappers. */
 export const jsonStorage = {

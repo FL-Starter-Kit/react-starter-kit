@@ -15,7 +15,11 @@ export default defineConfig({
     strictPort: true,
   },
   build: {
-    sourcemap: true,
+    // Production sourcemaps are disabled by default (public maps expose
+    // source code). Opt in via SOURCEMAP=true when uploading 'hidden' maps
+    // to an error-monitoring platform — 'hidden' keeps them out of the
+    // browser's DevTools while remaining uploadable.
+    sourcemap: process.env.SOURCEMAP === 'true' ? 'hidden' : false,
     target: 'es2022',
     reportCompressedSize: false,
   },
