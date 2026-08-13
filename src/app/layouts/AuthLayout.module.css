@@ -4,7 +4,7 @@
   justify-content: center;
   min-height: 100dvh;
   padding: var(--space-6);
-  background-color: var(--color-bg-subtle);
+  background-color: var(--color-background-subtle);
 }
 
 .container {
@@ -18,6 +18,6 @@
 .brand {
   text-align: center;
   font-size: var(--text-3xl);
-  color: var(--color-primary);
+  color: var(--color-action-primary);
   margin-bottom: var(--space-4);
 }

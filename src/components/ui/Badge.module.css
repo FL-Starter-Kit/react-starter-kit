@@ -11,31 +11,31 @@
 }
 
 .neutral {
-  background-color: var(--color-bg-subtle);
-  color: var(--color-text-subtle);
+  background-color: var(--color-background-subtle);
+  color: var(--color-text-secondary);
   border-color: var(--color-border);
 }
 
 .success {
-  background-color: var(--color-success-bg);
-  color: var(--color-success);
-  border-color: var(--color-success-border);
+  background-color: var(--color-status-success-subtle);
+  color: var(--color-status-success);
+  border-color: var(--color-status-success-border);
 }
 
 .warning {
-  background-color: var(--color-warning-bg);
-  color: var(--color-warning);
-  border-color: var(--color-warning-border);
+  background-color: var(--color-status-warning-subtle);
+  color: var(--color-status-warning);
+  border-color: var(--color-status-warning-border);
 }
 
 .danger {
-  background-color: var(--color-danger-bg);
-  color: var(--color-danger);
-  border-color: var(--color-danger-border);
+  background-color: var(--color-status-danger-subtle);
+  color: var(--color-status-danger);
+  border-color: var(--color-status-danger-border);
 }
 
 .info {
-  background-color: var(--color-info-bg);
-  color: var(--color-info);
-  border-color: var(--color-info-border);
+  background-color: var(--color-status-info-subtle);
+  color: var(--color-status-info);
+  border-color: var(--color-status-info-border);
 }

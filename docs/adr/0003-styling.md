@@ -13,6 +13,12 @@ Accepted
 - **Design tokens** as CSS custom properties in `src/styles/tokens.css` — colors (light + dark),
   spacing, type scale, radius, shadows, z-index, breakpoints, transitions, focus rings — consumed
   exclusively by components.
+- **Two token layers.** _Primitive tokens_ (raw, theme-agnostic values: `--blue-500`, `--gray-700`,
+  `--space-4`, `--radius-md`) live on `:root` and never flip with theme. _Semantic tokens_
+  (role-based: `--color-surface`, `--color-text-primary`, `--color-action-primary`,
+  `--color-border`) reference primitives and are remapped per theme (`[data-theme='dark']`,
+  `prefers-contrast`). Components consume semantic tokens only; client-specific branding overrides
+  the semantic mapping (or the primitives it references) without touching components.
 - **No Tailwind, no runtime CSS-in-JS, no component library.** Zero runtime styling dependencies.
 - Dark mode via `[data-theme='dark']` on the root; high-contrast via `prefers-contrast` overrides;
   reduced motion via `prefers-reduced-motion`.

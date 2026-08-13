@@ -5,17 +5,17 @@ documented in this repository.
 
 ## 1. Core stack
 
-| Area         | Choice                                       |
-| ------------ | -------------------------------------------- |
-| Language     | TypeScript 5.9 (strictest settings)          |
-| Build / dev  | Vite 8 (lazy route-level chunks)             |
-| UI           | React 19                                     |
-| Routing      | React Router v8 (URL-driven state)           |
-| Server state | TanStack Query 5                             |
-| Forms        | React Hook Form + Zod 4 schemas              |
-| Styling      | CSS Modules + design tokens, no UI framework |
-| API mocking  | MSW (browser worker + Node server)           |
-| Testing      | Vitest, Testing Library, Playwright          |
+| Area         | Choice                                                              |
+| ------------ | ------------------------------------------------------------------- |
+| Language     | TypeScript 5.9 (strictest settings)                                 |
+| Build / dev  | Vite 8 (lazy route-level chunks)                                    |
+| UI           | React 19                                                            |
+| Routing      | React Router v8 (URL-driven state)                                  |
+| Server state | TanStack Query 5                                                    |
+| Forms        | React Hook Form + Zod 4 schemas                                     |
+| Styling      | CSS Modules + design tokens (primitive + semantic), no UI framework |
+| API mocking  | MSW (browser worker + Node server)                                  |
+| Testing      | Vitest, Testing Library, Playwright                                 |
 
 ## 2. Application (shipped routes)
 
@@ -109,8 +109,11 @@ Four testing layers, all configured and runnable:
 - axe accessibility scanning at every layer (component tests + `e2e/a11y.spec.ts` tagged `@a11y`).
 - Coverage thresholds enforced (70/70/70/60), lint via ESLint flat config (strict TS, `react-hooks`,
   `jsx-a11y`, import ordering, architecture-boundary rules), Prettier formatting.
-- **CI** (`.github/workflows/ci.yml`): typecheck, lint, format check, unit tests, coverage, build,
-  `npm audit`, Playwright E2E with report artifact on failure.
+- **CI** (`.github/workflows/ci.yml`): quality (typecheck, lint, format) and tests (Vitest +
+  coverage thresholds) run in parallel with the production build; Playwright E2E (incl. `@a11y`
+  scans) runs after the build succeeds, with the HTML report uploaded on failure.
+- **Security** (`.github/workflows/security.yml`): `npm audit --audit-level=high` and dependency
+  review on dependency changes plus nightly runs.
 
 ## 9. Developer experience
 

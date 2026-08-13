@@ -11,14 +11,14 @@
 
 .subtitle {
   font-size: var(--text-sm);
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 
 .subtitle code {
   font-family: var(--font-mono);
   font-size: var(--text-xs);
-  background-color: var(--color-bg-subtle);
+  background-color: var(--color-background-subtle);
   padding: 0 var(--space-1);
   border-radius: var(--radius-xs);
 }

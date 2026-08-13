@@ -27,43 +27,43 @@
 }
 
 .info {
-  background-color: var(--color-info-bg);
-  border-color: var(--color-info-border);
-  color: var(--color-text);
+  background-color: var(--color-status-info-subtle);
+  border-color: var(--color-status-info-border);
+  color: var(--color-text-primary);
 }
 
 .info .title {
-  color: var(--color-info);
+  color: var(--color-status-info);
 }
 
 .success {
-  background-color: var(--color-success-bg);
-  border-color: var(--color-success-border);
-  color: var(--color-text);
+  background-color: var(--color-status-success-subtle);
+  border-color: var(--color-status-success-border);
+  color: var(--color-text-primary);
 }
 
 .success .title {
-  color: var(--color-success);
+  color: var(--color-status-success);
 }
 
 .warning {
-  background-color: var(--color-warning-bg);
-  border-color: var(--color-warning-border);
-  color: var(--color-text);
+  background-color: var(--color-status-warning-subtle);
+  border-color: var(--color-status-warning-border);
+  color: var(--color-text-primary);
 }
 
 .warning .title {
-  color: var(--color-warning);
+  color: var(--color-status-warning);
 }
 
 .danger {
-  background-color: var(--color-danger-bg);
-  border-color: var(--color-danger-border);
-  color: var(--color-text);
+  background-color: var(--color-status-danger-subtle);
+  border-color: var(--color-status-danger-border);
+  color: var(--color-text-primary);
 }
 
 .danger .title {
-  color: var(--color-danger);
+  color: var(--color-status-danger);
 }
 
 .dismiss {

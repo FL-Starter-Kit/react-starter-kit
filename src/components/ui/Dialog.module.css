@@ -6,7 +6,7 @@
   border: none;
   border-radius: var(--radius-lg);
   background-color: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   box-shadow: var(--shadow-lg);
   overflow: hidden;
 }
@@ -40,7 +40,7 @@
 .description {
   padding: var(--space-4) var(--space-6) 0;
   font-size: var(--text-sm);
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
   margin: 0;
 }
 

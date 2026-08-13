@@ -33,32 +33,32 @@
 
 .secondary {
   background-color: var(--color-surface);
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
   border-color: var(--color-border);
 }
 
 .secondary:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
 }
 
 .ghost:hover:not(:disabled) {
   background-color: var(--color-surface-hover);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .danger {
   background-color: transparent;
-  color: var(--color-danger);
+  color: var(--color-status-danger);
 }
 
 .danger:hover:not(:disabled) {
-  background-color: var(--color-danger-bg);
+  background-color: var(--color-status-danger-subtle);
 }
 
 .loading {

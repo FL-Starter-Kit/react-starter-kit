@@ -25,21 +25,21 @@
 /* ---- Variants ---- */
 
 .primary {
-  background-color: var(--color-primary);
-  color: var(--color-on-primary);
+  background-color: var(--color-action-primary);
+  color: var(--color-action-primary-contrast);
 }
 
 .primary:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-action-primary-hover);
 }
 
 .primary:active:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--color-primary-active);
+  background-color: var(--color-action-primary-active);
 }
 
 .secondary {
   background-color: var(--color-surface);
-  color: var(--color-text);
+  color: var(--color-text-primary);
   border-color: var(--color-border-strong);
 }
 
@@ -48,22 +48,22 @@
 }
 
 .danger {
-  background-color: var(--color-danger);
-  color: var(--color-on-danger);
+  background-color: var(--color-action-danger);
+  color: var(--color-action-danger-contrast);
 }
 
 .danger:hover:not(:disabled):not([aria-disabled='true']) {
-  background-color: var(--color-danger-hover);
+  background-color: var(--color-action-danger-hover);
 }
 
 .ghost {
   background-color: transparent;
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
 }
 
 .ghost:hover:not(:disabled):not([aria-disabled='true']) {
   background-color: var(--color-surface-hover);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 /* ---- Sizes ---- */

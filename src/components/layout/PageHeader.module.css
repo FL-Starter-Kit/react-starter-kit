@@ -13,7 +13,7 @@
   font-weight: var(--font-weight-semibold);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-primary);
+  color: var(--color-action-primary);
 }
 
 .title {
@@ -26,7 +26,7 @@
   margin: var(--space-1-5) 0 0;
   max-width: 42rem;
   font-size: var(--text-sm);
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
 }
 
 .actions {

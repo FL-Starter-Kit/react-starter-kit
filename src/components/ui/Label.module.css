@@ -3,5 +3,5 @@
   margin-bottom: var(--space-1-5);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }

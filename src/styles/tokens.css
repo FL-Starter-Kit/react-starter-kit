@@ -1,53 +1,99 @@
 /* ==========================================================================
    Design tokens — the single source of truth for all visual decisions.
    Use these variables in components; never hard-code raw values.
-   Light theme is the default on :root; dark theme via [data-theme="dark"].
+
+   The token set is split into two layers:
+
+   LAYER 1 — PRIMITIVE TOKENS (this file, `:root` only)
+     Raw, theme-agnostic values: color ramps (blue-500, gray-700), spacing
+     (space-4), radius (radius-md), type, shadows, z-index, breakpoints.
+     They never flip when the theme changes. A client brand re-skins the
+     product by overriding primitives (or by remapping layer 2).
+
+   LAYER 2 — SEMANTIC TOKENS (theme-dependent)
+     Role-based variables that *reference* primitives: color-background,
+     color-surface, color-text-primary, color-action-primary, color-border,
+     ... Light theme on :root, dark theme via [data-theme="dark"].
+     Components only ever consume semantic tokens. Client-specific branding
+     = override layer 2 (or the primitives layer 2 references); components
+     never change.
    ========================================================================== */
 
 :root {
-  /* ---- Color: semantic primitives (light) ---- */
-  --color-bg: #ffffff;
-  --color-bg-subtle: #f4f5f7;
-  --color-surface: #ffffff;
-  --color-surface-hover: #eef0f3;
-  --color-border: #d0d5dc;
-  --color-border-strong: #98a2b3;
+  /* ====================================================================
+     LAYER 1 — PRIMITIVE TOKENS
+     Raw values, theme-agnostic. Override here to re-skin the product.
+     ==================================================================== */
 
-  --color-text: #101828;
-  --color-text-subtle: #475467;
-  --color-text-faint: #667085;
+  /* ---- Color primitives ---- */
+  --white: #ffffff;
 
-  --color-primary: #1d4ed8;
-  --color-primary-hover: #1e40af;
-  --color-primary-active: #1e3a8a;
-  --color-on-primary: #ffffff;
+  /* Neutrals — light ramp (light surfaces & text) */
+  --gray-0: #ffffff;
+  --gray-50: #f4f5f7;
+  --gray-100: #eef0f3;
+  --gray-200: #d0d5dc;
+  --gray-300: #98a2b3;
+  --gray-400: #667085;
+  --gray-500: #475467;
+  --gray-600: #344054;
+  --gray-700: #1d2939;
+  --gray-800: #101828;
 
-  --color-secondary: #475467;
-  --color-secondary-hover: #344054;
+  /* Neutrals — dark ramp (dark surfaces & text) */
+  --gray-dark-0: #f0f2f5;
+  --gray-dark-50: #b6bec9;
+  --gray-dark-100: #8b95a3;
+  --gray-dark-200: #4a5462;
+  --gray-dark-300: #333b46;
+  --gray-dark-400: #232933;
+  --gray-dark-500: #1a1f26;
+  --gray-dark-600: #161a20;
+  --gray-dark-700: #0f1115;
 
-  --color-success: #067647;
-  --color-success-bg: #ecfdf3;
-  --color-success-border: #abefc6;
+  /* Blue — light ramp */
+  --blue-50: #eff8ff;
+  --blue-100: #b2ddff;
+  --blue-200: #175cd3;
+  --blue-300: #1d4ed8;
+  --blue-400: #1e40af;
+  --blue-500: #1e3a8a;
 
-  --color-warning: #b54708;
-  --color-warning-bg: #fffaeb;
-  --color-warning-border: #fedf89;
+  /* Blue — dark ramp */
+  --blue-dark-0: #a5ccff;
+  --blue-dark-50: #93c5fd;
+  --blue-dark-100: #7ab7ff;
+  --blue-dark-200: #60a5fa;
+  --blue-dark-300: #3b82f6;
+  --blue-dark-800: #1e4d7a;
+  --blue-dark-900: #10243c;
 
-  --color-danger: #b42318;
-  --color-danger-hover: #912018;
-  --color-danger-bg: #fef3f2;
-  --color-danger-border: #fecdca;
-  --color-on-danger: #ffffff;
+  /* Green — success ramp */
+  --green-50: #ecfdf3;
+  --green-100: #abefc6;
+  --green-500: #067647;
+  --green-dark-50: #6ce9a6;
+  --green-dark-800: #1d5c3c;
+  --green-dark-900: #0d2b1c;
 
-  --color-info: #175cd3;
-  --color-info-bg: #eff8ff;
-  --color-info-border: #b2ddff;
+  /* Amber — warning ramp */
+  --amber-50: #fffaeb;
+  --amber-100: #fedf89;
+  --amber-500: #b54708;
+  --amber-dark-50: #fcd34d;
+  --amber-dark-800: #6b5510;
+  --amber-dark-900: #33290a;
 
-  --color-focus-ring: #1d4ed8;
-  --color-link: #175cd3;
-  --color-link-hover: #1849a9;
-
-  --color-overlay: rgb(16 24 40 / 0.5);
+  /* Red — danger ramp */
+  --red-50: #fef3f2;
+  --red-100: #fecdca;
+  --red-500: #b42318;
+  --red-600: #912018;
+  --red-dark-50: #fecaca;
+  --red-dark-100: #fda29b;
+  --red-dark-800: #7a271a;
+  --red-dark-900: #3d1512;
+  --red-dark-950: #1a0807;
 
   /* ---- Spacing scale (4px base) ---- */
   --space-0: 0;
@@ -98,13 +144,6 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
 
-  /* ---- Shadows ---- */
-  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
-  --shadow-sm: 0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
-  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.1);
-  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.1), 0 4px 6px -4px rgb(16 24 40 / 0.1);
-  --shadow-focus: 0 0 0 3px rgb(29 78 216 / 0.35);
-
   /* ---- Z-index scale ---- */
   --z-sticky: 100;
   --z-header: 200;
@@ -134,50 +173,122 @@
   /* ---- Layout ---- */
   --container-max-width: 1200px;
   --header-height: 4rem;
+
+  /* ====================================================================
+     LAYER 2 — SEMANTIC TOKENS
+     Role-based variables that reference primitives. Components consume
+     ONLY these. Light theme is the default on :root; dark theme overrides
+     in [data-theme="dark"] below.
+     ==================================================================== */
+
+  /* ---- Background & surface ---- */
+  --color-background: var(--gray-0);
+  --color-background-subtle: var(--gray-50);
+  --color-surface: var(--gray-0);
+  --color-surface-hover: var(--gray-100);
+
+  /* ---- Border ---- */
+  --color-border: var(--gray-200);
+  --color-border-strong: var(--gray-300);
+
+  /* ---- Text ---- */
+  --color-text-primary: var(--gray-800);
+  --color-text-secondary: var(--gray-500);
+  --color-text-tertiary: var(--gray-400);
+  --color-text-inverse: var(--white);
+
+  /* ---- Action ---- */
+  --color-action-primary: var(--blue-300);
+  --color-action-primary-hover: var(--blue-400);
+  --color-action-primary-active: var(--blue-500);
+  --color-action-primary-contrast: var(--white);
+
+  --color-action-secondary: var(--gray-500);
+  --color-action-secondary-hover: var(--gray-600);
+
+  --color-action-danger: var(--red-500);
+  --color-action-danger-hover: var(--red-600);
+  --color-action-danger-contrast: var(--white);
+
+  /* ---- Status ---- */
+  --color-status-success: var(--green-500);
+  --color-status-success-subtle: var(--green-50);
+  --color-status-success-border: var(--green-100);
+
+  --color-status-warning: var(--amber-500);
+  --color-status-warning-subtle: var(--amber-50);
+  --color-status-warning-border: var(--amber-100);
+
+  --color-status-danger: var(--red-500);
+  --color-status-danger-subtle: var(--red-50);
+  --color-status-danger-border: var(--red-100);
+
+  --color-status-info: var(--blue-200);
+  --color-status-info-subtle: var(--blue-50);
+  --color-status-info-border: var(--blue-100);
+
+  /* ---- Link & focus ---- */
+  --color-link: var(--blue-200);
+  --color-link-hover: var(--blue-400);
+  --color-focus-ring: var(--blue-300);
+
+  /* ---- Overlay ---- */
+  --color-overlay: rgb(16 24 40 / 0.5);
+
+  /* ---- Elevation (theme-tuned shadows) ---- */
+  --shadow-xs: 0 1px 2px rgb(16 24 40 / 0.05);
+  --shadow-sm: 0 1px 3px rgb(16 24 40 / 0.1), 0 1px 2px rgb(16 24 40 / 0.06);
+  --shadow-md: 0 4px 8px -2px rgb(16 24 40 / 0.1), 0 2px 4px -2px rgb(16 24 40 / 0.1);
+  --shadow-lg: 0 12px 16px -4px rgb(16 24 40 / 0.1), 0 4px 6px -4px rgb(16 24 40 / 0.1);
+  --shadow-focus: 0 0 0 3px rgb(29 78 216 / 0.35);
 }
 
-/* ---- Dark theme ---- */
+/* ---- Dark theme: semantic tokens remapped to dark-ramp primitives ---- */
 [data-theme='dark'] {
-  --color-bg: #0f1115;
-  --color-bg-subtle: #161a20;
-  --color-surface: #1a1f26;
-  --color-surface-hover: #232933;
-  --color-border: #333b46;
-  --color-border-strong: #4a5462;
+  --color-background: var(--gray-dark-700);
+  --color-background-subtle: var(--gray-dark-600);
+  --color-surface: var(--gray-dark-500);
+  --color-surface-hover: var(--gray-dark-400);
 
-  --color-text: #f0f2f5;
-  --color-text-subtle: #b6bec9;
-  --color-text-faint: #8b95a3;
+  --color-border: var(--gray-dark-300);
+  --color-border-strong: var(--gray-dark-200);
 
-  --color-primary: #60a5fa;
-  --color-primary-hover: #93c5fd;
-  --color-primary-active: #3b82f6;
-  --color-on-primary: #0b1220;
+  --color-text-primary: var(--gray-dark-0);
+  --color-text-secondary: var(--gray-dark-50);
+  --color-text-tertiary: var(--gray-dark-100);
+  --color-text-inverse: var(--gray-dark-700);
 
-  --color-secondary: #9aa4b2;
-  --color-secondary-hover: #b6bec9;
+  --color-action-primary: var(--blue-dark-200);
+  --color-action-primary-hover: var(--blue-dark-50);
+  --color-action-primary-active: var(--blue-dark-300);
+  --color-action-primary-contrast: var(--gray-dark-700);
 
-  --color-success: #6ce9a6;
-  --color-success-bg: #0d2b1c;
-  --color-success-border: #1d5c3c;
+  --color-action-secondary: var(--gray-dark-100);
+  --color-action-secondary-hover: var(--gray-dark-50);
 
-  --color-warning: #fcd34d;
-  --color-warning-bg: #33290a;
-  --color-warning-border: #6b5510;
+  --color-action-danger: var(--red-dark-100);
+  --color-action-danger-hover: var(--red-dark-50);
+  --color-action-danger-contrast: var(--red-dark-950);
 
-  --color-danger: #fda29b;
-  --color-danger-hover: #fecaca;
-  --color-danger-bg: #3d1512;
-  --color-danger-border: #7a271a;
-  --color-on-danger: #1a0807;
+  --color-status-success: var(--green-dark-50);
+  --color-status-success-subtle: var(--green-dark-900);
+  --color-status-success-border: var(--green-dark-800);
 
-  --color-info: #7ab7ff;
-  --color-info-bg: #10243c;
-  --color-info-border: #1e4d7a;
+  --color-status-warning: var(--amber-dark-50);
+  --color-status-warning-subtle: var(--amber-dark-900);
+  --color-status-warning-border: var(--amber-dark-800);
 
-  --color-focus-ring: #60a5fa;
-  --color-link: #7ab7ff;
-  --color-link-hover: #a5ccff;
+  --color-status-danger: var(--red-dark-100);
+  --color-status-danger-subtle: var(--red-dark-900);
+  --color-status-danger-border: var(--red-dark-800);
+
+  --color-status-info: var(--blue-dark-100);
+  --color-status-info-subtle: var(--blue-dark-900);
+  --color-status-info-border: var(--blue-dark-800);
+
+  --color-link: var(--blue-dark-100);
+  --color-link-hover: var(--blue-dark-0);
+  --color-focus-ring: var(--blue-dark-200);
 
   --color-overlay: rgb(0 0 0 / 0.6);
 
@@ -191,16 +302,16 @@
 /* ---- High contrast (when the user requests it) ---- */
 @media (prefers-contrast: more) {
   :root {
-    --color-border: #667085;
-    --color-border-strong: #475467;
-    --color-text-subtle: #1f2937;
-    --color-focus-ring: var(--color-text);
+    --color-border: var(--gray-400);
+    --color-border-strong: var(--gray-500);
+    --color-text-secondary: var(--gray-700);
+    --color-focus-ring: var(--color-text-primary);
   }
 
   [data-theme='dark'] {
-    --color-border: #b6bec9;
-    --color-border-strong: #d0d5dc;
-    --color-text-subtle: #e4e7eb;
-    --color-focus-ring: var(--color-text);
+    --color-border: var(--gray-dark-50);
+    --color-border-strong: var(--gray-dark-0);
+    --color-text-secondary: var(--gray-dark-0);
+    --color-focus-ring: var(--color-text-primary);
   }
 }

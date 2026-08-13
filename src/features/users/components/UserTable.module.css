@@ -20,8 +20,8 @@
 
 .table thead th {
   font-weight: var(--font-weight-semibold);
-  color: var(--color-text-subtle);
-  background-color: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  background-color: var(--color-background-subtle);
 }
 
 .table tbody tr:last-child th,
@@ -38,12 +38,12 @@
   text-align: left;
   padding: var(--space-2) var(--space-4);
   font-size: var(--text-xs);
-  color: var(--color-text-faint);
+  color: var(--color-text-tertiary);
 }
 
 .name {
   font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .actions {
@@ -67,5 +67,5 @@
 }
 
 .danger {
-  color: var(--color-danger);
+  color: var(--color-status-danger);
 }

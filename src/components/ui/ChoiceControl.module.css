@@ -3,7 +3,7 @@
 .control {
   width: 1.125rem;
   height: 1.125rem;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-action-primary);
   cursor: pointer;
 }
 
@@ -22,7 +22,7 @@
   margin-bottom: var(--space-2);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .option {
@@ -43,7 +43,7 @@
   width: 1.125rem;
   height: 1.125rem;
   margin-top: 0.15rem;
-  accent-color: var(--color-primary);
+  accent-color: var(--color-action-primary);
 }
 
 .optionText {
@@ -55,11 +55,11 @@
 
 .hint {
   font-size: var(--text-xs);
-  color: var(--color-text-faint);
+  color: var(--color-text-tertiary);
 }
 
 .invalidOption {
-  color: var(--color-danger);
+  color: var(--color-status-danger);
 }
 
 /* ---- Switch ---- */
@@ -81,7 +81,7 @@
 }
 
 .switch:hover:not(:disabled) {
-  border-color: var(--color-text-faint);
+  border-color: var(--color-text-tertiary);
 }
 
 .switch:disabled {
@@ -90,12 +90,12 @@
 }
 
 .switchOn {
-  background-color: var(--color-primary);
-  border-color: var(--color-primary);
+  background-color: var(--color-action-primary);
+  border-color: var(--color-action-primary);
 }
 
 .switchOn:hover:not(:disabled) {
-  background-color: var(--color-primary-hover);
+  background-color: var(--color-action-primary-hover);
 }
 
 .switchThumb {

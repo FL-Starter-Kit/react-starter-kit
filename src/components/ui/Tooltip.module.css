@@ -10,8 +10,8 @@
   transform: translateX(-50%) translateY(2px);
   max-width: 16rem;
   padding: var(--space-1-5) var(--space-2-5);
-  background-color: var(--color-text);
-  color: var(--color-bg);
+  background-color: var(--color-text-primary);
+  color: var(--color-background);
   border-radius: var(--radius-sm);
   font-size: var(--text-xs);
   line-height: var(--leading-normal);

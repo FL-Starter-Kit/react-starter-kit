@@ -68,6 +68,11 @@ Flat config in `eslint.config.js`. Beyond the defaults:
 
 - **CSS Modules + design tokens.** No inline styles for layout/colors; tokens from
   `src/styles/tokens.css` (or component CSS custom properties derived from them).
+- **Semantic, not primitive.** Components reference _semantic_ tokens (`--color-surface`,
+  `--color-text-primary`, `--color-action-primary`, `--color-border`), never primitives
+  (`--blue-500`, `--gray-700`) and never raw values. Primitives are the raw palette in `tokens.css`;
+  reach for a primitive only when deriving a new component-level variable, and add a semantic token
+  when a role is reused across components.
 - Class names are camelCase in modules; BEM is unnecessary.
 - Components accept `className` and merge with `cn` (`src/utils/cn.ts`). Never reach into another
   component's CSS.

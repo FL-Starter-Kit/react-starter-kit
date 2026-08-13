@@ -13,7 +13,7 @@
   border: none;
   border-bottom: 2px solid transparent;
   background: none;
-  color: var(--color-text-subtle);
+  color: var(--color-text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--font-weight-medium);
   cursor: pointer;
@@ -24,17 +24,17 @@
 }
 
 .tab:hover:not(:disabled) {
-  color: var(--color-text);
+  color: var(--color-text-primary);
 }
 
 .tab:disabled {
-  color: var(--color-text-faint);
+  color: var(--color-text-tertiary);
   cursor: not-allowed;
 }
 
 .active {
-  color: var(--color-primary);
-  border-bottom-color: var(--color-primary);
+  color: var(--color-action-primary);
+  border-bottom-color: var(--color-action-primary);
 }
 
 .panel {

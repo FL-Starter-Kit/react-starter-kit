@@ -103,7 +103,8 @@ docs/           Architecture, testing, security, a11y, standards, ADRs
 - **Accessible by default.** Native elements (`<dialog>`, `<details>`, `<select>`) before custom
   widgets; WAI-ARIA patterns only where native widgets cannot do the job; axe in CI. See
   `docs/ACCESSIBILITY.md`.
-- **Zero runtime UI framework.** CSS Modules + design tokens. No Tailwind, no component library.
+- **Zero runtime UI framework.** CSS Modules + two-layer design tokens (raw primitives → semantic
+  roles). No Tailwind, no component library.
 
 ## Testing
 
