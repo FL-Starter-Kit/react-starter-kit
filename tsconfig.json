@@ -29,9 +29,17 @@
 
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["src/*"],
+      "@examples/*": ["examples/*"]
     }
   },
-  "include": ["src", "e2e", "playwright.config.ts", "eslint.config.js", "vite.config.ts"],
+  "include": [
+    "src",
+    "examples",
+    "e2e",
+    "playwright.config.ts",
+    "eslint.config.js",
+    "vite.config.ts"
+  ],
   "exclude": ["node_modules", "dist", "test-results", "playwright-report"]
 }

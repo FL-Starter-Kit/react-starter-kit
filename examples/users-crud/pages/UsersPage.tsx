@@ -10,17 +10,18 @@ import { Button } from '@/components/ui/Button';
 import { Dialog } from '@/components/ui/Dialog';
 import { Pagination } from '@/components/ui/Pagination';
 import { Skeleton } from '@/components/ui/Skeleton';
-import { UserFilters, type UserListQueryUpdate } from '@/features/users/components/UserFilters';
-import { UserFormDialog } from '@/features/users/components/UserFormDialog';
-import { UserTable } from '@/features/users/components/UserTable';
-import { useDeleteUser, useUsers } from '@/features/users/hooks/useUsers';
-import { PAGE_SIZE_OPTIONS, type User } from '@/features/users/models/user';
-import { userListQuerySchema } from '@/features/users/schemas/userSchemas';
 import { announce } from '@/lib/accessibility/liveRegion';
 import { useAuthContext } from '@/lib/auth';
 import { ApiError, ErrorCode } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
 import { parseQueryParams } from '@/utils/url';
+
+import { UserFilters, type UserListQueryUpdate } from '../components/UserFilters';
+import { UserFormDialog } from '../components/UserFormDialog';
+import { UserTable } from '../components/UserTable';
+import { useDeleteUser, useUsers } from '../hooks/useUsers';
+import { PAGE_SIZE_OPTIONS, type User } from '../models/user';
+import { userListQuerySchema } from '../schemas/userSchemas';
 
 import styles from './UsersPage.module.css';
 

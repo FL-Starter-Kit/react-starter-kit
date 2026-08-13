@@ -7,7 +7,7 @@ import { RouterProvider } from 'react-router/dom';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
 import { routes } from '@/app/router/routes';
 import { AuthProvider } from '@/lib/auth/AuthContext';
-import { setActiveSession } from '@/tests/mocks/handlers';
+import { setActiveSession } from '@/tests/mocks/session';
 import { createTestQueryClient } from '@/tests/render';
 
 interface RenderAppOptions {

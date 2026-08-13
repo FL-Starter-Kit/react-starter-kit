@@ -3,7 +3,9 @@
  * client. Features never call `fetch` directly.
  */
 
-import type { UserListQuery } from '@/features/users/models/user';
+import { httpClient } from '@/lib/http';
+
+import type { UserListQuery } from '../models/user';
 import {
   userInputSchema,
   userListSchema,
@@ -11,8 +13,7 @@ import {
   type ValidatedUser,
   type ValidatedUserInput,
   type ValidatedUserList,
-} from '@/features/users/schemas/userSchemas';
-import { httpClient } from '@/lib/http';
+} from '../schemas/userSchemas';
 
 export const usersApi = {
   /** Paginated, filterable user list. */

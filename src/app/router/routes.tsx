@@ -46,8 +46,7 @@ export const routes: readonly RouteObject[] = [
     children: [
       {
         index: true,
-        lazy: () =>
-          import('@/features/home/pages/HomePage').then((m) => ({ Component: m.default })),
+        lazy: () => import('@examples/home/pages/HomePage').then((m) => ({ Component: m.default })),
         handle: { crumb: 'Home' },
       },
       {
@@ -63,7 +62,9 @@ export const routes: readonly RouteObject[] = [
           {
             index: true,
             lazy: () =>
-              import('@/features/users/pages/UsersPage').then((m) => ({ Component: m.default })),
+              import('@examples/users-crud/pages/UsersPage').then((m) => ({
+                Component: m.default,
+              })),
           },
         ],
       },
@@ -79,7 +80,7 @@ export const routes: readonly RouteObject[] = [
           {
             index: true,
             lazy: () =>
-              import('@/features/docs/pages/ComponentsPage').then((m) => ({
+              import('@examples/showcase/pages/ComponentsPage').then((m) => ({
                 Component: m.default,
               })),
           },
@@ -108,7 +109,7 @@ export const routes: readonly RouteObject[] = [
       {
         index: true,
         lazy: () =>
-          import('@/features/auth/pages/LoginPage').then((m) => ({ Component: m.default })),
+          import('@examples/auth/pages/LoginPage').then((m) => ({ Component: m.default })),
       },
     ],
   },

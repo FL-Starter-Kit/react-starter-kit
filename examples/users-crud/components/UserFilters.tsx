@@ -3,14 +3,15 @@ import { useEffect, useState } from 'react';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Select } from '@/components/ui/Select';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+
 import {
   UserRole,
   UserStatus,
   type UserListQuery,
   type UserRoleValue,
   type UserStatusValue,
-} from '@/features/users/models/user';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+} from '../models/user';
 
 import styles from './UserFilters.module.css';
 

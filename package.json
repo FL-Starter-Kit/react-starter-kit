@@ -24,6 +24,11 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "npm run typecheck && npm run lint && npm run test && npm run build",
+    "generate": "node scripts/generate.mjs",
+    "generate:feature": "node scripts/generate.mjs feature",
+    "generate:component": "node scripts/generate.mjs component",
+    "generate:hook": "node scripts/generate.mjs hook",
+    "generate:api": "node scripts/generate.mjs api",
     "prepare": "husky"
   },
   "dependencies": {

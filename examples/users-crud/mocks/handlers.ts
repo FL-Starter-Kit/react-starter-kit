@@ -1,79 +1,12 @@
 import { HttpResponse, delay, http } from 'msw';
 import type { JsonBodyType } from 'msw';
 
-import type { User } from '@/features/users/models/user';
-import {
-  demoAccounts,
-  getMockUsers,
-  isEmailTaken,
-  resetMockDb,
-  setMockUsers,
-} from '@/tests/mocks/db';
-import { resetScenario, scenario } from '@/tests/mocks/scenario';
+import { sessionUserId } from '@/tests/mocks/session';
 
-const SESSION_COOKIE = 'starter_session';
+import type { User } from '../models/user';
 
-/**
- * Session resolution:
- *  - Browser (dev/e2e): the real backend sets an httpOnly cookie, but MSW's
- *    Service Worker cannot touch `Set-Cookie` (a known MSW v2 limitation), so
- *    the mock persists the session in localStorage instead. Each e2e test
- *    gets a fresh browser context, so sessions never leak between tests.
- *  - Node tests: tests set the active session directly via
- *    `setActiveSession()`. MSW's node server emulates cookies across
- *    requests, so in test mode the storage path is disabled to prevent
- *    a session set by one test from leaking into the next.
- */
-
-let activeSession: string | null = null;
-
-export function setActiveSession(userId: string | null): void {
-  activeSession = userId;
-}
-
-export function getActiveSession(): string | null {
-  return activeSession;
-}
-
-function readBrowserSession(): string | null {
-  try {
-    return window.localStorage.getItem(SESSION_COOKIE);
-  } catch {
-    return null;
-  }
-}
-
-function writeBrowserSession(userId: string | null): void {
-  try {
-    if (userId === null) {
-      window.localStorage.removeItem(SESSION_COOKIE);
-    } else {
-      window.localStorage.setItem(SESSION_COOKIE, userId);
-    }
-  } catch {
-    // Storage unavailable (private mode etc.); session simply won't persist.
-  }
-}
-
-function sessionUserId(request: Request): string | null {
-  if (scenario.auth.expireNextRequest) {
-    scenario.auth.expireNextRequest = false;
-    return null;
-  }
-  if (import.meta.env.MODE !== 'test') {
-    return readBrowserSession();
-  }
-  void request;
-  return activeSession;
-}
-
-function currentUser(request: Request): User | null {
-  const userId = sessionUserId(request);
-  if (userId === null) {
-    return null;
-  }
-  return getMockUsers().find((user) => user.id === userId) ?? null;
-}
+import { getMockUsers, isEmailTaken, resetMockDb, setMockUsers } from './db';
+import { resetUsersScenario, usersScenario } from './scenario';
 
 function unauthorized(): HttpResponse<JsonBodyType> {
   return HttpResponse.json(
@@ -86,66 +19,6 @@ function jsonOk<T extends JsonBodyType>(data: T, extra?: ResponseInit): HttpResp
   return HttpResponse.json(data, { status: 200, ...extra });
 }
 
-export const authHandlers = [
-  http.post('/api/auth/login', async ({ request }) => {
-    if (scenario.auth.rejectLogin) {
-      return unauthorized();
-    }
-    const body = (await request.json()) as { email?: string; password?: string };
-    const account = Object.values(demoAccounts).find(
-      (candidate) => candidate.email === body.email && candidate.password === body.password,
-    );
-    if (!account) {
-      return HttpResponse.json(
-        { code: 'UNAUTHORIZED', message: 'Invalid email or password.' },
-        { status: 401 },
-      );
-    }
-    const user = getMockUsers().find((candidate) => candidate.id === account.id);
-    if (!user) {
-      return unauthorized();
-    }
-    if (import.meta.env.MODE !== 'test') {
-      writeBrowserSession(user.id);
-    } else {
-      activeSession = user.id;
-    }
-    return jsonOk({ user });
-  }),
-
-  http.get('/api/auth/me', ({ request }) => {
-    const user = currentUser(request);
-    if (user === null) {
-      return unauthorized();
-    }
-    return jsonOk(user);
-  }),
-
-  http.post('/api/auth/refresh', ({ request }) => {
-    if (scenario.auth.failNextRefresh) {
-      scenario.auth.failNextRefresh = false;
-      return unauthorized();
-    }
-    const userId = sessionUserId(request);
-    if (userId === null) {
-      return unauthorized();
-    }
-    const user = getMockUsers().find((candidate) => candidate.id === userId);
-    if (!user) {
-      return unauthorized();
-    }
-    return jsonOk({ user });
-  }),
-
-  http.post('/api/auth/logout', () => {
-    activeSession = null;
-    if (import.meta.env.MODE !== 'test') {
-      writeBrowserSession(null);
-    }
-    return new HttpResponse(null, { status: 204 });
-  }),
-];
-
 function createApiError(
   status: number,
   code: string,
@@ -153,6 +26,14 @@ function createApiError(
   fieldErrors?: Record<string, string[]>,
 ): HttpResponse<JsonBodyType> {
   return HttpResponse.json({ code, message, fieldErrors }, { status });
+}
+
+function currentUser(request: Request): User | null {
+  const userId = sessionUserId(request);
+  if (userId === null) {
+    return null;
+  }
+  return getMockUsers().find((user) => user.id === userId) ?? null;
 }
 
 /** Validation shared by create/update. */
@@ -204,11 +85,11 @@ function validateUserInput(
 
 export const usersHandlers = [
   http.get('/api/users', async ({ request }) => {
-    if (scenario.users.listDelayMs > 0) {
-      await delay(scenario.users.listDelayMs);
+    if (usersScenario.listDelayMs > 0) {
+      await delay(usersScenario.listDelayMs);
     }
-    if (scenario.users.failListWith !== undefined) {
-      const status = scenario.users.failListWith;
+    if (usersScenario.failListWith !== undefined) {
+      const status = usersScenario.failListWith;
       if (status === 500) {
         return createApiError(500, 'SERVER_ERROR', 'The server encountered an error.');
       }
@@ -328,8 +209,8 @@ export const usersHandlers = [
   }),
 ];
 
-export function resetMocks(): void {
+/** Reset the example's mock database and scenario knobs between tests. */
+export function resetUsersMock(): void {
   resetMockDb();
-  resetScenario();
-  setActiveSession(null);
+  resetUsersScenario();
 }

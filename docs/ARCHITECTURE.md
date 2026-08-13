@@ -40,11 +40,7 @@ src/
     layout/       Container, PageHeader
     navigation/   Breadcrumbs, MainNav
   features/       Feature-oriented modules — the unit of ownership
-    users/        models/, schemas/, api/, utils/, hooks/, components/, pages/
-    auth/         pages/ (login)
-    docs/         pages/ (live component showcase)
     errors/       pages/ (404, 403)
-    home/         pages/
   hooks/          Cross-cutting hooks (useMediaQuery, useReducedMotion, useDebouncedValue)
   lib/            Framework-agnostic libraries — no React components
     auth/         Session model, permissions, token storage, refresh, context
@@ -56,16 +52,20 @@ src/
   tests/          MSW mocks, setup, render helpers, axe utilities
   types/          Shared types (api, branded)
   utils/          Pure helpers with no app dependencies
+examples/         Reference/demo features, wired into the starter but NOT shipped
+                  business logic: users-crud/, auth/, home/, showcase/ (see docs/adr/0008)
 e2e/              Playwright specs
 docs/             Architecture, testing, a11y, security, ADRs
 ```
 
 ## 3. Feature module anatomy
 
-A feature owns everything it needs, organized by role:
+A feature owns everything it needs, organized by role. The canonical reference is the
+`examples/users-crud/` example (reproduced in `src/features/` as real features when building a
+project):
 
 ```
-features/users/
+examples/users-crud/
   models/user.ts       Types + constants (no logic)
   schemas/             Zod runtime schemas + React Hook Form schemas
   api/usersApi.ts      Endpoint definitions using the HTTP client
@@ -73,9 +73,10 @@ features/users/
   hooks/useUsers.ts    TanStack Query hooks + query keys + invalidation
   components/          Feature-specific UI (table, filters, form dialog)
   pages/UsersPage.tsx  Page composition + URL state
+  mocks/               MSW handlers + seed DB + scenario knobs (example only)
 ```
 
-Rules for features:
+Rules for features (examples follow the same rules):
 
 - A feature may import from `app`, `components`, `hooks`, `lib`, `utils`, `types` — and **never from
   another feature** (except its own subfolder).
@@ -102,6 +103,12 @@ utils, types  ←  hooks  ←  lib  ←  components  ←  features  ←  app
 **Enforcement.** `eslint.config.js` uses `no-restricted-paths` zones so violations fail lint. When a
 boundary is violated, fix it architecturally (move the code) rather than adding a rule exception.
 Known historical violations and their fixes are documented in `PROGRESS.md`.
+
+**Examples.** The `examples/` directory holds reference/demo features that are wired into the
+runnable starter but kept out of `src/` so client projects never ship demo business logic. Examples
+follow the feature rules (no cross-example imports), with one documented exception: the `auth` mock
+resolves sessions against the users-crud seed store (`examples/users-crud/mocks/db.ts`). See
+`docs/adr/0008-examples-separation.md`.
 
 ## 5. State management
 
@@ -152,7 +159,7 @@ The client is configured once in bootstrap from the validated environment (`lib/
   `ProtectedRoute` sends the user to `/login`, carrying the attempted route as navigation state
   (`{ from }`) so login can restore it — no persistent storage involved.
 - **Logout** is an API call (invalidates the cookie) followed by a client-side session clear.
-- **Demo accounts** live in `src/tests/mocks/db.ts`; the mock backend emulates cookies in the
+- **Demo accounts** live in `examples/auth/mocks/db.ts`; the mock backend emulates cookies in the
   browser and falls back to module state under Node (tests call `setActiveSession('user-1')`).
 
 ## 8. Routing
@@ -178,10 +185,17 @@ The client is configured once in bootstrap from the validated environment (`lib/
 
 ## 10. Mocks (MSW)
 
-- Handlers in `src/tests/mocks/handlers.ts` (auth + users CRUD), in-memory database in `db.ts`,
-  mutable test knobs in `scenario.ts` (delays, sticky failure flags, session expiry).
+- The mock backend is split between core session infrastructure and the demo examples:
+  - Core `src/tests/mocks/` holds the generic plumbing: the session store (`session.ts`), the
+    session-lifecycle scenario knobs (`scenario.ts`), and the MSW bootstrap that composes the
+    handler lists (`browser.ts`, `node.ts`).
+  - The demo handlers live with their examples: `examples/auth/mocks/` (login/me/refresh/logout +
+    demo accounts) and `examples/users-crud/mocks/` (users CRUD + 25 seeded users + scenario knobs).
+- The auth mock resolves sessions against the users-crud seed store, so the signed-in identity
+  always matches the directory shown by the users example.
 - Browser worker (`public/mockServiceWorker.js`, committed) enables development without a backend:
-  `VITE_ENABLE_MOCKS=true`.
+  `VITE_ENABLE_MOCKS=true`. Sessions persist in localStorage (the Service Worker cannot set
+  cookies).
 - Node server (`setupServer`) powers all Vitest tests; reset via `resetMockServer()` in
   `src/tests/setup.ts`.
 - Scenario flags are **sticky until reset** on purpose: the HTTP client retries 5xx, so one-shot

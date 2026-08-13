@@ -8,6 +8,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      '@examples': fileURLToPath(new URL('./examples', import.meta.url)),
     },
   },
   server: {
@@ -27,7 +28,7 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
-    include: ['src/**/*.test.{ts,tsx}'],
+    include: ['src/**/*.test.{ts,tsx}', 'examples/**/*.test.{ts,tsx}'],
     css: {
       modules: {
         // Keep original class names so tests can assert on variant classes.
@@ -37,9 +38,11 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'html', 'lcov'],
-      include: ['src/**/*.{ts,tsx}'],
+      include: ['src/**/*.{ts,tsx}', 'examples/**/*.{ts,tsx}'],
       exclude: [
         'src/**/*.test.{ts,tsx}',
+        'examples/**/*.test.{ts,tsx}',
+        'examples/**/mocks/**',
         'src/tests/**',
         'src/main.tsx',
         'src/**/index.ts',

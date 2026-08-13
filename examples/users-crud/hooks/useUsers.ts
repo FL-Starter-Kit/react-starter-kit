@@ -6,9 +6,9 @@
 
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
-import { usersApi } from '@/features/users/api/usersApi';
-import type { UserInput, UserListQuery } from '@/features/users/models/user';
-import type { ValidatedUserInput } from '@/features/users/schemas/userSchemas';
+import { usersApi } from '../api/usersApi';
+import type { UserInput, UserListQuery } from '../models/user';
+import type { ValidatedUserInput } from '../schemas/userSchemas';
 
 export const usersQueryKeys = {
   all: ['users'] as const,

@@ -8,7 +8,7 @@ How to get set up and what happens to a change from idea to merge.
 npm install
 npm run check          # typecheck + lint + test + build
 npx playwright install chromium   # only needed for E2E
-npm run dev            # mock backend on; demo accounts in src/tests/mocks/db.ts
+npm run dev            # mock backend on; demo accounts in examples/auth/mocks/db.ts
 ```
 
 If anything fails at `npm run check`, stop and fix it before writing new code — the repository is
@@ -62,7 +62,7 @@ The reviewer verifies, for every PR:
 
 ## 6. Adding a new feature
 
-Copy the shape of `features/users/` — it is the reference feature:
+Copy the shape of `examples/users-crud/` — it is the reference feature:
 
 1. `models/` — types + constants.
 2. `schemas/` — Zod schemas (runtime validation + form schemas).
@@ -71,8 +71,9 @@ Copy the shape of `features/users/` — it is the reference feature:
 5. `hooks/` — TanStack Query hooks with centralized query keys.
 6. `components/` — feature UI; `pages/` — page composition.
 7. Wire the route in `src/app/router/routes.tsx` (lazy), with guards and a breadcrumb.
-8. Add MSW handlers for the new endpoints in `src/tests/mocks/handlers.ts` and register them with
-   both the node server and the browser worker.
+8. Add MSW handlers for the new endpoints (see `examples/users-crud/mocks/handlers.ts` for the
+   pattern) and register them with both the node server and the browser worker
+   (`src/tests/mocks/node.ts` / `browser.ts`).
 9. Tests: unit (utils/schemas) + component + integration against MSW; `@a11y` E2E for the main page.
 
 ## 7. Gotchas worth re-reading before you start
@@ -81,3 +82,30 @@ Copy the shape of `features/users/` — it is the reference feature:
   sticky scenario flags, seed ordering, `within()` timing).
 - `PROGRESS.md` — the full history of tooling constraints (ESLint/TS version locks, MSW v2,
   react-router v8 imports).
+
+## 8. Code generators
+
+For repeated freelance work, use the generators (`scripts/generate.mjs`, run via `npm run generate`)
+to scaffold idiomatic skeletons instead of hand-copying the `users` reference feature:
+
+```bash
+npm run generate feature users        # api/, components/, hooks/, models/, pages/, schemas/, utils/
+npm run generate component DataTable  # shared component (css + test + barrel)
+npm run generate -- component UserTable --feature users   # feature component
+npm run generate hook useUsers        # shared hook (--feature users for a feature hook)
+npm run generate api users            # models + schemas + api for a feature
+```
+
+Note: when passing the `--feature` flag, prefix the command with `--` (`npm run generate -- ...`) so
+npm forwards the flag to the script instead of parsing it as npm configuration.
+
+Rules:
+
+- Names are validated: features/apis use lowercase kebab-case (`users`, `user-profiles`); components
+  use PascalCase (`DataTable`); hooks must start with `use`.
+- **Never overwrites** — if any target file exists the command fails with the conflicting path.
+- Generated files follow the conventions (import order, `httpClient`, query keys, Zod runtime
+  validation) and pass `npm run check` as-is; unit tests for the generator live in
+  `src/tests/generate.test.ts`.
+- After generating a feature, wire the route in `src/app/router/routes.tsx` and add MSW handlers for
+  `/api/<feature>` following the `examples/users-crud/mocks/` pattern (see §6).

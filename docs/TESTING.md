@@ -25,8 +25,12 @@ Commands: `npm run test` (Vitest), `npm run test:coverage` (thresholds 70/70/70/
   settle. Integration tests use this. Call `setActiveSession('user-1')` for authenticated scenarios.
 - **`src/tests/a11y.ts`** — `expectNoAxeViolations(element)` / `renderAndCheckA11y(ui)` using
   axe-core directly (no jest-axe wrapper).
-- **`src/tests/mocks/`** — MSW handlers, the seeded in-memory DB (25 users + demo accounts), and
-  `scenario.ts` knobs (`listDelayMs`, sticky `failListWith`, `expireNextRequest`, `rejectLogin`).
+- **`src/tests/mocks/`** — core MSW plumbing: session store (`session.ts`), session-lifecycle
+  scenario knobs (`scenario.ts`), and the browser/node bootstrap that composes the example handlers.
+  The demo handlers and seed data live with their examples: `examples/users-crud/mocks/` (users
+  CRUD, 25 seeded users, `usersScenario` knobs: `listDelayMs`, sticky `failListWith`) and
+  `examples/auth/mocks/` (login/me/refresh/logout, demo accounts, session knobs:
+  `expireNextRequest`, `failNextRefresh`, `rejectLogin`).
 
 ## 3. MSW conventions
 
@@ -69,9 +73,9 @@ Commands: `npm run test` (Vitest), `npm run test:coverage` (thresholds 70/70/70/
 
 ## 6. Fixtures and seed data
 
-- 25 seeded users in `src/tests/mocks/db.ts`, **in creation order, not alphabetical**. Page 1 =
-  users 1–10 (Ada Lovelace … Guido van Rossum); page 2 = users 11–20 (Katherine Johnson … Donald
-  Knuth); page 3 = users 21–25 (Mary Wilkes … Sophie Wilson).
+- 25 seeded users in `examples/users-crud/mocks/db.ts`, **in creation order, not alphabetical**.
+  Page 1 = users 1–10 (Ada Lovelace … Guido van Rossum); page 2 = users 11–20 (Katherine Johnson …
+  Donald Knuth); page 3 = users 21–25 (Mary Wilkes … Sophie Wilson).
 - Role cycle: Admin, Editor, Viewer, Viewer, Editor (repeat). Status cycle: Active, Active, Active,
   Invited, Disabled (repeat).
 - Invited users: Edsger Dijkstra (user-4), Radia Perlman (user-9), Bjarne Stroustrup (user-14),

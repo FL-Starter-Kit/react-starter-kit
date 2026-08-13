@@ -5,7 +5,7 @@
 
 import { z } from 'zod';
 
-import { UserRole, UserStatus } from '@/features/users/models/user';
+import { UserRole, UserStatus } from '../models/user';
 
 export const userFormSchema = z.object({
   name: z

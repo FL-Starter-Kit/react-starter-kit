@@ -1,7 +1,7 @@
-import { UserStatusBadge } from '@/features/users/components/UserStatusBadge';
-import type { User } from '@/features/users/models/user';
-import { canDelete as isDeletable, roleLabel } from '@/features/users/utils/userDisplay';
+import type { User } from '../models/user';
+import { canDelete as isDeletable, roleLabel } from '../utils/userDisplay';
 
+import { UserStatusBadge } from './UserStatusBadge';
 import styles from './UserTable.module.css';
 
 export interface UserTableProps {

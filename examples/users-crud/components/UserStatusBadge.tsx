@@ -1,6 +1,7 @@
 import { Badge, type BadgeVariant } from '@/components/ui/Badge';
-import type { UserStatusValue } from '@/features/users/models/user';
-import { statusLabel } from '@/features/users/utils/userDisplay';
+
+import type { UserStatusValue } from '../models/user';
+import { statusLabel } from '../utils/userDisplay';
 
 const STATUS_VARIANTS: Readonly<Record<UserStatusValue, BadgeVariant>> = {
   active: 'success',

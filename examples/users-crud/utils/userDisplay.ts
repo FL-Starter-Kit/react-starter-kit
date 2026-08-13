@@ -10,7 +10,7 @@ import {
   type User,
   type UserRoleValue,
   type UserStatusValue,
-} from '@/features/users/models/user';
+} from '../models/user';
 
 export const ROLE_LABELS: Readonly<Record<UserRoleValue, string>> = {
   [UserRole.Admin]: 'Admin',

@@ -1,5 +1,6 @@
 import { setupWorker } from 'msw/browser';
 
-import { authHandlers, usersHandlers } from '@/tests/mocks/handlers';
+import { authHandlers } from '@examples/auth/mocks/handlers';
+import { usersHandlers } from '@examples/users-crud/mocks/handlers';
 
 export const worker = setupWorker(...authHandlers, ...usersHandlers);
