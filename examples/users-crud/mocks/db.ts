@@ -1,9 +1,12 @@
 /**
- * In-memory mock database shared by the MSW handlers.
- * Reset between tests via `resetMockDb()`.
+ * In-memory mock database for the users-crud example, shared by the MSW
+ * handlers. Reset between tests via `resetMockDb()`.
+ *
+ * The demo accounts for login (examples/auth/mocks/db.ts) resolve sessions
+ * against this seed store by email, so ids here must stay stable.
  */
 
-import { UserRole, UserStatus, type User } from '@/features/users/models/user';
+import { UserRole, UserStatus, type User } from '../models/user';
 
 const NAMES = [
   'Ada Lovelace',
@@ -64,27 +67,6 @@ function createSeedUsers(): User[] {
 }
 
 let users: User[] = createSeedUsers();
-
-/**
- * Demo accounts for the login form. Ids must exist in the seed list —
- * the login/me handlers resolve the session to a seed user — and roles
- * must match that seed user's role (Admin/Editor/Viewer cycle).
- */
-export const demoAccounts = {
-  admin: { id: 'user-1', email: 'admin@example.com', password: 'admin123', role: UserRole.Admin },
-  editor: {
-    id: 'user-2',
-    email: 'editor@example.com',
-    password: 'editor123',
-    role: UserRole.Editor,
-  },
-  viewer: {
-    id: 'user-3',
-    email: 'viewer@example.com',
-    password: 'viewer123',
-    role: UserRole.Viewer,
-  },
-};
 
 export function getMockUsers(): readonly User[] {
   return users;

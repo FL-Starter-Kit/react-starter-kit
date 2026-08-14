@@ -27,8 +27,8 @@ decays into a dependency swamp in any codebase this size.
 
 ## Consequences
 
-- A feature is independently readable, testable, and portable: `features/users/` is the reference
-  example.
+- A feature is independently readable, testable, and portable: `examples/users-crud/` is the
+  reference example.
 - Boundaries keep the architecture diagram honest — lint fails before review has to.
 - Enforcement cost: developers occasionally fight the zones (e.g. a guard that wanted a Spinner).
   The documented resolution pattern (move shared pieces into `app/` or the primitive layer) keeps

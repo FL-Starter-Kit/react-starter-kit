@@ -2,8 +2,9 @@ import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
-import { scenario } from '@/tests/mocks/scenario';
 import { renderApp } from '@/tests/renderApp';
+
+import { usersScenario } from './mocks/scenario';
 
 /**
  * Integration tests for the Users feature — the full app (theme, query,
@@ -55,7 +56,7 @@ describe('UsersPage integration', () => {
     });
 
     it('shows a loading skeleton while the list request is in flight', async () => {
-      scenario.users.listDelayMs = 400;
+      usersScenario.listDelayMs = 400;
       await renderApp({ initialEntries: ['/users'], sessionUserId: 'user-1' });
 
       expect(await screen.findByRole('status', { name: 'Loading users' })).toBeInTheDocument();
@@ -67,14 +68,14 @@ describe('UsersPage integration', () => {
       const user = userEvent.setup();
       // Sticky until reset — the HTTP client retries 5xx, so a one-shot
       // failure would be retried into success and no error would surface.
-      scenario.users.failListWith = 500;
+      usersScenario.failListWith = 500;
       await renderApp({ initialEntries: ['/users'], sessionUserId: 'user-1' });
 
       expect(
         await screen.findByRole('heading', { name: 'Could not load users' }, { timeout: 5000 }),
       ).toBeInTheDocument();
 
-      scenario.users.failListWith = undefined;
+      usersScenario.failListWith = undefined;
       await user.click(screen.getByRole('button', { name: 'Try again' }));
       expect(await within(table()).findByText('Ada Lovelace')).toBeInTheDocument();
     });

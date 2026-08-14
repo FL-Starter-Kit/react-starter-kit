@@ -630,7 +630,7 @@ Use controlled update groups rather than blindly updating everything.
 
 ---
 
-## 21. Add code generators
+## 21. Add code generators — ✅ Fixed
 
 For repeated freelance work, generators can significantly improve productivity.
 
@@ -654,6 +654,12 @@ features/users/
 ├── schemas/
 └── utils/
 ```
+
+Implemented as `scripts/generate.mjs` (dependency-free Node ESM, run via `npm run generate`).
+Skeletons follow the repo conventions (feature anatomy incl. `pages/`, `httpClient` API layer,
+TanStack Query hooks, Zod schemas, CSS Modules) and pass `npm run check` as-is. Generators never
+overwrite existing files. Usage + rules documented in `docs/CONTRIBUTING.md` §8 and `README.md`;
+tests in `src/tests/generate.test.ts`.
 
 **Priority:** P1
 
@@ -1151,8 +1157,8 @@ COMPLEX FLOW  → State Machine when justified
       docs/ARCHITECTURE.md §6)
 - [x] Telemetry abstraction — vendor-neutral via `logger.setTransport` (src/lib/logging/logger.ts)
 - [ ] Dependency automation
-- [ ] Code generators
-- [ ] Separate examples from core starter
+- [x] Code generators — `scripts/generate.mjs`, `npm run generate ...` (feature/component/hook/api)
+- [x] Separate examples from core starter
 
 ## Longer-term
 

@@ -31,21 +31,22 @@ npm run dev
 
 Opens Vite's dev server at `http://localhost:5173` with the MSW mock backend enabled
 (`.env.local.example` is copied to `.env.local` by default). Demo accounts are documented in
-`src/tests/mocks/db.ts` (`admin@example.com` / `admin123`, plus `editor@` and `viewer@`).
+`examples/auth/mocks/db.ts` (`admin@example.com` / `admin123`, plus `editor@` and `viewer@`).
 
 Useful shortcuts:
 
-| Command                       | What it does                                                   |
-| ----------------------------- | -------------------------------------------------------------- |
-| `npm run dev`                 | Start the dev server (MSW mocks on)                            |
-| `npm run lint` / `lint:fix`   | ESLint (flat config, strict TS rules, architecture boundaries) |
-| `npm run typecheck`           | `tsc --noEmit`                                                 |
-| `npm run test` / `test:watch` | Vitest unit/component/integration tests                        |
-| `npm run test:coverage`       | Vitest with v8 coverage (thresholds 70/70/70/60)               |
-| `npm run test:e2e`            | Playwright E2E (needs Chromium installed)                      |
-| `npm run test:a11y`           | Playwright tests tagged `@a11y` (axe scans)                    |
-| `npm run format`              | Prettier on everything                                         |
-| `npm run check`               | typecheck + lint + test + build in one shot                    |
+| Command                       | What it does                                                    |
+| ----------------------------- | --------------------------------------------------------------- |
+| `npm run dev`                 | Start the dev server (MSW mocks on)                             |
+| `npm run lint` / `lint:fix`   | ESLint (flat config, strict TS rules, architecture boundaries)  |
+| `npm run typecheck`           | `tsc --noEmit`                                                  |
+| `npm run test` / `test:watch` | Vitest unit/component/integration tests                         |
+| `npm run test:coverage`       | Vitest with v8 coverage (thresholds 70/70/70/60)                |
+| `npm run test:e2e`            | Playwright E2E (needs Chromium installed)                       |
+| `npm run test:a11y`           | Playwright tests tagged `@a11y` (axe scans)                     |
+| `npm run format`              | Prettier on everything                                          |
+| `npm run generate ...`        | Scaffold features/components/hooks/apis (see [Code generators]) |
+| `npm run check`               | typecheck + lint + test + build in one shot                     |
 
 ## Production build
 
@@ -77,7 +78,7 @@ src/
   app/          App shell: bootstrap, config, providers, router, layouts,
                 error boundaries, guards
   components/   UI primitives (ui/), feedback/, layout/, navigation/
-  features/     Feature-oriented modules (users, auth, home, docs, errors)
+  features/     Core features only (errors: 404/403)
   hooks/        Shared hooks (useMediaQuery, useReducedMotion, useDebouncedValue)
   lib/          Framework-agnostic libraries (auth, http, logging, storage,
                 accessibility)
@@ -85,6 +86,9 @@ src/
   tests/        Test infrastructure: MSW mocks, setup, render helpers, axe
   types/        Shared TypeScript types
   utils/        Pure helpers (cn, format, url, invariant)
+examples/       Reference/demo features (users-crud, auth, home, showcase) —
+                wired into the runnable starter but not shipped with client
+                projects. Delete the wiring to start clean.
 e2e/            Playwright end-to-end tests
 docs/           Architecture, testing, security, a11y, standards, ADRs
 ```
@@ -93,6 +97,9 @@ docs/           Architecture, testing, security, a11y, standards, ADRs
 
 - **Feature-oriented modules.** Code that changes together lives together under `features/<name>/` —
   models, schemas, API layer, hooks, components, pages. No cross-feature imports (ESLint-enforced).
+- **Demo code is separated.** Reference features live in `examples/` so client projects never ship
+  demo business logic; the starter still wires them in so they remain runnable references (see
+  `examples/README.md`).
 - **Dependency direction.** `components/` and `features/` may depend on `lib/`, `hooks/`, and
   `utils/`, never the other way around. Enforced with ESLint `no-restricted-paths` zones (see
   `docs/ARCHITECTURE.md`).
@@ -117,6 +124,25 @@ docs/           Architecture, testing, security, a11y, standards, ADRs
 - **E2E** — Playwright against the mocked dev server, including `@a11y` tagged axe scans.
 
 See `docs/TESTING.md` for details and conventions.
+
+## Code generators
+
+Repeated freelance work benefits from scaffolding. Generators create idiomatic skeletons that follow
+the repository conventions (feature anatomy, `httpClient` API layer, TanStack Query hooks, Zod
+schemas, CSS Modules) and pass `npm run check` out of the box:
+
+```bash
+npm run generate feature users        # full feature module skeleton
+npm run generate component DataTable  # shared component + css + test + barrel
+npm run generate hook useUsers        # shared hook
+npm run generate api users            # models + schemas + api for a feature
+npm run generate -- component UserTable --feature users   # component inside a feature
+```
+
+Pass flags after a `--` separator (`npm run generate -- ...`) so npm forwards them to the script
+instead of parsing them as npm configuration.
+
+Generators never overwrite existing files. See `docs/CONTRIBUTING.md` §8 for details.
 
 ## Documentation
 

@@ -1,14 +1,19 @@
 # Enterprise React Starter — Build Progress
 
-Tracking file so work can be stopped and resumed at any time. Last updated: 2026-08-12 (6th
+Tracking file so work can be stopped and resumed at any time. Last updated: 2026-08-13 (9th
 session).
 
 **Resume here:** run `npm install` if `node_modules` is missing, then continue from the next
 unfinished phase below. After each phase, run `npm run check` (`typecheck` + `lint` + `test` +
 `build`) before moving on.
 
-**Current status (6th session):** **249 Vitest tests across 26 files green**; `tsc --noEmit` and
-`eslint .` clean. Added a second P0 pass on the issues review:
+**Current status (9th session):** **257 Vitest tests across 28 files green**; `tsc --noEmit` and
+`eslint .` clean. Demo features moved from `src/features/` to `examples/` (issue #22) — core `src/`
+now holds only framework + core features, and the starter stays fully runnable by wiring the
+examples in (router + MSW bootstrap). Full gate verified: typecheck, lint, tests, build, coverage
+thresholds, E2E 16/16. See "9th session" below and `docs/adr/0008-examples-separation.md`.
+
+Prior session highlights:
 
 - Router now uses route-level `lazy` (no `React.lazy` + Suspense gaps); root `HydrateFallback`
   covers the initial chunk load.
@@ -24,6 +29,62 @@ unfinished phase below. After each phase, run `npm run check` (`typecheck` + `li
 - Logger sanitize extended to `Set-Cookie`, `access_token`, `refresh_token`, `csrf`/`xsrf`-shaped
   keys (pattern-matched), with automated tests.
 - E2E (16/16) unverified this session — run `npm run test:e2e` before cutting a release.
+
+---
+
+## 8th session — code generators (issue #21)
+
+- [x] **Code generators added** (`scripts/generate.mjs`, dependency-free Node ESM, no new deps):
+      `npm run generate feature|component|hook|api <name>`. Scaffolds idiomatic skeletons that
+      follow the repo conventions and pass `npm run check` as-is:
+  - `feature users` → `features/users/{api,components,hooks,models,pages,schemas,utils}/` with a
+    model, Zod schemas (runtime + form), `httpClient`-based API, TanStack Query hooks, display utils
+    and a `PageHeader` page. Naming derives from the feature name (`users` → `User`/`usersApi`
+    /`useUsers`; `user-profiles` → `userProfile`/`userProfilesApi`/`useUserProfiles`).
+  - `component DataTable` → shared `src/components/data-table/` (+ css + test + barrel);
+    `--feature users` targets a feature's `components/`.
+  - `hook useX` → shared `src/hooks/` or feature hooks with `--feature`.
+  - `api users` → models + schemas + api (data layer) for a feature.
+  - **Never overwrites** — fails listing the conflicting path. Names validated (kebab-case /
+    PascalCase / `use` prefix).
+- [x] Generated output verified: `tsc --noEmit`, `eslint`, and `prettier --check` all clean on a
+      generated feature + component + hook. `.gitkeep` added to `.prettierignore` (prettier can't
+      infer a parser for it).
+- [x] Tests: `src/tests/generate.test.ts` (10) spawn the script against a temp `GENERATE_ROOT` and
+      assert the scaffolded tree, pluralization, `--feature`, validation and overwrite refusal.
+- [x] Docs: README (generators section + command table), `docs/CONTRIBUTING.md` §8, issues list (#21
+      → ✅ Fixed), `.prettierignore`.
+- [x] `scripts` added to eslint ignores (plain-JS tooling, no TS project service); `tsconfig`
+      already excludes it.
+- [x] `npm run check`-equivalent verified locally (typecheck + lint + vitest green); E2E unaffected.
+
+---
+
+## 9th session — examples separation (issue #22)
+
+- [x] **Demo features moved out of `src/features/` into `examples/`** (wired in, physically
+      separated): `examples/users-crud/` (the canonical CRUD reference: api, components, hooks,
+      models, pages, schemas, utils, mocks, integration tests), `examples/auth/` (LoginPage + login
+      test + mocks), `examples/home/` (HomePage), `examples/showcase/` (ComponentsPage). `src/`
+      keeps only core features (`errors/`). See `docs/adr/0008-examples-separation.md`.
+- [x] **Core mock split**: `src/tests/mocks/` now holds the generic plumbing (session store in
+      `session.ts`, auth scenario knobs in `scenario.ts`, browser/node bootstrap) and composes the
+      example handlers via the `@examples/` alias. Deleted the old monolithic `handlers.ts`/`db.ts`.
+- [x] **Wiring**: router lazy-imports example pages; browser worker and node server compose example
+      handlers with the core session store; `@examples/` alias added to tsconfig, Vite and ESLint.
+- [x] **Examples are portable**: internal imports relative, core imports via `@/`; docs show how to
+      copy an example into `src/features/<name>`. ESLint `no-restricted-paths` now enforces feature
+      boundaries inside `examples/` (one exempted dependency: the auth mock resolves sessions
+      against the users-crud seed store so signed-in identity matches the users directory).
+- [x] **Gotchas fixed**: `@/examples/...` does not resolve — use `@examples/...`; eslint except
+      entries must be directory prefixes (`path.relative` treats them as files); the auth login
+      handler must resolve the session user by `id` (`user-1` …), not by email (demo account emails
+      don't match seed emails).
+- [x] **Verified**: typecheck, lint, 257 tests, build, coverage thresholds and E2E 16/16 all green
+      (two E2E flakes during one parallel run are parallel-run flakiness; CI runs `workers: 1`).
+- [x] Docs updated: `examples/*/README.md`, `docs/ARCHITECTURE.md`, `docs/FEATURES.md`,
+      `docs/TESTING.md`, `docs/CONTRIBUTING.md`, `docs/adr/0004`, root `README.md`, ADR 0008 +
+      index, issues list (#22 → ✅ Fixed).
 
 ---
 
@@ -122,6 +183,9 @@ unfinished phase below. After each phase, run `npm run check` (`typecheck` + `li
 
 ## Phase 4 — Features ✅ DONE (files written; typecheck not yet green)
 
+> Note: the demo features below were later moved to `examples/` (9th session); these records
+> document the original work. `src/features/` now holds only `errors/`.
+
 - [x] `features/users/`: models/user.ts, schemas/userSchemas.ts (zod runtime validation),
       schemas/userFormSchemas.ts (RHF), api/usersApi.ts, utils/userDisplay.ts
       (labels/initials/canDelete), hooks/useUsers.ts (list/detail/create/update/delete,
@@ -133,6 +197,10 @@ unfinished phase below. After each phase, run `npm run check` (`typecheck` + `li
       `UnauthorizedPage.tsx`, `features/docs/pages/ComponentsPage.tsx` (live UI showcase)
 
 ## Phase 5 — MSW + test infra ✅ DONE (223 tests green, 25 files)
+
+> Note: the mock `db.ts`/`handlers.ts` below were split up in the 9th session — core plumbing now in
+> `src/tests/mocks/` (session.ts, scenario.ts, browser.ts, node.ts), demo handlers in
+> `examples/users-crud/mocks/` and `examples/auth/mocks/`.
 
 - [x] `src/tests/mocks/` — db.ts (25 seeded users + demo accounts), scenario.ts (expireNextRequest,
       rejectLogin, **failListWith** (renamed from failNextListWith — sticky until reset, see

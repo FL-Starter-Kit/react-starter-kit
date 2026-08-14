@@ -9,12 +9,7 @@
 
 import { z } from 'zod';
 
-import {
-  DEFAULT_PAGE_SIZE,
-  PAGE_SIZE_OPTIONS,
-  UserRole,
-  UserStatus,
-} from '@/features/users/models/user';
+import { DEFAULT_PAGE_SIZE, PAGE_SIZE_OPTIONS, UserRole, UserStatus } from '../models/user';
 
 const timestampSchema = z.iso.datetime();
 

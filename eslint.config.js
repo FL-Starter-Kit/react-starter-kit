@@ -38,6 +38,11 @@ export const prettierOptions = {
  *   hooks/ ────── CANNOT import: features/, components/
  *   utils/ ────── CANNOT import: anything but types/ and other utils
  *
+ * Demo/reference features live outside src/ in `examples/` and follow the
+ * same feature rules (no cross-example imports), with one documented
+ * exception: the auth mock resolves sessions against the users-crud seed
+ * store.
+ *
  * See docs/ARCHITECTURE.md#dependency-rules for the full dependency matrix.
  */
 export default tseslint.config(
@@ -51,6 +56,7 @@ export default tseslint.config(
       'public/mockServiceWorker.js',
       '.agents',
       'eslint.config.js',
+      'scripts',
     ],
   },
   js.configs.recommended,
@@ -146,6 +152,7 @@ export default tseslint.config(
           alphabetize: { order: 'asc', caseInsensitive: true },
           pathGroups: [
             { pattern: '@/**', group: 'internal', position: 'before' },
+            { pattern: '@examples/**', group: 'internal', position: 'before' },
             { pattern: '@/*/*.{css}', group: 'index', position: 'after' },
           ],
         },
@@ -166,18 +173,38 @@ export default tseslint.config(
               message: 'UI components must not import from the app layer.',
             },
             {
-              target: './src/features/users',
+              target: './src/features',
               from: './src/features',
-              except: ['./users'],
               message:
                 'Features must not import from another feature. Extract shared code to lib/ or components/.',
             },
             {
-              target: './src/features/auth',
-              from: './src/features',
-              except: ['./auth'],
+              target: './examples/users-crud',
+              from: './examples',
+              except: ['./users-crud'],
               message:
-                'Features must not import from another feature. Extract shared code to lib/ or components/.',
+                'Examples must not import from another example. Extract shared code to lib/ or components/.',
+            },
+            {
+              target: './examples/auth',
+              from: './examples',
+              except: ['./auth', 'users-crud/mocks'],
+              message:
+                'Examples must not import from another example (the auth mock resolves sessions against the users-crud seed store).',
+            },
+            {
+              target: './examples/home',
+              from: './examples',
+              except: ['./home'],
+              message:
+                'Examples must not import from another example. Extract shared code to lib/ or components/.',
+            },
+            {
+              target: './examples/showcase',
+              from: './examples',
+              except: ['./showcase'],
+              message:
+                'Examples must not import from another example. Extract shared code to lib/ or components/.',
             },
             {
               target: './src/lib',

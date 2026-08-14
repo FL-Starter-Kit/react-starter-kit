@@ -19,6 +19,11 @@ documented in this repository.
 
 ## 2. Application (shipped routes)
 
+The demo routes below are backed by reference features living in `examples/` (see
+`docs/adr/0008-examples-separation.md`). They are wired into the runnable starter so it can be
+explored, but they are not part of the core `src/` a client project ships; delete the example wiring
+to start clean.
+
 - **Home page** — `/` landing page.
 - **Login** — `/login` sign-in form with real credential validation and friendly errors.
 - **Users feature** — `/users`, an admin CRUD reference feature:
@@ -30,7 +35,7 @@ documented in this repository.
   - role/status badges, loading skeletons, empty and error states
 - **Component showcase** — `/components`, a living preview of the UI primitives.
 - **Error pages** — `/unauthorized` and not-found (`*`), plus route-level error screens and an
-  app-wide `AppErrorBoundary`.
+  app-wide `AppErrorBoundary`. These are core `src/features/errors/`.
 
 ## 3. Authentication & authorization
 
@@ -88,12 +93,15 @@ One centralized client — no raw `fetch` in features:
 
 ## 7. Mock backend (MSW)
 
+- Core plumbing in `src/tests/mocks/` (session store, scenario knobs, browser/node bootstrap); demo
+  handlers live with their examples: `examples/auth/mocks/` and `examples/users-crud/mocks/`.
 - In-memory seeded database: 25 users (deterministic order/roles/status — see `docs/TESTING.md`
-  §6) + demo accounts (`admin@example.com` / `admin123`, plus `editor@` and `viewer@`).
+  §6) + demo accounts (`admin@example.com` / `admin123`, plus `editor@` and `viewer@`) defined in
+  `examples/auth/mocks/db.ts` and mapped to the seed in `examples/users-crud/mocks/db.ts`.
 - Same MSW handlers power dev (browser worker, persistent localStorage session) and tests (Node
   server, `setActiveSession`).
-- Test knobs (`src/tests/mocks/scenario.ts`): response delays, sticky failure flags, session expiry,
-  login rejection.
+- Test knobs: session lifecycle in `src/tests/mocks/scenario.ts` (session expiry, login rejection),
+  users list in `examples/users-crud/mocks/scenario.ts` (response delays, sticky failure flags).
 
 ## 8. Quality & testing
 
@@ -119,6 +127,9 @@ Four testing layers, all configured and runnable:
 
 - One-command gates: `npm run dev` (app + mocks), `npm run check` (typecheck + lint + test + build),
   `npm run test:e2e`, `npm run test:a11y`, `npm run format`.
+- **Code generators** (`npm run generate feature|component|hook|api`): scaffold idiomatic,
+  lint-clean skeletons for features, components, hooks and API layers — see `docs/CONTRIBUTING.md`
+  §8.
 - Husky + lint-staged git hooks; Conventional Commits enforced in contributing docs.
 - Architecture enforced by tooling: feature-oriented modules, no cross-feature imports, one-way
   dependency direction (`components`/`features` → `lib`/`hooks`/`utils`).

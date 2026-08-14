@@ -8,15 +8,12 @@ import { Dialog } from '@/components/ui/Dialog';
 import { FormField } from '@/components/ui/FormField';
 import { Input } from '@/components/ui/Input';
 import { Select } from '@/components/ui/Select';
-import { useCreateUser, useUpdateUser, toUserInput } from '@/features/users/hooks/useUsers';
-import { UserRole, UserStatus, type User } from '@/features/users/models/user';
-import {
-  emptyUserForm,
-  userFormSchema,
-  type UserFormValues,
-} from '@/features/users/schemas/userFormSchemas';
 import { ApiError } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
+
+import { useCreateUser, useUpdateUser, toUserInput } from '../hooks/useUsers';
+import { UserRole, UserStatus, type User } from '../models/user';
+import { emptyUserForm, userFormSchema, type UserFormValues } from '../schemas/userFormSchemas';
 
 export interface UserFormDialogProps {
   /** When set, the dialog edits this user; otherwise it creates. */
