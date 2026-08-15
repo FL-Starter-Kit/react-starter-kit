@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router';
 
-import { Alert } from '@/components/feedback/Alert';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Container } from '@/components/layout/Container';
@@ -53,7 +52,6 @@ export default function UsersPage() {
     user: null,
   });
   const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
-  const [actionError, setActionError] = useState<string | null>(null);
 
   const canCreate = can('users:create');
   const canUpdate = can('users:update');
@@ -79,11 +77,11 @@ export default function UsersPage() {
     announce(`User ${saved.name} saved.`);
   };
 
-  const handleDelete = async () => {
+  // Rethrows so the Dialog shows the error inline and stays open.
+  const handleDelete = async (): Promise<void> => {
     if (deleteTarget === null) {
       return;
     }
-    setActionError(null);
     try {
       await deleteMutation.mutateAsync(deleteTarget.id);
       announce(`User ${deleteTarget.name} deleted.`);
@@ -93,13 +91,13 @@ export default function UsersPage() {
       }
     } catch (error) {
       if (error instanceof ApiError && error.code === ErrorCode.Forbidden) {
-        setActionError('You do not have permission to delete users.');
-      } else if (error instanceof ApiError) {
-        setActionError(error.message);
-      } else {
-        logger.error('Delete failed unexpectedly', {}, error);
-        setActionError('Unable to delete the user. Please try again.');
+        throw new Error('You do not have permission to delete users.');
       }
+      if (error instanceof ApiError) {
+        throw new Error(error.message);
+      }
+      logger.error('Delete failed unexpectedly', {}, error);
+      throw new Error('Unable to delete the user. Please try again.');
     }
   };
 
@@ -121,18 +119,6 @@ export default function UsersPage() {
           )
         }
       />
-
-      {actionError !== null && (
-        <Alert
-          variant="danger"
-          onDismiss={() => {
-            setActionError(null);
-          }}
-          className={styles.inlineAlert}
-        >
-          {actionError}
-        </Alert>
-      )}
 
       <UserFilters query={query} onQueryChange={updateQuery} />
 
@@ -215,28 +201,9 @@ export default function UsersPage() {
           }
         }}
         title="Delete user"
-        size="sm"
-        footer={
-          <>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setDeleteTarget(null);
-              }}
-              disabled={deleteMutation.isPending}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="danger"
-              onClick={() => void handleDelete()}
-              loading={deleteMutation.isPending}
-              loadingLabel="Deleting user"
-            >
-              Delete
-            </Button>
-          </>
-        }
+        confirmLabel="Delete"
+        loadingLabel="Deleting user"
+        onConfirm={handleDelete}
       >
         <p>
           Delete <strong>{deleteTarget?.name}</strong>? This action cannot be undone.

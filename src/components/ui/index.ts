@@ -2,7 +2,7 @@ export { AccordionItem } from './Accordion';
 export { Badge, type BadgeVariant } from './Badge';
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button';
 export { Checkbox } from './Checkbox';
-export { Dialog, type DialogProps } from './Dialog';
+export { Dialog, type DialogProps, type DialogVariant } from './Dialog';
 export { Drawer, type DrawerProps } from './Drawer';
 export { DropdownMenu, type DropdownMenuItem } from './DropdownMenu';
 export { FormField, type FormFieldProps } from './FormField';

@@ -205,7 +205,7 @@ describe('UsersPage integration', () => {
       await screen.findByText('Alan Turing');
 
       await user.click(within(row('Alan Turing')).getByRole('button', { name: 'Delete' }));
-      const dialog = screen.getByRole('dialog');
+      const dialog = screen.getByRole('alertdialog');
       expect(within(dialog).getByText('Alan Turing')).toBeInTheDocument();
 
       await user.click(within(dialog).getByRole('button', { name: 'Delete' }));

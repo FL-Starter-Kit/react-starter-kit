@@ -10,6 +10,7 @@ import { loadConfig } from '@/app/config/env';
 import { QueryProvider } from '@/app/providers/QueryProvider';
 import { ThemeProvider } from '@/app/providers/ThemeProvider';
 import { AppRouter } from '@/app/router/AppRouter';
+import { ToastProvider } from '@/components/feedback/toast/ToastProvider';
 import { AuthProvider } from '@/lib/auth';
 import { configureHttpClient } from '@/lib/http';
 import { logger } from '@/lib/logging/logger';
@@ -47,6 +48,7 @@ export async function bootstrap(): Promise<void> {
           <AuthProvider>
             <AppRouter />
           </AuthProvider>
+          <ToastProvider />
         </QueryProvider>
       </ThemeProvider>
     </StrictMode>,

@@ -14,388 +14,7 @@ review of the React starter kit.
 
 ---
 
-# P0 — Fix Before Making This the Master Starter
-
-## 1. QueryClient is recreated on provider render — ✅ Fixed
-
-**Area:** TanStack Query / Providers
-
-The `QueryProvider` creates a new `QueryClient` whenever the provider renders.
-
-### Risk
-
-A QueryClient should remain stable for the lifetime of the application. Recreating it can cause:
-
-- loss of query cache
-- unnecessary refetching
-- unexpected query lifecycle behavior
-- cache invalidation/state resets
-
-### Recommendation
-
-Create the client once, for example with lazy `useState` initialization:
-
-```tsx
-export function QueryProvider({ children }: { children: ReactNode }) {
-  const [client] = useState(createQueryClient);
-
-  return <QueryClientProvider client={client}>{children}</QueryClientProvider>;
-}
-```
-
-**Priority:** P0
-
----
-
-## 2. ProtectedRoute performs a side effect during render — ✅ Fixed
-
-**Area:** Authentication / Routing
-
-The protected route updates return-path storage while rendering.
-
-### Risk
-
-Side effects during render are undesirable in React and can become problematic with:
-
-- concurrent rendering
-- Strict Mode
-- repeated renders
-- future React features
-
-### Recommendation
-
-Prefer React Router navigation state or perform persistent storage updates inside an effect.
-
-Ideally:
-
-```text
-Protected route
-      ↓
-Navigate to login
-      ↓
-state: { from: attemptedLocation }
-      ↓
-login succeeds
-      ↓
-navigate back to original location
-```
-
-**Priority:** P0
-
----
-
-## 3. Authentication refresh failure should explicitly transition to unauthenticated — ✅ Fixed
-
-**Area:** Authentication
-
-The refresh flow is sophisticated and already uses a single-flight approach, but refresh failure
-should have a single authoritative authentication transition.
-
-### Risk
-
-Without a centralized transition, multiple queries/components may independently discover that the
-session has expired.
-
-This can lead to:
-
-- repeated failures
-- inconsistent UI
-- unnecessary requests
-- difficult-to-debug authentication state
-
-### Recommendation
-
-Model the authentication lifecycle explicitly:
-
-```text
-authenticated
-      ↓
-401
-      ↓
-refresh
-      ↓
-success ─────→ authenticated
-      ↓
-failure
-      ↓
-unauthenticated
-      ↓
-login
-```
-
-**Priority:** P0
-
----
-
-## 4. Production sourcemaps should not be enabled by default — ✅ Fixed
-
-**Area:** Build / Security
-
-The Vite build currently enables sourcemaps.
-
-### Risk
-
-Public production sourcemaps can expose:
-
-- source code
-- internal file structure
-- implementation details
-- potentially sensitive comments or metadata
-
-### Recommendation
-
-Use one of:
-
-- no production sourcemaps
-- hidden sourcemaps uploaded only to an error-monitoring platform
-- sourcemaps enabled only for internal environments
-
-**Priority:** P0
-
----
-
-## 5. Remove committed `.deb` packages — ✅ Fixed
-
-**Area:** Repository / CI
-
-Linux `.deb` packages are present in the repository.
-
-### Risk
-
-This creates:
-
-- unnecessary repository size
-- OS/environment coupling
-- maintenance overhead
-- confusing dependency ownership
-
-### Recommendation
-
-Install required browser/system dependencies through CI/container setup instead.
-
-For Playwright, use its supported dependency installation or a suitable CI/container image.
-
-**Priority:** P0
-
----
-
-## 6. Review Tabs keyboard and focus handling — ✅ Fixed
-
-**Area:** Accessibility / UI primitives
-
-The Tabs component has good keyboard-navigation intentions, but there are edge cases around focus
-management and disabled tabs.
-
-### Issues to review
-
-- `tablist` should not unnecessarily become an additional keyboard stop
-- Home/End should skip disabled tabs
-- Arrow navigation should always select/focus the next enabled tab
-- roving `tabIndex` should remain consistent
-- focus behavior should follow the WAI-ARIA Tabs pattern
-
-### Recommendation
-
-Implement the tabs interaction model around:
-
-```text
-ArrowLeft / ArrowRight
-Home / End
-disabled-tab skipping
-roving tabindex
-focus restoration
-```
-
-**Priority:** P0
-
----
-
-## 7. Tooltip semantics need another accessibility pass — ✅ Fixed
-
-**Area:** Accessibility / UI primitives
-
-The tooltip implementation supports behavior that can become interactive.
-
-### Risk
-
-An interactive tooltip is generally a sign that the component should instead be a Popover.
-
-### Recommendation
-
-Keep responsibilities separate:
-
-```text
-Tooltip
-  → non-interactive supplementary information
-
-Popover
-  → interactive floating content
-
-DropdownMenu
-  → menu commands/actions
-```
-
-Also ensure:
-
-- timers are cleaned up
-- tooltip content does not become an accidental keyboard target
-- focus/hover behavior follows expected tooltip semantics
-
-**Priority:** P0
-
----
-
-## 8. Security headers and CSP need an explicit deployment contract — ✅ Fixed
-
-**Area:** Security
-
-The starter discusses security but should clearly distinguish application responsibilities from
-deployment/server responsibilities.
-
-### Recommended deployment headers
-
-```text
-Content-Security-Policy
-Strict-Transport-Security
-X-Content-Type-Options
-Referrer-Policy
-Permissions-Policy
-frame-ancestors
-```
-
-### Recommendation
-
-Add deployment documentation showing recommended secure defaults for:
-
-- Nginx
-- CDN
-- cloud hosting
-- reverse proxy
-
-Do not assume Vite itself can provide all of these.
-
-**Priority:** P0
-
----
-
-## 9. Make CSRF integration an explicit extension point — ✅ Fixed
-
-**Area:** Authentication / HTTP
-
-The cookie-based authentication model is strong, but CSRF handling should be a first-class
-configurable mechanism.
-
-### Recommendation
-
-Provide an abstraction such as:
-
-```ts
-configureHttpClient({
-  csrfProvider,
-});
-```
-
-This allows projects to support different backend patterns:
-
-```text
-HttpOnly session cookie
-CSRF cookie + header
-BFF
-OAuth/OIDC
-Authorization header
-```
-
-without rewriting the HTTP layer.
-
-**Priority:** P0
-
----
-
-## 10. Add typed URL/query-parameter parsing — ✅ Fixed
-
-**Area:** Routing / URL state
-
-URL state is correctly preferred for things such as:
-
-- pagination
-- filters
-- search
-- sorting
-
-However, parsing URL parameters manually can lead to inconsistent validation.
-
-### Risk
-
-Example:
-
-```ts
-Number(searchParams.get('page'));
-```
-
-can produce invalid or unexpected values.
-
-### Recommendation
-
-Use a schema-driven approach:
-
-```text
-URL
- ↓
-Zod schema
- ↓
-typed feature query state
-```
-
-Example:
-
-```text
-/users?page=abc
-```
-
-should deterministically fall back to a safe value.
-
-**Priority:** P0
-
----
-
 # P1 — Fix/Add Before Serious Client Projects
-
-## 11. Reconsider the default `services/` layer — ✅ Fixed
-
-**Area:** Architecture
-
-Feature folders currently contain a `services/` layer.
-
-### Risk
-
-A generic service directory tends to become a dumping ground:
-
-```text
-UserService
-ProjectService
-BillingService
-DashboardService
-PermissionService
-```
-
-### Recommendation
-
-Prefer more explicit responsibilities:
-
-```text
-api/
-hooks/
-models/
-schemas/
-utils/
-components/
-```
-
-Use a service abstraction only when it represents a genuinely distinct responsibility.
-
-**Priority:** P1
-
----
 
 ## 12. Add a reusable enterprise DataTable
 
@@ -425,11 +44,11 @@ hard parts.
 
 ---
 
-## 13. Add a Toast/Notification system
+## 13. Add a Toast/Notification system — ✅ Implemented
 
 A reusable notification system is needed across almost every client application.
 
-Recommended capabilities:
+Recommended capabilities (all delivered by `src/components/feedback/toast`):
 
 ```text
 success
@@ -443,11 +62,13 @@ stacking
 accessibility announcements
 ```
 
+Built on `@radix-ui/react-toast` (see "Implemented components" below).
+
 **Priority:** P1
 
 ---
 
-## 14. Add ConfirmDialog
+## 14. Add a standardized modal/confirmation component — ✅ Implemented
 
 Dangerous operations should use a standardized confirmation component.
 
@@ -468,6 +89,10 @@ The component should support:
 - destructive styling
 - loading state
 - async confirmation
+
+Delivered by `src/components/ui/Dialog` (see "Implemented components" below). During delivery it
+absorbed the native-`<dialog>` `Dialog` and became the single modal primitive: a confirmation
+`role="alertdialog"` mode and a generic `role="dialog"` mode.
 
 **Priority:** P1
 
@@ -545,66 +170,7 @@ accessibility
 
 ---
 
-## 18. Establish a formal error taxonomy — ✅ Fixed
-
-Current error normalization is already good, but the starter should make the hierarchy explicit.
-
-Suggested model:
-
-```text
-AppError
-├── ApiError
-│   ├── Unauthorized
-│   ├── Forbidden
-│   ├── Validation
-│   ├── Conflict
-│   ├── NotFound
-│   ├── RateLimited
-│   └── Server
-├── NetworkError
-├── ValidationError
-└── UnexpectedError
-```
-
-This makes UI behavior consistent.
-
-**Status:** implemented as a single normalized `ApiError` class + stable `ErrorCode` enum
-(`src/lib/http/errors.ts`, `src/types/api.ts`) covering every leaf type above (incl. Network,
-Timeout, Aborted, BadRequest), with per-code user-safe default messages and field-error envelopes —
-documented in `docs/ARCHITECTURE.md` §6 ("Normalized errors").
-
-**Priority:** P1
-
----
-
-## 19. Add telemetry/error-reporting abstraction — ✅ Fixed
-
-Add a thin abstraction rather than hard-coding a vendor.
-
-Example:
-
-```ts
-reportError(error, {
-  feature: 'users',
-  action: 'create-user',
-});
-```
-
-Potential implementations:
-
-```text
-Sentry
-Datadog
-New Relic
-Azure Monitor
-OpenTelemetry
-```
-
-**Priority:** P1
-
----
-
-## 20. Add dependency update automation
+## 18. Add dependency update automation
 
 Use:
 
@@ -630,66 +196,7 @@ Use controlled update groups rather than blindly updating everything.
 
 ---
 
-## 21. Add code generators — ✅ Fixed
-
-For repeated freelance work, generators can significantly improve productivity.
-
-Examples:
-
-```bash
-npm run generate feature users
-npm run generate component DataTable
-npm run generate hook useUsers
-npm run generate api users
-```
-
-Generated feature structure:
-
-```text
-features/users/
-├── api/
-├── components/
-├── hooks/
-├── models/
-├── schemas/
-└── utils/
-```
-
-Implemented as `scripts/generate.mjs` (dependency-free Node ESM, run via `npm run generate`).
-Skeletons follow the repo conventions (feature anatomy incl. `pages/`, `httpClient` API layer,
-TanStack Query hooks, Zod schemas, CSS Modules) and pass `npm run check` as-is. Generators never
-overwrite existing files. Usage + rules documented in `docs/CONTRIBUTING.md` §8 and `README.md`;
-tests in `src/tests/generate.test.ts`.
-
-**Priority:** P1
-
----
-
-## 22. Separate reference/demo features from the core starter
-
-Avoid shipping client projects with demo business logic.
-
-Prefer:
-
-```text
-src/
-  app/
-  components/
-  features/
-  lib/
-
-examples/
-  users-crud/
-  auth/
-```
-
-This keeps the actual project clean while preserving reference implementations.
-
-**Priority:** P1
-
----
-
-## 23. Align Node version requirements
+## 19. Align Node version requirements
 
 The package configuration and CI should communicate the same supported Node version policy.
 
@@ -713,38 +220,7 @@ package.json engines
 
 # P2 — Valuable Enhancements
 
-## 24. Introduce primitive vs semantic design tokens
-
-Separate:
-
-### Primitive tokens
-
-```text
-blue-500
-gray-700
-space-4
-radius-md
-```
-
-from:
-
-### Semantic tokens
-
-```text
-color-action-primary
-color-surface
-color-text-primary
-color-text-secondary
-color-border
-```
-
-Semantic tokens make client-specific branding much easier.
-
-**Priority:** P2
-
----
-
-## 25. Add complex workflow/state-machine guidance
+## 24. Add complex workflow/state-machine guidance
 
 Do not add a state-machine library by default.
 
@@ -770,7 +246,7 @@ Use a state machine only when the workflow actually warrants it.
 
 ---
 
-## 26. Add CODEOWNERS / ownership conventions
+## 25. Add CODEOWNERS / ownership conventions
 
 Useful when the project grows beyond a single developer.
 
@@ -787,7 +263,7 @@ tests/
 
 ---
 
-## 27. Add project profiles
+## 26. Add project profiles
 
 Create documented project presets rather than multiple codebases.
 
@@ -827,7 +303,7 @@ audit
 
 ---
 
-## 28. Add an AI development contract
+## 27. Add an AI development contract
 
 Since the repository is intended for AI-assisted development, add:
 
@@ -855,7 +331,7 @@ This gives every AI coding agent the same project contract.
 
 ---
 
-## 29. Add OpenAPI integration/code generation
+## 28. Add OpenAPI integration/code generation
 
 For API-heavy freelance projects, consider supporting:
 
@@ -875,7 +351,7 @@ This can eliminate repetitive manual API typing.
 
 ---
 
-## 30. Consider Storybook only if the component library grows
+## 29. Consider Storybook only if the component library grows
 
 Storybook is useful for:
 
@@ -891,7 +367,7 @@ But it should not be mandatory for every small freelance project.
 
 ---
 
-## 31. Consider visual regression testing later
+## 30. Consider visual regression testing later
 
 Once the UI system becomes stable, consider:
 
@@ -909,7 +385,7 @@ This is particularly useful for shared UI components.
 
 # P3 — Optional / Future
 
-## 32. Internationalization
+## 31. Internationalization
 
 Do not add i18n libraries by default.
 
@@ -927,7 +403,7 @@ native Intl APIs
 
 ---
 
-## 33. PWA/offline support
+## 32. PWA/offline support
 
 Only introduce this for projects that actually require:
 
@@ -940,7 +416,7 @@ Only introduce this for projects that actually require:
 
 ---
 
-## 34. Advanced performance instrumentation
+## 33. Advanced performance instrumentation
 
 Eventually consider:
 
@@ -1125,44 +601,19 @@ COMPLEX FLOW  → State Machine when justified
 
 # Final Priority Summary
 
-## Must fix first
-
-- [x] Stable QueryClient — lazy `useState` init in `src/app/providers/QueryProvider.tsx`
-- [x] Remove ProtectedRoute render-time side effect — uses navigation state
-      (`src/app/guards/guards.tsx`)
-- [x] Centralize auth refresh failure handling — single authoritative `expireSession` transition
-      (`src/lib/auth/refreshSession.ts`, `AuthContext.tsx`)
-- [x] Disable/hide production sourcemaps — off by default, `SOURCEMAP=true` opts into hidden maps
-      (`vite.config.ts`)
-- [x] Remove `.deb` packages — deleted from git; `*.deb` gitignored
-- [x] Complete Tabs accessibility review — no tablist tab stop, Home/End skip disabled, consistent
-      roving tabindex (`src/components/ui/Tabs.tsx`)
-- [x] Separate Tooltip and Popover semantics — non-interactive tooltip only, timers cleaned up
-      (`src/components/ui/Tooltip.tsx`)
-- [x] Document security headers/CSP — deployment contract in `docs/SECURITY.md` (§6)
-- [x] Make CSRF configurable — `configureHttpClient({ csrf: { headerName, getToken } })`
-      (`src/lib/http/configure.ts`, `client.ts`)
-- [x] Add typed URL parameter parsing — `parseQueryParams` (`src/utils/url.ts`) + schema-driven
-      offsets in `UsersPage`
-
 ## Next most valuable
 
 - [ ] Enterprise DataTable
-- [ ] Toast/notification system
-- [ ] ConfirmDialog
+- [x] Toast/notification system
+- [x] Dialog (modal/confirmation primitive)
 - [ ] Popover
 - [ ] Combobox/Autocomplete
 - [ ] FileUpload
-- [x] Error taxonomy — explicit via `ApiError` + `ErrorCode` (src/lib/http/errors.ts,
-      docs/ARCHITECTURE.md §6)
-- [x] Telemetry abstraction — vendor-neutral via `logger.setTransport` (src/lib/logging/logger.ts)
 - [ ] Dependency automation
-- [x] Code generators — `scripts/generate.mjs`, `npm run generate ...` (feature/component/hook/api)
-- [x] Separate examples from core starter
+- [ ] Align Node version requirements
 
 ## Longer-term
 
-- [ ] Semantic design tokens
 - [ ] State-machine guidance
 - [ ] CODEOWNERS
 - [ ] Project profiles
@@ -1173,6 +624,150 @@ COMPLEX FLOW  → State Machine when justified
 - [ ] i18n
 - [ ] PWA/offline support
 - [ ] Advanced performance instrumentation
+
+---
+
+# Implemented Components
+
+## 1. Toast / Notification system — ✅ Complete
+
+**Component:** `ToastProvider` + imperative `toast` API (`src/components/feedback/toast`)
+
+**Files added**
+
+- `src/components/feedback/toast/types.ts` — `ToastVariant`, `ToastAction`, `ToastOptions`, `ToastData`, `ToastInput`
+- `src/components/feedback/toast/store.ts` — module-level store + `toast.success/info/warning/error/dismiss/dismissAll/clear`
+- `src/components/feedback/toast/ToastProvider.tsx` — app-wide provider (`useSyncExternalStore` + Radix `Toast.Provider`)
+- `src/components/feedback/toast/ToastItem.tsx` — single toast (Radix `Toast.Root`), exit-animation-aware removal
+- `src/components/feedback/toast/ToastIcon.tsx` — inline SVG variant icons
+- `src/components/feedback/toast/Toast.module.css` — tokens-based styles, responsive positioning
+- `src/components/feedback/toast/index.ts` — public exports
+- `src/components/feedback/toast/toast.test.tsx` — 16 unit tests
+
+**Files modified**
+
+- `src/components/feedback/index.ts` — exports the toast system
+- `src/app/bootstrap/bootstrap.tsx` — mounts `<ToastProvider />` at the app root
+- `src/components/a11y.test.tsx` — axe scan for an active toast
+- `examples/showcase/pages/ComponentsPage.tsx` — live Toast demo section
+- `package.json` / `package-lock.json` — added `@radix-ui/react-toast`
+
+**Dependencies**
+
+- `@radix-ui/react-toast` (first Radix primitive in the repo, per the decision to use Radix for the complex components in this task). Everything else (pausable timers, live-region announcements, swipe, focus management) comes from Radix.
+
+**Important design decisions**
+
+- Imperative module-level API (`toast.success(...)`) backed by an immutable snapshot + subscriber store consumed by the provider via `useSyncExternalStore` — callable from anywhere (event handlers, async flows, error boundaries) with no context wiring, and calls before the provider mounts are still shown.
+- Per-variant auto-dismiss defaults (error lingers longest); `duration: Infinity` keeps a toast until dismissed.
+- Variant-to-politeness mapping: `error` uses Radix's `foreground` type (assertive live region), the rest use `background` (polite).
+- Dismissal is two-phase (`active` → `leaving`): the item stays mounted with `open=false` so the exit animation plays, then is removed via `animationend` (checking `data-state="closed"`) with a 600ms `setTimeout` fallback for environments where the animation never fires (jsdom) — guarantees no leaked toasts.
+- `onDismiss` fires exactly once (on the `active` → `leaving` transition), so swipe/close/auto-dismiss/Escape/action all trigger it without double-calls.
+- Radix provides pause-on-hover/focus/resume, Escape-to-close, swipe-to-dismiss, focus management (F8 hotkey, focus proxies) and announcements out of the box — not re-implemented.
+- Styling follows repo conventions: CSS modules, semantic tokens (`--z-toast`, status colors, `--transition-base`), responsive full-width-on-mobile → floating card on ≥640px, reduced-motion respected.
+- `toast.clear()` is exposed as an explicit test/cleanup helper to avoid cross-test store pollution.
+
+**Tests performed**
+
+- Rendering (title + description, string shorthand, id-returning dismiss)
+- Stacking order (newest first), `dismissAll`
+- Auto-dismiss after configured duration, `Infinity` duration, pause-on-hover/resume (fake timers)
+- Close button + `onDismiss` (called once), `dismissible: false`, action button (runs + closes), Escape-close
+- Accessibility announcements: `aria-live="assertive"` for error, `"polite"` otherwise (`role="status"`)
+- Lifecycle: clean unmount with active toasts, no leakage into a later provider
+- axe scan (`expectNoAxeViolations`) on a provider with an active toast
+- e2e axe scans (`e2e/a11y.spec.ts`) on login/users/showcase still pass with the provider mounted
+
+**Validation:** Typecheck PASS · Lint PASS · Unit tests PASS (274) · Build PASS · e2e a11y PASS
+
+**Known limitations**
+
+- The store is a module singleton; the optional per-instance `store` injection is not implemented (documented as future work if a consumer needs isolated toast stacks).
+- Exit-animation removal in browsers relies on `animationend`; the CSS exit duration is `--transition-base` (200ms), and the 600ms fallback covers non-animating environments.
+- Radix live-region text is filled on a later animation frame, so tests assert announcement semantics (attributes) rather than the announcer text content (jsdom does not run rAF).
+
+---
+
+## 2. Dialog — the single modal primitive — ✅ Complete
+
+**Component:** `Dialog` (`src/components/ui/Dialog`) — the merge result of the former
+`ConfirmDialog` (Radix AlertDialog) and the native-`<dialog>` `Dialog` (removed). One component,
+two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"`).
+
+**Files added**
+
+- `src/components/ui/Dialog/Dialog.tsx` — the component (renders Radix Dialog *or* Radix AlertDialog)
+- `src/components/ui/Dialog/Dialog.module.css` — token-based styles (`--z-dialog` overlay, reduced-motion-gated entrance animation, `sm`/`md`/`lg` widths)
+- `src/components/ui/Dialog/index.ts` — public exports
+- `src/components/ui/Dialog/dialog.test.tsx` — 21 unit tests
+- `src/components/ui/drawer.test.tsx` — the Drawer tests formerly living in `dialog.test.tsx` were moved here (Drawer itself is unchanged)
+
+**Files modified**
+
+- `src/components/ui/index.ts` — exports `Dialog` + `DialogProps` + `DialogVariant`
+- `src/components/feedback/index.ts` — `ConfirmDialog` export removed (component moved to `ui/`)
+- `src/components/a11y.test.tsx` — axe scans for a generic Dialog (`role="dialog"`) and a confirm Dialog (`role="alertdialog"`)
+- `examples/showcase/pages/ComponentsPage.tsx` — demo sections (danger "Delete workspace" confirm; generic "Example dialog" via `footer` + `showCloseButton`)
+- `examples/users-crud/pages/UsersPage.tsx` — delete confirmation uses `<Dialog onConfirm={handleDelete}>`; page-level `actionError` state/Alert removed (handleDelete rethrows so the dialog shows the error inline)
+- `examples/users-crud/components/UserFormDialog.tsx` — form modal uses `Dialog` (generic mode) with a custom `footer` (Cancel + submit) + `showCloseButton` + `size="md"`
+- `examples/users-crud/users-crud.test.tsx` — role queries: create/edit flows assert `dialog`, delete flow asserts `alertdialog`
+- `package.json` / `package-lock.json` — added `@radix-ui/react-dialog`
+
+**Files removed**
+
+- `src/components/ui/Dialog.tsx`, `src/components/ui/Dialog.module.css`, `src/components/ui/dialog.test.tsx` — the original native-`<dialog>` `Dialog` (its tests moved to `drawer.test.tsx` where they applied to `Drawer`)
+- `src/components/feedback/ConfirmDialog/` — renamed/relocated to `src/components/ui/Dialog/`
+
+**Dependencies**
+
+- `@radix-ui/react-dialog` (v1.x) and `@radix-ui/react-alert-dialog` (v1.1.x) — the same
+  controlled `open`/`onOpenChange` API with different role semantics: `Dialog` gives `role="dialog"`
+  (closes on outside click), `AlertDialog` gives `role="alertdialog"` (forces a decision, no
+  outside-click close). Both provide focus trap, ESC handling, scroll lock and `aria-describedby`
+  wiring. No native `<dialog>`.
+
+**Important design decisions**
+
+- `variant?: 'confirm' | 'generic'` selects the role: `'confirm'` renders Radix AlertDialog
+  (`role="alertdialog"`, forces an explicit choice), `'generic'` renders Radix Dialog
+  (`role="dialog"`). Defaults to `'confirm'` when `onConfirm` is provided, otherwise `'generic'` —
+  consumers pick confirmation vs generic usage by whether they pass `onConfirm`.
+- The two Radix roots share one content body (header + optional ✕ close, description, body, footer).
+  Footer resolution: custom `footer` > built-in confirm/cancel (when `onConfirm` is set) > single
+  "Close" fallback (`AlertDialog.Cancel` / `Dialog.Close`). `showCloseButton` ✕ has
+  `aria-label="Close dialog"`; `size: 'sm' | 'md' | 'lg'`.
+- Async confirm: `onConfirm?: () => void | Promise<void>`. Success closes the dialog; a rejection
+  keeps it open and surfaces the thrown `Error.message` inline via `Alert variant="danger"` (generic
+  fallback for non-`Error` rejections). `onConfirm` is optional — omit it for a pure information
+  dialog.
+- Loading: while submitting, the confirm button shows `loading` and BOTH buttons are `disabled`. A
+  ref guard plus the disabled buttons prevent double submission.
+- State resets per open via the "adjust state during render" pattern (`setSubmitting`/`setError`)
+  rather than a cascading effect; the submit-guard ref is released in an effect (the
+  `react-hooks/set-state-in-effect` and `react-hooks/refs` rules reject the naive alternatives).
+- Focus restoration: Radix restores focus to its own `Trigger`, which does not exist in a controlled
+  component. The component captures `document.activeElement` in `onOpenAutoFocus` and restores it in
+  `onCloseAutoFocus` (preventing Radix's default), so focus returns to the invoking button after
+  Cancel/ESC/success.
+- AlertDialog does not close on outside-click (forces a decision); Dialog does (standard modal
+  semantics) — both tested.
+- Styling: header/body/footer layout, destructive styling via `Button variant="danger"`, compact
+  `sm` default size, `--z-dialog` overlay/content layering, reduced-motion respected.
+
+**Tests performed**
+
+- Confirm mode: renders nothing when closed; title/description/actions; custom labels; Cancel → `onOpenChange(false)`; ESC → `onOpenChange(false)`; outside-click does NOT close; focus trap + focus restore; async confirm (buttons disabled while pending, no double submit, closes on resolve); sync `onConfirm`; error state on rejection (stays open, `role="alert"`, buttons re-enabled); generic fallback for non-`Error` rejections; state reset on reopen after closing mid-submit; role is `alertdialog`
+- Generic mode: role is `dialog` (not `alertdialog`); single "Close" fallback button closes; closes on outside click (pointerdown + deferred click — Radix registers the outside listener on the next tick); explicit `variant="confirm"` without `onConfirm` renders an `alertdialog` with a Close button; explicit `variant="generic"` overrides the confirm default
+- Shared: close (✕) hidden by default, shown + closes when `showCloseButton` is set; custom `footer` replaces the built-in buttons; `size` class applied
+- axe scans (`expectNoAxeViolations`) on both an open generic Dialog and an open confirm Dialog
+
+**Validation:** Typecheck PASS · Lint PASS · Unit tests PASS (290) · Build PASS · e2e a11y PASS
+
+**Known limitations**
+
+- The component assumes the invoking button holds focus when the dialog opens (standard flow); restoring focus is a no-op if nothing was focused.
+- ESC/outside-click dismissal of Radix is not suppressed while submitting (an in-flight action still resolves and closes idempotently).
+- In confirm mode without `onConfirm` (acknowledge-only `alertdialog`), the confirm button is omitted and a single "Close" button is shown.
 
 ---
 
@@ -1190,34 +785,3 @@ highest-value P1 items would make it a much stronger master template for repeate
 projects.
 
 ---
-
-# Caveats on "Fixed" Markers
-
-Items marked ✅ Fixed above are implemented in the codebase, but a few deviate from what the
-original recommendation proposed. The differences are intentional design choices; revisit them if
-the intent diverges from the codebase's actual model:
-
-## Error taxonomy (#18)
-
-The suggested model was a class hierarchy (`AppError` → `ApiError` → `Unauthorized`/`Forbidden`/...,
-plus `NetworkError`/`ValidationError`/`UnexpectedError`). The codebase instead implements a flat
-**single `ApiError` class + stable `ErrorCode` enum** (`src/lib/http/errors.ts`, `src/types/api.ts`)
-with normalized defaults and field-error envelopes.
-
-- Equivalent outcome: an explicit, exhaustive taxonomy with consistent UI behavior — but errors are
-  distinguished by `error.code` (e.g. `ErrorCode.Unauthorized`), not by `instanceof` subclasses.
-- If `instanceof`-based handling (or typed subclasses that can carry extra data) is ever needed, the
-  enum model would need to be revisited.
-
-## Telemetry abstraction (#19)
-
-The suggested API was a dedicated `reportError(error, { feature, action })` helper. The codebase
-instead exposes the logging abstraction: `logger.error(message, context, error)` plus
-`logger.setTransport(...)` for forwarding to a vendor (Sentry/OTel/etc.).
-
-- Equivalent outcome: vendor-neutral error reporting with feature/action context — but the calling
-  convention is `logger.error('...', { feature: 'users', action: 'create-user' }, error)` instead of
-  `reportError(...)`, and there is no error-aware batching/rate-limiting beyond what a custom
-  transport implements.
-- A thin `reportError` wrapper can be added on top of the logger if a single entry point for
-  error-only reporting (vs. generic logging) is preferred.

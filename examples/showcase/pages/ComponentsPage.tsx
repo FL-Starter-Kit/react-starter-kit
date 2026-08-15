@@ -4,6 +4,7 @@ import { useTheme } from '@/app/providers/themeContext';
 import { Alert } from '@/components/feedback/Alert';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { toast } from '@/components/feedback/toast';
 import { Container } from '@/components/layout/Container';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
@@ -41,6 +42,7 @@ export default function ComponentsPage() {
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [switchOn, setSwitchOn] = useState(false);
   const [tabId, setTabId] = useState('t1');
   const [page, setPage] = useState(1);
@@ -184,6 +186,14 @@ export default function ComponentsPage() {
           <Tooltip label="Archives the current record.">
             <Button variant="secondary">Archive</Button>
           </Tooltip>
+          <Button
+            variant="danger"
+            onClick={() => {
+              setConfirmOpen(true);
+            }}
+          >
+            Open confirm dialog
+          </Button>
         </div>
       </section>
 
@@ -221,6 +231,49 @@ export default function ComponentsPage() {
         </div>
       </section>
 
+      <section aria-labelledby="toasts-heading" className={styles.section}>
+        <h2 id="toasts-heading" className={styles.heading}>
+          Toasts
+        </h2>
+        <div className={styles.row}>
+          <Button
+            onClick={() => {
+              toast.success({ title: 'Changes saved', description: 'Your profile was updated.' });
+            }}
+          >
+            Success
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast.info({ title: 'Heads up', description: 'A new release is coming.' });
+            }}
+          >
+            Info
+          </Button>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              toast.warning({ title: 'Review required', description: 'This record is pending.' });
+            }}
+          >
+            Warning
+          </Button>
+          <Button
+            variant="danger"
+            onClick={() => {
+              toast.error({
+                title: 'Request failed',
+                description: 'Check your connection and try again.',
+                action: { label: 'Retry', onClick: () => undefined },
+              });
+            }}
+          >
+            Error
+          </Button>
+        </div>
+      </section>
+
       <section aria-labelledby="structure-heading" className={styles.section}>
         <h2 id="structure-heading" className={styles.heading}>
           Structure &amp; empty/error states
@@ -240,8 +293,9 @@ export default function ComponentsPage() {
                     focus) for free. We prefer them over ARIA-invented patterns.
                   </AccordionItem>
                   <AccordionItem summary="What about focus management?">
-                    The Dialog and Drawer use the native <code>&lt;dialog&gt;</code> element, which
-                    traps focus and handles ESC automatically.
+                    Dialog (Radix, with `role="dialog"` or `role="alertdialog"`) and Drawer (the
+                    native <code>&lt;dialog&gt;</code> element) both trap focus and handle ESC
+                    automatically.
                   </AccordionItem>
                 </div>
               ),
@@ -272,25 +326,17 @@ export default function ComponentsPage() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         title="Example dialog"
-        description="A modal built on the native dialog element."
+        description="The single modal primitive — used here as a general-purpose dialog."
+        showCloseButton
         footer={
-          <>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                setDialogOpen(false);
-              }}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                setDialogOpen(false);
-              }}
-            >
-              Confirm
-            </Button>
-          </>
+          <Button
+            variant="secondary"
+            onClick={() => {
+              setDialogOpen(false);
+            }}
+          >
+            Close
+          </Button>
         }
       >
         <p>
@@ -309,6 +355,22 @@ export default function ComponentsPage() {
           Drawers are for secondary content that supports the current page without navigating away.
         </p>
       </Drawer>
+
+      <Dialog
+        open={confirmOpen}
+        onOpenChange={setConfirmOpen}
+        title="Delete workspace"
+        description="This permanently removes the workspace and all associated data. This action cannot be undone."
+        confirmLabel="Delete workspace"
+        cancelLabel="Keep workspace"
+        onConfirm={async () => {
+          await new Promise((resolve) => {
+            setTimeout(resolve, 800);
+          });
+        }}
+      >
+        <p>Are you sure you want to continue?</p>
+      </Dialog>
     </Container>
   );
 }

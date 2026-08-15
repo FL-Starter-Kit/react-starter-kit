@@ -1,0 +1,235 @@
+/* ==========================================================================
+   Toast — stacked notifications rendered by Radix Toast into a fixed viewport.
+   ========================================================================== */
+
+.viewport {
+  position: fixed;
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  width: 100%;
+  margin: 0;
+  padding: var(--space-4);
+  max-height: 100dvh;
+  overflow-y: auto;
+  list-style: none;
+  outline: none;
+  /* Radix sets pointer-events: none when empty so clicks pass through. */
+}
+
+.bottom-right {
+  right: 0;
+  bottom: 0;
+}
+
+.top-right {
+  right: 0;
+  top: 0;
+}
+
+.bottom-left {
+  left: 0;
+  bottom: 0;
+}
+
+.top-left {
+  left: 0;
+  top: 0;
+}
+
+/* Desktop: the stack is a floating card column anchored near the chosen edge. */
+@media (min-width: 640px) {
+  .viewport {
+    width: 24rem;
+    max-width: min(24rem, calc(100vw - 2 * var(--space-8)));
+  }
+
+  .bottom-right {
+    right: var(--space-4);
+    bottom: var(--space-4);
+  }
+
+  .top-right {
+    right: var(--space-4);
+    top: var(--space-4);
+  }
+
+  .bottom-left {
+    left: var(--space-4);
+    bottom: var(--space-4);
+  }
+
+  .top-left {
+    left: var(--space-4);
+    top: var(--space-4);
+  }
+}
+
+/* ---- Toast card ---- */
+
+.toast {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-3-5) var(--space-4);
+  background-color: var(--color-surface);
+  color: var(--color-text-primary);
+  border: 1px solid var(--color-border);
+  border-left-width: 4px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  font-size: var(--text-sm);
+  line-height: var(--leading-normal);
+  pointer-events: auto;
+  list-style: none;
+}
+
+.success {
+  border-left-color: var(--color-status-success);
+}
+
+.info {
+  border-left-color: var(--color-status-info);
+}
+
+.warning {
+  border-left-color: var(--color-status-warning);
+}
+
+.error {
+  border-left-color: var(--color-status-danger);
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  margin-top: 1px;
+  color: var(--color-text-tertiary);
+}
+
+.success .icon {
+  color: var(--color-status-success);
+}
+
+.info .icon {
+  color: var(--color-status-info);
+}
+
+.warning .icon {
+  color: var(--color-status-warning);
+}
+
+.error .icon {
+  color: var(--color-status-danger);
+}
+
+.body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-0-5);
+}
+
+.title {
+  font-weight: var(--font-weight-semibold);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.description {
+  margin: 0;
+  color: var(--color-text-secondary);
+}
+
+/* ---- Action & dismiss ---- */
+
+.action {
+  flex-shrink: 0;
+  align-self: center;
+  height: 2rem;
+  padding: 0 var(--space-3);
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background-color: var(--color-action-primary);
+  color: var(--color-action-primary-contrast);
+  font-size: var(--text-sm);
+  font-weight: var(--font-weight-medium);
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.action:hover {
+  background-color: var(--color-action-primary-hover);
+}
+
+.close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  align-self: flex-start;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: none;
+  color: var(--color-text-tertiary);
+  cursor: pointer;
+}
+
+.close:hover {
+  background-color: var(--color-surface-hover);
+  color: var(--color-text-primary);
+}
+
+/* ---- Motion ---- */
+
+@media (prefers-reduced-motion: no-preference) {
+  .toast[data-state='open'] {
+    animation: toast-in var(--transition-base) var(--ease-out);
+  }
+
+  .toast[data-state='closed'] {
+    animation: toast-out var(--transition-base) var(--ease-out);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+/* Swipe-to-dismiss feedback (Radix sets the --radix-toast-swipe-* variables). */
+.toast[data-swipe='move'] {
+  transform: translateX(var(--radix-toast-swipe-move-x));
+}
+
+.toast[data-swipe='cancel'] {
+  transform: translateX(0);
+}
+
+.toast[data-swipe='end'] {
+  transform: translateX(var(--radix-toast-swipe-end-x));
+}

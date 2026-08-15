@@ -115,6 +115,8 @@ export function UserFormDialog({ user, open, onOpenChange, onSaved }: UserFormDi
       onOpenChange={onOpenChange}
       title={isEdit ? `Edit ${user.name}` : 'Create user'}
       description={isEdit ? 'Update the user details below.' : 'Add a new user to the directory.'}
+      size="md"
+      showCloseButton
       footer={
         <>
           <Button

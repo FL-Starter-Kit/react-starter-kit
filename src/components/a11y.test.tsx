@@ -1,9 +1,10 @@
-import { screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vitest';
 
 import { Alert } from '@/components/feedback/Alert';
 import { EmptyState } from '@/components/feedback/EmptyState';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { ToastProvider, toast } from '@/components/feedback/toast';
 import { PageHeader } from '@/components/layout/PageHeader';
 import { Breadcrumbs } from '@/components/navigation/Breadcrumbs';
 import { MainNav } from '@/components/navigation/MainNav';
@@ -95,13 +96,37 @@ describe('UI primitives axe scans', () => {
     );
   });
 
-  it('Dialog is accessible', async () => {
+  it('Dialog (generic) is accessible', async () => {
     await renderAndCheckA11y(
-      <Dialog open onOpenChange={() => undefined} title="Confirm" description="Are you sure?">
-        Body
+      <Dialog
+        open
+        onOpenChange={() => undefined}
+        title="Example dialog"
+        description="A general purpose modal."
+        showCloseButton
+        footer={<Button>Save</Button>}
+      >
+        <p>Body content</p>
       </Dialog>,
       axeOptions,
     );
+    expect(screen.getByRole('button', { name: 'Close dialog' })).toBeInTheDocument();
+  });
+
+  it('Dialog (confirm) is accessible', async () => {
+    await renderAndCheckA11y(
+      <Dialog
+        open
+        onOpenChange={() => undefined}
+        title="Delete user"
+        description="This cannot be undone."
+        onConfirm={() => Promise.resolve()}
+      >
+        Delete this account?
+      </Dialog>,
+      axeOptions,
+    );
+    expect(screen.getByRole('alertdialog', { name: 'Delete user' })).toBeInTheDocument();
   });
 
   it('DropdownMenu closed is accessible', async () => {
@@ -174,6 +199,15 @@ describe('UI primitives axe scans', () => {
   it('Tooltip is accessible with aria-describedby wiring', async () => {
     const { container } = await renderAndCheckA11y(<TooltipHarness />, axeOptions);
     expect(container.querySelector('[aria-describedby]')).not.toBeNull();
+  });
+
+  it('ToastProvider with an active toast has no violations', async () => {
+    toast.clear();
+    render(<ToastProvider />);
+    toast.success({ title: 'Saved', description: 'Your changes were saved.' });
+    expect(await screen.findByText('Saved')).toBeInTheDocument();
+    await expectNoAxeViolations(axeOptions);
+    toast.clear();
   });
 });
 
