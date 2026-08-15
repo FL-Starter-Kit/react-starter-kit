@@ -13,6 +13,7 @@ import { AccordionItem } from '@/components/ui/Accordion';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { Combobox } from '@/components/ui/Combobox';
 import { Dialog } from '@/components/ui/Dialog';
 import { Drawer } from '@/components/ui/Drawer';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
@@ -21,6 +22,7 @@ import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { Label } from '@/components/ui/Label';
 import { Pagination } from '@/components/ui/Pagination';
+import { Popover, PopoverClose, PopoverContent, PopoverTrigger } from '@/components/ui/Popover';
 import { Radio, RadioGroup } from '@/components/ui/Radio';
 import { Select } from '@/components/ui/Select';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -46,6 +48,7 @@ export default function ComponentsPage() {
   const [switchOn, setSwitchOn] = useState(false);
   const [tabId, setTabId] = useState('t1');
   const [page, setPage] = useState(1);
+  const [assignee, setAssignee] = useState<readonly string[]>([]);
 
   return (
     <Container>
@@ -182,6 +185,32 @@ export default function ComponentsPage() {
               { label: 'Duplicate', onSelect: () => undefined },
               { label: 'Delete', onSelect: () => undefined, destructive: true },
             ]}
+          />
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button variant="secondary">Filters</Button>
+            </PopoverTrigger>
+            <PopoverContent aria-label="Filters">
+              <div className={styles.popoverStack}>
+                <p>Filter options render in a portaled, collision-aware panel.</p>
+                <PopoverClose asChild>
+                  <Button variant="secondary">Close</Button>
+                </PopoverClose>
+              </div>
+            </PopoverContent>
+          </Popover>
+          <Combobox
+            label="Assignee"
+            options={[
+              { value: 'ada', label: 'Ada Lovelace' },
+              { value: 'alan', label: 'Alan Turing' },
+              { value: 'grace', label: 'Grace Hopper' },
+              { value: 'katherine', label: 'Katherine Johnson', disabled: true },
+            ]}
+            value={assignee}
+            onValueChange={setAssignee}
+            placeholder="Search assignees"
+            clearable
           />
           <Tooltip label="Archives the current record.">
             <Button variant="secondary">Archive</Button>

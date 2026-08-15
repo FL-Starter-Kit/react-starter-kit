@@ -30,6 +30,14 @@
   align-items: flex-start;
 }
 
+.popoverStack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-width: 14rem;
+  padding: var(--space-2);
+}
+
 .switchRow {
   display: inline-flex;
   align-items: center;

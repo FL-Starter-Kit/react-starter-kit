@@ -9,7 +9,7 @@ import { signIn } from './support/helpers';
  * failures are actionable.
  */
 test.describe('axe scans', () => {
-  test('login page has no violations', async ({ page }) => {
+  test('login page has no violations @a11y', async ({ page }) => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
 
@@ -17,7 +17,7 @@ test.describe('axe scans', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('users page has no violations', async ({ page }) => {
+  test('users page has no violations @a11y', async ({ page }) => {
     await signIn(page);
     await page.goto('/users');
     await expect(page.getByRole('heading', { name: 'Users', level: 1 })).toBeVisible();
@@ -27,7 +27,7 @@ test.describe('axe scans', () => {
     expect(results.violations).toEqual([]);
   });
 
-  test('component showcase has no violations', async ({ page }) => {
+  test('component showcase has no violations @a11y', async ({ page }) => {
     await signIn(page);
     await page.goto('/components');
     await expect(page.getByRole('heading', { name: 'Components', level: 1 })).toBeVisible();

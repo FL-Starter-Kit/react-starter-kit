@@ -35,6 +35,7 @@
     "@hookform/resolvers": "^5.7.1",
     "@radix-ui/react-alert-dialog": "^1.1.23",
     "@radix-ui/react-dialog": "^1.1.23",
+    "@radix-ui/react-popover": "^1.1.23",
     "@radix-ui/react-toast": "^1.2.23",
     "@tanstack/react-query": "^5.101.4",
     "react": "^19.2.8",

@@ -101,7 +101,7 @@ test.describe('users feature (admin)', () => {
     const row = page.getByRole('row', { name: /Alan Turing/ });
     await row.getByRole('button', { name: 'Delete' }).click();
 
-    const dialog = page.getByRole('dialog');
+    const dialog = page.getByRole('alertdialog');
     await expect(dialog.getByRole('heading', { name: 'Delete user' })).toBeVisible();
     await expect(dialog).toContainText('Alan Turing');
     await dialog.getByRole('button', { name: 'Delete' }).click();

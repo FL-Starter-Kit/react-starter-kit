@@ -1,8 +1,8 @@
 # UI Component Implementation Playbook
 
 Fast-track guide for implementing the remaining enterprise UI primitives in this starter kit
-(Popover, Combobox, FileUpload, DataTable). Distilled from the Toast/Notification implementation —
-read this before starting a component to avoid re-discovering the repo's conventions.
+(Combobox, FileUpload, DataTable). Distilled from the Toast/Notification implementation — read this
+before starting a component to avoid re-discovering the repo's conventions.
 
 **Rule: implement exactly ONE component at a time. After each one, validate, update
 `react-starter-kit-issues.md`, then STOP and wait for confirmation.**
@@ -27,6 +27,8 @@ read this before starting a component to avoid re-discovering the repo's convent
   - `IconButton`, `Spinner`, `Skeleton`, `Badge`.
   - `FormField` (`@/components/ui/FormField`) — label + error + hint wiring.
   - `Pagination` (`@/components/ui/Pagination`) — for the DataTable.
+  - `Popover` (`@/components/ui/Popover`) — composable `Popover`/`PopoverTrigger`/`PopoverContent`
+    (Radix); the Combobox/command palette build on it.
   - `Alert` (`@/components/feedback/Alert`) — variant styling reference.
   - `announce(message, 'polite'|'assertive')` from `@/lib/accessibility/liveRegion`.
   - `Dialog` (`@/components/ui/Dialog`) — the single modal primitive (Radix, `role="dialog"` or

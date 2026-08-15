@@ -98,7 +98,7 @@ absorbed the native-`<dialog>` `Dialog` and became the single modal primitive: a
 
 ---
 
-## 15. Add a proper Popover primitive
+## 15. Add a proper Popover primitive — ✅ Implemented
 
 A reusable Popover should provide:
 
@@ -120,11 +120,15 @@ command palette
 contextual actions
 ```
 
+Delivered by `src/components/ui/Popover` (see "Implemented components" below). Built on
+`@radix-ui/react-popover`; the composable pieces (`PopoverTrigger`, `PopoverContent`, …) are the
+foundation the Combobox and Command palette build on.
+
 **Priority:** P1
 
 ---
 
-## 16. Add Combobox/Autocomplete
+## 16. Add Combobox/Autocomplete — ✅ Implemented
 
 This is a common enterprise UI requirement.
 
@@ -143,6 +147,13 @@ ARIA semantics
 ```
 
 **Priority:** P1
+
+Delivered by `src/components/ui/Combobox` — a WAI-ARIA combobox (a `role="combobox"`
+input wired to a `role="listbox"` via `aria-activedescendant`) built on the Popover
+primitive. Supports ↑ ↓ Home End Enter Escape navigation, client-side typeahead
+filtering, a debounced and race-safe async option loader with loading/error/empty
+states, disabled options, single or multi selection (with removable tags), a clear
+button, and external validation errors.
 
 ---
 
@@ -606,8 +617,8 @@ COMPLEX FLOW  → State Machine when justified
 - [ ] Enterprise DataTable
 - [x] Toast/notification system
 - [x] Dialog (modal/confirmation primitive)
-- [ ] Popover
-- [ ] Combobox/Autocomplete
+- [x] Popover
+- [x] Combobox/Autocomplete
 - [ ] FileUpload
 - [ ] Dependency automation
 - [ ] Align Node version requirements
@@ -768,6 +779,128 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
 - The component assumes the invoking button holds focus when the dialog opens (standard flow); restoring focus is a no-op if nothing was focused.
 - ESC/outside-click dismissal of Radix is not suppressed while submitting (an in-flight action still resolves and closes idempotently).
 - In confirm mode without `onConfirm` (acknowledge-only `alertdialog`), the confirm button is omitted and a single "Close" button is shown.
+
+---
+
+## 3. Popover — ✅ Complete
+
+**Component:** `Popover` (`src/components/ui/Popover`) — composable popover primitives built on
+`@radix-ui/react-popover`.
+
+**Files added**
+
+- `src/components/ui/Popover/Popover.tsx` — `Popover` (root), `PopoverTrigger`, `PopoverAnchor`, `PopoverClose`, `PopoverContent`
+- `src/components/ui/Popover/Popover.module.css` — token-based content panel + arrow, `--z-popover` layering, opacity-only entrance (transform is owned by Radix's collision positioning)
+- `src/components/ui/Popover/index.ts` — public exports
+- `src/components/ui/Popover/popover.test.tsx` — 8 unit tests
+
+**Files modified**
+
+- `src/components/ui/index.ts` — exports the Popover pieces
+- `src/components/a11y.test.tsx` — axe scan for an open Popover
+- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (Button trigger via `asChild`, close button)
+- `src/styles/tokens.css` — added `--z-popover: 350` (between drawer and dialog)
+- `src/tests/setup.ts` — polyfilled `ResizeObserver` (Radix Popper measures content with it; jsdom lacks it)
+- `package.json` / `package-lock.json` — added `@radix-ui/react-popover`
+
+**Dependencies**
+
+- `@radix-ui/react-popover` (v1.x) — positioning, collision detection, viewport bounds, portal,
+  focus management, ESC/outside-click dismissal, `role="dialog"` on content.
+
+**Important design decisions**
+
+- **Composability first:** the pieces (`Popover` root, `PopoverTrigger`, `PopoverAnchor`,
+  `PopoverClose`, `PopoverContent`) are thin, styled wrappers around the Radix primitives so date
+  pickers, comboboxes and command palettes build on top. Root is uncontrolled by default
+  (`defaultOpen`) or controlled (`open`/`onOpenChange`); non-modal by default.
+- `PopoverContent` sets `sideOffset = 8` and renders an arrow by default (`showArrow` to opt out);
+  content has no accessible name by default, so consumers pass `aria-label`/`aria-labelledby`
+  (axe requires named dialogs).
+- Styling: `--z-popover` z-index (above drawer, below dialog), surface/border/shadow tokens,
+  opacity-only entrance animation gated on `prefers-reduced-motion` (animating `transform` would
+  fight Radix's inline positioning transform).
+
+**Tests performed**
+
+- Opens on trigger click, closes on a second click; open by default via `defaultOpen`
+- Controlled `open`/`onOpenChange` (Escape → `onOpenChange(false)`)
+- ESC closes and restores focus to the trigger
+- Focus moves into the content on open
+- Closes on outside pointer down (deferred dismissal: pointerdown + click after the listener tick)
+- Arrow rendered by default, omitted with `showArrow={false}`
+- axe scan (`expectNoAxeViolations`) on an open Popover
+
+**Validation:** Typecheck PASS · Lint PASS · Unit tests PASS (299) · Build PASS · e2e a11y PASS
+
+**Known limitations**
+
+- The content relies on the consumer supplying an accessible name (`aria-label`) — the component
+  does not auto-label from the trigger.
+- jsdom does not run ResizeObserver callbacks, so layout-sensitive assertions (collision shifts)
+  are covered by Radix's own tests, not the unit suite.
+
+---
+
+## 4. Combobox / Autocomplete — ✅ Complete
+
+**Component:** `Combobox` (`src/components/ui/Combobox`) — WAI-ARIA combobox built on the Popover
+primitive.
+
+**Files added**
+
+- `src/components/ui/Combobox/Combobox.tsx` — the combobox (input with `role="combobox"`, list with
+  `role="listbox"`/`role="option"`, `aria-activedescendant` wiring)
+- `src/components/ui/Combobox/Combobox.module.css` — token-based input (mirrors FieldControl),
+  tags, listbox panel (width matched to the input via `--radix-popover-trigger-width`)
+- `src/components/ui/Combobox/index.ts` — public exports (`Combobox`, `ComboboxOption`, `ComboboxProps`)
+- `src/components/ui/Combobox/combobox.test.tsx` — 18 unit tests
+
+**Files modified**
+
+- `src/components/ui/index.ts` — exports the Combobox
+- `src/components/a11y.test.tsx` — axe scan for an open Combobox
+- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (assignee picker, clearable)
+
+**Dependencies**
+
+- `@radix-ui/react-popover` (already present) — open state, positioning, outside-click/focus dismissal.
+
+**Important design decisions**
+
+- **Uniform value API:** `value: readonly string[]` + `onValueChange` — single mode is 0/1 entries,
+  multiple mode is any length. No separate "multi" boolean in the value contract.
+- **Options may be static or async:** `options` is either `readonly ComboboxOption[]` or a
+  `(query) => Promise<...>` loader. The loader is debounced (200 ms), race-safe (a request-id ref
+  discards stale resolutions), and drives explicit loading (`role="status"`), load-error
+  (`role="alert"`), and empty (`role="status"`) states.
+- **Focus stays in the input:** `onOpenAutoFocus`/`onCloseAutoFocus` are suppressed, and outside
+  dismissals are ignored when they originate inside the anchor (the input is the anchor, which Radix
+  otherwise treats as "outside"). A `reopenOnFocusRef` flag stops a post-selection refocus from
+  re-opening the list in single mode.
+- **Radix dismissal gotchas (all encoded in the tests):** (1) a pointerdown on the anchor dismisses
+  the popover right after it opens → suppress `onPointerDownOutside` when the target is inside the
+  anchor; (2) returning focus to the input after an option click fires `onFocusOutside` → suppress
+  when the target is inside the anchor; (3) focus() on an already-focused input is a no-op, but after
+  an option click the input has blurred, so refocusing re-fires onFocus.
+- The listbox width tracks the input width with `--radix-popover-trigger-width` (Radix sets it to
+  the anchor width).
+
+**Tests performed**
+
+- Opens on focus, aria-expanded toggles; typing filters (typeahead)
+- ↑/↓ navigation (wrapping, skipping disabled), Home/End, Enter selects and closes (single)
+- `aria-activedescendant` tracks the highlighted option
+- Disabled options are skipped in navigation and ignored on click
+- Multiple mode: toggle selection, list stays open, removable tags, aria-selected
+- Clear button clears the selection and refocuses the input
+- Custom empty-state message; Escape closes and reverts the query
+- Outside pointer down closes (deferred dismissal pattern)
+- External `error` → `aria-invalid` + `aria-describedby` + `role="alert"` message
+- Async: loading → success → re-query; loader error message; debounce coalesces rapid typing
+- axe scan (`expectNoAxeViolations`) on an open Combobox
+
+**Validation:** Typecheck PASS · Lint PASS · Unit tests PASS · Build PASS · e2e a11y PASS
 
 ---
 

@@ -2,6 +2,7 @@ export { AccordionItem } from './Accordion';
 export { Badge, type BadgeVariant } from './Badge';
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button';
 export { Checkbox } from './Checkbox';
+export { Combobox, type ComboboxOption, type ComboboxProps } from './Combobox';
 export { Dialog, type DialogProps, type DialogVariant } from './Dialog';
 export { Drawer, type DrawerProps } from './Drawer';
 export { DropdownMenu, type DropdownMenuItem } from './DropdownMenu';
@@ -10,6 +11,14 @@ export { IconButton, type IconButtonProps } from './IconButton';
 export { Input, type InputProps } from './Input';
 export { Label } from './Label';
 export { Pagination, type PaginationProps } from './Pagination';
+export {
+  Popover,
+  PopoverAnchor,
+  PopoverClose,
+  PopoverContent,
+  PopoverTrigger,
+  type PopoverContentProps,
+} from './Popover';
 export { Radio, RadioGroup } from './Radio';
 export { Select, type SelectProps } from './Select';
 export { Skeleton } from './Skeleton';

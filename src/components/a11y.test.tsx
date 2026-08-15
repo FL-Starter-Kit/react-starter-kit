@@ -1,4 +1,5 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { describe, expect, it } from 'vitest';
 
 import { Alert } from '@/components/feedback/Alert';
@@ -12,12 +13,14 @@ import { AccordionItem } from '@/components/ui/Accordion';
 import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
+import { Combobox } from '@/components/ui/Combobox';
 import { Dialog } from '@/components/ui/Dialog';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
 import { FormField } from '@/components/ui/FormField';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
 import { Pagination } from '@/components/ui/Pagination';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/Popover';
 import { Radio, RadioGroup } from '@/components/ui/Radio';
 import { Select } from '@/components/ui/Select';
 import { Switch } from '@/components/ui/Switch';
@@ -127,6 +130,40 @@ describe('UI primitives axe scans', () => {
       axeOptions,
     );
     expect(screen.getByRole('alertdialog', { name: 'Delete user' })).toBeInTheDocument();
+  });
+
+  it('Popover is accessible', async () => {
+    await renderAndCheckA11y(
+      <Popover open>
+        <PopoverTrigger>Filters</PopoverTrigger>
+        <PopoverContent aria-label="Filters">
+          <p>Filter by status</p>
+          <button type="button">Apply</button>
+        </PopoverContent>
+      </Popover>,
+      axeOptions,
+    );
+    expect(screen.getByRole('dialog', { name: 'Filters' })).toBeInTheDocument();
+  });
+
+  it('Combobox is accessible', async () => {
+    const user = userEvent.setup();
+    render(
+      <main>
+        <Combobox
+          label="Assignee"
+          options={[
+            { value: 'ada', label: 'Ada Lovelace' },
+            { value: 'alan', label: 'Alan Turing' },
+          ]}
+          value={[]}
+          onValueChange={() => undefined}
+        />
+      </main>,
+    );
+    await user.click(screen.getByRole('combobox'));
+    await expectNoAxeViolations(axeOptions);
+    expect(screen.getByRole('listbox')).toBeInTheDocument();
   });
 
   it('DropdownMenu closed is accessible', async () => {

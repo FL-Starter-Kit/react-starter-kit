@@ -42,6 +42,23 @@ if (typeof window.matchMedia !== 'function') {
   });
 }
 
+// Radix primitives measure their content (Popper/use-size) with ResizeObserver,
+// which jsdom does not implement; a no-op stub keeps them renderable in tests.
+if (typeof window.ResizeObserver === 'undefined') {
+  class ResizeObserverStub {
+    observe(): void {
+      // Elements are never actually measured in jsdom.
+    }
+    unobserve(): void {
+      // Nothing is being observed.
+    }
+    disconnect(): void {
+      // Nothing to clean up.
+    }
+  }
+  window.ResizeObserver = ResizeObserverStub;
+}
+
 beforeAll(() => {
   server.listen({ onUnhandledRequest: 'error' });
 });
