@@ -16,6 +16,7 @@ import { Checkbox } from '@/components/ui/Checkbox';
 import { Combobox } from '@/components/ui/Combobox';
 import { Dialog } from '@/components/ui/Dialog';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
+import { FileUpload } from '@/components/ui/FileUpload';
 import { FormField } from '@/components/ui/FormField';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
@@ -164,6 +165,22 @@ describe('UI primitives axe scans', () => {
     await user.click(screen.getByRole('combobox'));
     await expectNoAxeViolations(axeOptions);
     expect(screen.getByRole('listbox')).toBeInTheDocument();
+  });
+
+  it('FileUpload is accessible', async () => {
+    const user = userEvent.setup();
+    const { container } = render(
+      <main>
+        <FileUpload label="documents" accept=".pdf,image/png" maxSizeBytes={1024} />
+      </main>,
+    );
+    const input = container.querySelector<HTMLInputElement>('input[type="file"]');
+    if (input === null) {
+      throw new Error('File input not rendered');
+    }
+    await user.upload(input, new File(['hello'], 'hello.pdf', { type: 'application/pdf' }));
+    await expectNoAxeViolations(axeOptions);
+    expect(screen.getByText('hello.pdf')).toBeInTheDocument();
   });
 
   it('DropdownMenu closed is accessible', async () => {

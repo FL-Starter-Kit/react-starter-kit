@@ -6,6 +6,15 @@ export { Combobox, type ComboboxOption, type ComboboxProps } from './Combobox';
 export { Dialog, type DialogProps, type DialogVariant } from './Dialog';
 export { Drawer, type DrawerProps } from './Drawer';
 export { DropdownMenu, type DropdownMenuItem } from './DropdownMenu';
+export {
+  FileUpload,
+  type FileUploadHandler,
+  type FileUploadItem,
+  type FileUploadProps,
+  type FileUploadStatus,
+  type RejectedFileItem,
+  type UploadCallbacks,
+} from './FileUpload';
 export { FormField, type FormFieldProps } from './FormField';
 export { IconButton, type IconButtonProps } from './IconButton';
 export { Input, type InputProps } from './Input';

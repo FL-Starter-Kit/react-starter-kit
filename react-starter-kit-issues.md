@@ -157,7 +157,7 @@ button, and external validation errors.
 
 ---
 
-## 17. Add FileUpload
+## 17. Add FileUpload — ✅ Implemented
 
 A reusable enterprise file-upload primitive would be highly valuable.
 
@@ -178,6 +178,14 @@ accessibility
 ```
 
 **Priority:** P1
+
+Delivered by `src/components/ui/FileUpload` — a native `input[type="file"]`-based
+uploader with a drop zone, keyboard-accessible file picker, per-file upload status
+(`pending`/`uploading`/`done`/`error`), drag & drop, file type + max-size validation
+(MIME, MIME-wildcard, and extension `accept` tokens), single- or multi-file modes,
+progress reporting, cancel (via `AbortController`), retry, and remove. Consumers
+provide `onUpload(file, { onProgress, signal })`; status transitions are announced
+through the live region. Rejected files are listed with actionable error messages.
 
 ---
 
@@ -619,7 +627,7 @@ COMPLEX FLOW  → State Machine when justified
 - [x] Dialog (modal/confirmation primitive)
 - [x] Popover
 - [x] Combobox/Autocomplete
-- [ ] FileUpload
+- [x] FileUpload
 - [ ] Dependency automation
 - [ ] Align Node version requirements
 

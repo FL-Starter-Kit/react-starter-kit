@@ -17,6 +17,7 @@ import { Combobox } from '@/components/ui/Combobox';
 import { Dialog } from '@/components/ui/Dialog';
 import { Drawer } from '@/components/ui/Drawer';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
+import { FileUpload, type UploadCallbacks } from '@/components/ui/FileUpload';
 import { FormField } from '@/components/ui/FormField';
 import { IconButton } from '@/components/ui/IconButton';
 import { Input } from '@/components/ui/Input';
@@ -49,6 +50,21 @@ export default function ComponentsPage() {
   const [tabId, setTabId] = useState('t1');
   const [page, setPage] = useState(1);
   const [assignee, setAssignee] = useState<readonly string[]>([]);
+
+  const uploadFile = async (
+    _file: File,
+    { onProgress, signal }: UploadCallbacks,
+  ): Promise<void> => {
+    for (let step = 1; step <= 10; step += 1) {
+      if (signal.aborted) {
+        throw new DOMException('Aborted', 'AbortError');
+      }
+      await new Promise((resolve) => {
+        setTimeout(resolve, 150);
+      });
+      onProgress(step * 10);
+    }
+  };
 
   return (
     <Container>
@@ -224,6 +240,19 @@ export default function ComponentsPage() {
             Open confirm dialog
           </Button>
         </div>
+      </section>
+
+      <section aria-labelledby="upload-heading" className={styles.section}>
+        <h2 id="upload-heading" className={styles.heading}>
+          File upload
+        </h2>
+        <FileUpload
+          label="documents"
+          accept=".png,.jpg,.jpeg,.pdf"
+          maxSizeBytes={5 * 1024 * 1024}
+          multiple
+          onUpload={uploadFile}
+        />
       </section>
 
       <section aria-labelledby="feedback-heading" className={styles.section}>
