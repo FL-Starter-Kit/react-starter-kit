@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 import { cn } from '@/utils/cn';
 
-import styles from './ChoiceControl.module.css';
+import styles from '../shared/ChoiceControl.module.css';
 
 export interface RadioGroupProps extends ComponentPropsWithoutRef<'fieldset'> {
   legend: ReactNode;

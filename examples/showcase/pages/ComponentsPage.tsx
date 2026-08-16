@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Combobox } from '@/components/ui/Combobox';
+import { DataTable, type DataTableColumn } from '@/components/ui/DataTable';
 import { Dialog } from '@/components/ui/Dialog';
 import { Drawer } from '@/components/ui/Drawer';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
@@ -34,6 +35,37 @@ import { Textarea } from '@/components/ui/Textarea';
 import { Tooltip } from '@/components/ui/Tooltip';
 
 import styles from './ComponentsPage.module.css';
+
+interface ProjectRow {
+  id: string;
+  name: string;
+  owner: string;
+  status: 'Active' | 'Archived';
+  progress: number;
+}
+
+const PROJECT_ROWS: readonly ProjectRow[] = [
+  { id: 'p1', name: 'Aurora', owner: 'Ada Lovelace', status: 'Active', progress: 80 },
+  { id: 'p2', name: 'Bluebird', owner: 'Alan Turing', status: 'Active', progress: 45 },
+  { id: 'p3', name: 'Cobalt', owner: 'Grace Hopper', status: 'Archived', progress: 100 },
+  { id: 'p4', name: 'Dandelion', owner: 'Katherine Johnson', status: 'Active', progress: 62 },
+  { id: 'p5', name: 'Ember', owner: 'Linus Torvalds', status: 'Active', progress: 91 },
+  { id: 'p6', name: 'Falcon', owner: 'Margaret Hamilton', status: 'Archived', progress: 100 },
+];
+
+const PROJECT_COLUMNS: readonly DataTableColumn<ProjectRow>[] = [
+  { id: 'name', header: 'Project', accessorKey: 'name', sortable: true },
+  { id: 'owner', header: 'Owner', accessorKey: 'owner', sortable: true },
+  { id: 'status', header: 'Status', accessorKey: 'status', sortable: true },
+  {
+    id: 'progress',
+    header: 'Progress',
+    accessorFn: (row) => row.progress,
+    sortable: true,
+    align: 'right',
+    render: (row) => `${row.progress}%`,
+  },
+];
 
 /**
  * Live documentation of the UI primitives. Doubles as a design-system
@@ -252,6 +284,32 @@ export default function ComponentsPage() {
           maxSizeBytes={5 * 1024 * 1024}
           multiple
           onUpload={uploadFile}
+        />
+      </section>
+
+      <section aria-labelledby="table-heading" className={styles.section}>
+        <h2 id="table-heading" className={styles.heading}>
+          Data table
+        </h2>
+        <DataTable
+          caption={`Projects (${PROJECT_ROWS.length} total)`}
+          columns={PROJECT_COLUMNS}
+          data={PROJECT_ROWS}
+          pagination
+          pageSize={5}
+          pageSizes={[5, 10, 20]}
+          enableRowSelection
+          bulkActions={(rows) => (
+            <Button
+              variant="danger"
+              size="sm"
+              onClick={() => {
+                toast.success({ title: `${rows.length} project(s) archived` });
+              }}
+            >
+              Archive selected
+            </Button>
+          )}
         />
       </section>
 

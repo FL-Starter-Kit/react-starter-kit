@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, Ref } from 'react';
 
 import { cn } from '@/utils/cn';
 
-import styles from './FieldControl.module.css';
+import styles from '../shared/FieldControl.module.css';
 
 export interface SelectProps extends ComponentPropsWithoutRef<'select'> {
   invalid?: boolean;

@@ -14,6 +14,7 @@ import { Badge } from '@/components/ui/Badge';
 import { Button } from '@/components/ui/Button';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { Combobox } from '@/components/ui/Combobox';
+import { DataTable } from '@/components/ui/DataTable';
 import { Dialog } from '@/components/ui/Dialog';
 import { DropdownMenu } from '@/components/ui/DropdownMenu';
 import { FileUpload } from '@/components/ui/FileUpload';
@@ -181,6 +182,33 @@ describe('UI primitives axe scans', () => {
     await user.upload(input, new File(['hello'], 'hello.pdf', { type: 'application/pdf' }));
     await expectNoAxeViolations(axeOptions);
     expect(screen.getByText('hello.pdf')).toBeInTheDocument();
+  });
+
+  it('DataTable is accessible', async () => {
+    const user = userEvent.setup();
+    render(
+      <main>
+        <DataTable
+          caption="Users"
+          columns={[
+            { id: 'name', header: 'Name', accessorKey: 'name', sortable: true },
+            { id: 'role', header: 'Role', accessorKey: 'role', sortable: true },
+            { id: 'email', header: 'Email', accessorKey: 'email' },
+          ]}
+          data={[
+            { id: 'u1', name: 'Ada Lovelace', role: 'Admin', email: 'ada@example.com' },
+            { id: 'u2', name: 'Alan Turing', role: 'Editor', email: 'alan@example.com' },
+          ]}
+          enableRowSelection
+          pagination
+          pageSize={1}
+          bulkActions={() => <Button>Archive</Button>}
+        />
+      </main>,
+    );
+    await user.click(screen.getByRole('button', { name: 'Columns' }));
+    await expectNoAxeViolations(axeOptions);
+    expect(screen.getByRole('checkbox', { name: 'Email' })).toBeInTheDocument();
   });
 
   it('DropdownMenu closed is accessible', async () => {

@@ -170,9 +170,9 @@ before starting a component to avoid re-discovering the repo's conventions.
   `document.activeElement` in `onOpenAutoFocus` and restore it in `onCloseAutoFocus`
   (`event.preventDefault()`). Radix handles Escape/scroll-lock/`aria-describedby`.
 - Tests: open/close, Escape, outside-click (confirm: stays open; generic: closes — outside-pointer
-  listeners are deferred to a `setTimeout(0)` + follow-up `click` in jsdom), focus
-  trapping/restore, async confirm (loading disables buttons, no double submit), error state, role
-  assertions (`dialog` vs `alertdialog`), axe scan.
+  listeners are deferred to a `setTimeout(0)` + follow-up `click` in jsdom), focus trapping/restore,
+  async confirm (loading disables buttons, no double submit), error state, role assertions (`dialog`
+  vs `alertdialog`), axe scan.
 
 ### Popover — `@radix-ui/react-popover`
 

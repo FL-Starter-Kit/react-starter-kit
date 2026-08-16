@@ -16,7 +16,7 @@ review of the React starter kit.
 
 # P1 — Fix/Add Before Serious Client Projects
 
-## 12. Add a reusable enterprise DataTable
+## 12. Add a reusable enterprise DataTable — ✅ Implemented
 
 This is probably the highest-value missing UI primitive.
 
@@ -37,8 +37,9 @@ keyboard navigation
 URL state
 ```
 
-Do not build an unnecessarily huge custom table if a mature headless/table engine can provide the
-hard parts.
+Delivered by `src/components/ui/DataTable` (see "Implemented components" below). A custom headless
+table (no new dependencies) built on the existing `Pagination` and `Popover` primitives. Filtering
+is owned by the consumer (server-side data is filtered before it reaches the table).
 
 **Priority:** P1
 
@@ -148,12 +149,11 @@ ARIA semantics
 
 **Priority:** P1
 
-Delivered by `src/components/ui/Combobox` — a WAI-ARIA combobox (a `role="combobox"`
-input wired to a `role="listbox"` via `aria-activedescendant`) built on the Popover
-primitive. Supports ↑ ↓ Home End Enter Escape navigation, client-side typeahead
-filtering, a debounced and race-safe async option loader with loading/error/empty
-states, disabled options, single or multi selection (with removable tags), a clear
-button, and external validation errors.
+Delivered by `src/components/ui/Combobox` — a WAI-ARIA combobox (a `role="combobox"` input wired to
+a `role="listbox"` via `aria-activedescendant`) built on the Popover primitive. Supports ↑ ↓ Home
+End Enter Escape navigation, client-side typeahead filtering, a debounced and race-safe async option
+loader with loading/error/empty states, disabled options, single or multi selection (with removable
+tags), a clear button, and external validation errors.
 
 ---
 
@@ -179,13 +179,13 @@ accessibility
 
 **Priority:** P1
 
-Delivered by `src/components/ui/FileUpload` — a native `input[type="file"]`-based
-uploader with a drop zone, keyboard-accessible file picker, per-file upload status
-(`pending`/`uploading`/`done`/`error`), drag & drop, file type + max-size validation
-(MIME, MIME-wildcard, and extension `accept` tokens), single- or multi-file modes,
-progress reporting, cancel (via `AbortController`), retry, and remove. Consumers
-provide `onUpload(file, { onProgress, signal })`; status transitions are announced
-through the live region. Rejected files are listed with actionable error messages.
+Delivered by `src/components/ui/FileUpload` — a native `input[type="file"]`-based uploader with a
+drop zone, keyboard-accessible file picker, per-file upload status
+(`pending`/`uploading`/`done`/`error`), drag & drop, file type + max-size validation (MIME,
+MIME-wildcard, and extension `accept` tokens), single- or multi-file modes, progress reporting,
+cancel (via `AbortController`), retry, and remove. Consumers provide
+`onUpload(file, { onProgress, signal })`; status transitions are announced through the live region.
+Rejected files are listed with actionable error messages.
 
 ---
 
@@ -622,7 +622,7 @@ COMPLEX FLOW  → State Machine when justified
 
 ## Next most valuable
 
-- [ ] Enterprise DataTable
+- [x] Enterprise DataTable
 - [x] Toast/notification system
 - [x] Dialog (modal/confirmation primitive)
 - [x] Popover
@@ -654,10 +654,14 @@ COMPLEX FLOW  → State Machine when justified
 
 **Files added**
 
-- `src/components/feedback/toast/types.ts` — `ToastVariant`, `ToastAction`, `ToastOptions`, `ToastData`, `ToastInput`
-- `src/components/feedback/toast/store.ts` — module-level store + `toast.success/info/warning/error/dismiss/dismissAll/clear`
-- `src/components/feedback/toast/ToastProvider.tsx` — app-wide provider (`useSyncExternalStore` + Radix `Toast.Provider`)
-- `src/components/feedback/toast/ToastItem.tsx` — single toast (Radix `Toast.Root`), exit-animation-aware removal
+- `src/components/feedback/toast/types.ts` — `ToastVariant`, `ToastAction`, `ToastOptions`,
+  `ToastData`, `ToastInput`
+- `src/components/feedback/toast/store.ts` — module-level store +
+  `toast.success/info/warning/error/dismiss/dismissAll/clear`
+- `src/components/feedback/toast/ToastProvider.tsx` — app-wide provider (`useSyncExternalStore` +
+  Radix `Toast.Provider`)
+- `src/components/feedback/toast/ToastItem.tsx` — single toast (Radix `Toast.Root`),
+  exit-animation-aware removal
 - `src/components/feedback/toast/ToastIcon.tsx` — inline SVG variant icons
 - `src/components/feedback/toast/Toast.module.css` — tokens-based styles, responsive positioning
 - `src/components/feedback/toast/index.ts` — public exports
@@ -673,17 +677,31 @@ COMPLEX FLOW  → State Machine when justified
 
 **Dependencies**
 
-- `@radix-ui/react-toast` (first Radix primitive in the repo, per the decision to use Radix for the complex components in this task). Everything else (pausable timers, live-region announcements, swipe, focus management) comes from Radix.
+- `@radix-ui/react-toast` (first Radix primitive in the repo, per the decision to use Radix for the
+  complex components in this task). Everything else (pausable timers, live-region announcements,
+  swipe, focus management) comes from Radix.
 
 **Important design decisions**
 
-- Imperative module-level API (`toast.success(...)`) backed by an immutable snapshot + subscriber store consumed by the provider via `useSyncExternalStore` — callable from anywhere (event handlers, async flows, error boundaries) with no context wiring, and calls before the provider mounts are still shown.
-- Per-variant auto-dismiss defaults (error lingers longest); `duration: Infinity` keeps a toast until dismissed.
-- Variant-to-politeness mapping: `error` uses Radix's `foreground` type (assertive live region), the rest use `background` (polite).
-- Dismissal is two-phase (`active` → `leaving`): the item stays mounted with `open=false` so the exit animation plays, then is removed via `animationend` (checking `data-state="closed"`) with a 600ms `setTimeout` fallback for environments where the animation never fires (jsdom) — guarantees no leaked toasts.
-- `onDismiss` fires exactly once (on the `active` → `leaving` transition), so swipe/close/auto-dismiss/Escape/action all trigger it without double-calls.
-- Radix provides pause-on-hover/focus/resume, Escape-to-close, swipe-to-dismiss, focus management (F8 hotkey, focus proxies) and announcements out of the box — not re-implemented.
-- Styling follows repo conventions: CSS modules, semantic tokens (`--z-toast`, status colors, `--transition-base`), responsive full-width-on-mobile → floating card on ≥640px, reduced-motion respected.
+- Imperative module-level API (`toast.success(...)`) backed by an immutable snapshot + subscriber
+  store consumed by the provider via `useSyncExternalStore` — callable from anywhere (event
+  handlers, async flows, error boundaries) with no context wiring, and calls before the provider
+  mounts are still shown.
+- Per-variant auto-dismiss defaults (error lingers longest); `duration: Infinity` keeps a toast
+  until dismissed.
+- Variant-to-politeness mapping: `error` uses Radix's `foreground` type (assertive live region), the
+  rest use `background` (polite).
+- Dismissal is two-phase (`active` → `leaving`): the item stays mounted with `open=false` so the
+  exit animation plays, then is removed via `animationend` (checking `data-state="closed"`) with a
+  600ms `setTimeout` fallback for environments where the animation never fires (jsdom) — guarantees
+  no leaked toasts.
+- `onDismiss` fires exactly once (on the `active` → `leaving` transition), so
+  swipe/close/auto-dismiss/Escape/action all trigger it without double-calls.
+- Radix provides pause-on-hover/focus/resume, Escape-to-close, swipe-to-dismiss, focus management
+  (F8 hotkey, focus proxies) and announcements out of the box — not re-implemented.
+- Styling follows repo conventions: CSS modules, semantic tokens (`--z-toast`, status colors,
+  `--transition-base`), responsive full-width-on-mobile → floating card on ≥640px, reduced-motion
+  respected.
 - `toast.clear()` is exposed as an explicit test/cleanup helper to avoid cross-test store pollution.
 
 **Tests performed**
@@ -691,8 +709,10 @@ COMPLEX FLOW  → State Machine when justified
 - Rendering (title + description, string shorthand, id-returning dismiss)
 - Stacking order (newest first), `dismissAll`
 - Auto-dismiss after configured duration, `Infinity` duration, pause-on-hover/resume (fake timers)
-- Close button + `onDismiss` (called once), `dismissible: false`, action button (runs + closes), Escape-close
-- Accessibility announcements: `aria-live="assertive"` for error, `"polite"` otherwise (`role="status"`)
+- Close button + `onDismiss` (called once), `dismissible: false`, action button (runs + closes),
+  Escape-close
+- Accessibility announcements: `aria-live="assertive"` for error, `"polite"` otherwise
+  (`role="status"`)
 - Lifecycle: clean unmount with active toasts, no leakage into a later provider
 - axe scan (`expectNoAxeViolations`) on a provider with an active toast
 - e2e axe scans (`e2e/a11y.spec.ts`) on login/users/showcase still pass with the provider mounted
@@ -701,49 +721,63 @@ COMPLEX FLOW  → State Machine when justified
 
 **Known limitations**
 
-- The store is a module singleton; the optional per-instance `store` injection is not implemented (documented as future work if a consumer needs isolated toast stacks).
-- Exit-animation removal in browsers relies on `animationend`; the CSS exit duration is `--transition-base` (200ms), and the 600ms fallback covers non-animating environments.
-- Radix live-region text is filled on a later animation frame, so tests assert announcement semantics (attributes) rather than the announcer text content (jsdom does not run rAF).
+- The store is a module singleton; the optional per-instance `store` injection is not implemented
+  (documented as future work if a consumer needs isolated toast stacks).
+- Exit-animation removal in browsers relies on `animationend`; the CSS exit duration is
+  `--transition-base` (200ms), and the 600ms fallback covers non-animating environments.
+- Radix live-region text is filled on a later animation frame, so tests assert announcement
+  semantics (attributes) rather than the announcer text content (jsdom does not run rAF).
 
 ---
 
 ## 2. Dialog — the single modal primitive — ✅ Complete
 
 **Component:** `Dialog` (`src/components/ui/Dialog`) — the merge result of the former
-`ConfirmDialog` (Radix AlertDialog) and the native-`<dialog>` `Dialog` (removed). One component,
-two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"`).
+`ConfirmDialog` (Radix AlertDialog) and the native-`<dialog>` `Dialog` (removed). One component, two
+roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"`).
 
 **Files added**
 
-- `src/components/ui/Dialog/Dialog.tsx` — the component (renders Radix Dialog *or* Radix AlertDialog)
-- `src/components/ui/Dialog/Dialog.module.css` — token-based styles (`--z-dialog` overlay, reduced-motion-gated entrance animation, `sm`/`md`/`lg` widths)
+- `src/components/ui/Dialog/Dialog.tsx` — the component (renders Radix Dialog _or_ Radix
+  AlertDialog)
+- `src/components/ui/Dialog/Dialog.module.css` — token-based styles (`--z-dialog` overlay,
+  reduced-motion-gated entrance animation, `sm`/`md`/`lg` widths)
 - `src/components/ui/Dialog/index.ts` — public exports
 - `src/components/ui/Dialog/dialog.test.tsx` — 21 unit tests
-- `src/components/ui/drawer.test.tsx` — the Drawer tests formerly living in `dialog.test.tsx` were moved here (Drawer itself is unchanged)
+- `src/components/ui/drawer.test.tsx` — the Drawer tests formerly living in `dialog.test.tsx` were
+  moved here (Drawer itself is unchanged)
 
 **Files modified**
 
 - `src/components/ui/index.ts` — exports `Dialog` + `DialogProps` + `DialogVariant`
 - `src/components/feedback/index.ts` — `ConfirmDialog` export removed (component moved to `ui/`)
-- `src/components/a11y.test.tsx` — axe scans for a generic Dialog (`role="dialog"`) and a confirm Dialog (`role="alertdialog"`)
-- `examples/showcase/pages/ComponentsPage.tsx` — demo sections (danger "Delete workspace" confirm; generic "Example dialog" via `footer` + `showCloseButton`)
-- `examples/users-crud/pages/UsersPage.tsx` — delete confirmation uses `<Dialog onConfirm={handleDelete}>`; page-level `actionError` state/Alert removed (handleDelete rethrows so the dialog shows the error inline)
-- `examples/users-crud/components/UserFormDialog.tsx` — form modal uses `Dialog` (generic mode) with a custom `footer` (Cancel + submit) + `showCloseButton` + `size="md"`
-- `examples/users-crud/users-crud.test.tsx` — role queries: create/edit flows assert `dialog`, delete flow asserts `alertdialog`
+- `src/components/a11y.test.tsx` — axe scans for a generic Dialog (`role="dialog"`) and a confirm
+  Dialog (`role="alertdialog"`)
+- `examples/showcase/pages/ComponentsPage.tsx` — demo sections (danger "Delete workspace" confirm;
+  generic "Example dialog" via `footer` + `showCloseButton`)
+- `examples/users-crud/pages/UsersPage.tsx` — delete confirmation uses
+  `<Dialog onConfirm={handleDelete}>`; page-level `actionError` state/Alert removed (handleDelete
+  rethrows so the dialog shows the error inline)
+- `examples/users-crud/components/UserFormDialog.tsx` — form modal uses `Dialog` (generic mode) with
+  a custom `footer` (Cancel + submit) + `showCloseButton` + `size="md"`
+- `examples/users-crud/users-crud.test.tsx` — role queries: create/edit flows assert `dialog`,
+  delete flow asserts `alertdialog`
 - `package.json` / `package-lock.json` — added `@radix-ui/react-dialog`
 
 **Files removed**
 
-- `src/components/ui/Dialog.tsx`, `src/components/ui/Dialog.module.css`, `src/components/ui/dialog.test.tsx` — the original native-`<dialog>` `Dialog` (its tests moved to `drawer.test.tsx` where they applied to `Drawer`)
+- `src/components/ui/Dialog.tsx`, `src/components/ui/Dialog.module.css`,
+  `src/components/ui/dialog.test.tsx` — the original native-`<dialog>` `Dialog` (its tests moved to
+  `drawer.test.tsx` where they applied to `Drawer`)
 - `src/components/feedback/ConfirmDialog/` — renamed/relocated to `src/components/ui/Dialog/`
 
 **Dependencies**
 
-- `@radix-ui/react-dialog` (v1.x) and `@radix-ui/react-alert-dialog` (v1.1.x) — the same
-  controlled `open`/`onOpenChange` API with different role semantics: `Dialog` gives `role="dialog"`
-  (closes on outside click), `AlertDialog` gives `role="alertdialog"` (forces a decision, no
-  outside-click close). Both provide focus trap, ESC handling, scroll lock and `aria-describedby`
-  wiring. No native `<dialog>`.
+- `@radix-ui/react-dialog` (v1.x) and `@radix-ui/react-alert-dialog` (v1.1.x) — the same controlled
+  `open`/`onOpenChange` API with different role semantics: `Dialog` gives `role="dialog"` (closes on
+  outside click), `AlertDialog` gives `role="alertdialog"` (forces a decision, no outside-click
+  close). Both provide focus trap, ESC handling, scroll lock and `aria-describedby` wiring. No
+  native `<dialog>`.
 
 **Important design decisions**
 
@@ -775,18 +809,30 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
 
 **Tests performed**
 
-- Confirm mode: renders nothing when closed; title/description/actions; custom labels; Cancel → `onOpenChange(false)`; ESC → `onOpenChange(false)`; outside-click does NOT close; focus trap + focus restore; async confirm (buttons disabled while pending, no double submit, closes on resolve); sync `onConfirm`; error state on rejection (stays open, `role="alert"`, buttons re-enabled); generic fallback for non-`Error` rejections; state reset on reopen after closing mid-submit; role is `alertdialog`
-- Generic mode: role is `dialog` (not `alertdialog`); single "Close" fallback button closes; closes on outside click (pointerdown + deferred click — Radix registers the outside listener on the next tick); explicit `variant="confirm"` without `onConfirm` renders an `alertdialog` with a Close button; explicit `variant="generic"` overrides the confirm default
-- Shared: close (✕) hidden by default, shown + closes when `showCloseButton` is set; custom `footer` replaces the built-in buttons; `size` class applied
+- Confirm mode: renders nothing when closed; title/description/actions; custom labels; Cancel →
+  `onOpenChange(false)`; ESC → `onOpenChange(false)`; outside-click does NOT close; focus trap +
+  focus restore; async confirm (buttons disabled while pending, no double submit, closes on
+  resolve); sync `onConfirm`; error state on rejection (stays open, `role="alert"`, buttons
+  re-enabled); generic fallback for non-`Error` rejections; state reset on reopen after closing
+  mid-submit; role is `alertdialog`
+- Generic mode: role is `dialog` (not `alertdialog`); single "Close" fallback button closes; closes
+  on outside click (pointerdown + deferred click — Radix registers the outside listener on the next
+  tick); explicit `variant="confirm"` without `onConfirm` renders an `alertdialog` with a Close
+  button; explicit `variant="generic"` overrides the confirm default
+- Shared: close (✕) hidden by default, shown + closes when `showCloseButton` is set; custom `footer`
+  replaces the built-in buttons; `size` class applied
 - axe scans (`expectNoAxeViolations`) on both an open generic Dialog and an open confirm Dialog
 
 **Validation:** Typecheck PASS · Lint PASS · Unit tests PASS (290) · Build PASS · e2e a11y PASS
 
 **Known limitations**
 
-- The component assumes the invoking button holds focus when the dialog opens (standard flow); restoring focus is a no-op if nothing was focused.
-- ESC/outside-click dismissal of Radix is not suppressed while submitting (an in-flight action still resolves and closes idempotently).
-- In confirm mode without `onConfirm` (acknowledge-only `alertdialog`), the confirm button is omitted and a single "Close" button is shown.
+- The component assumes the invoking button holds focus when the dialog opens (standard flow);
+  restoring focus is a no-op if nothing was focused.
+- ESC/outside-click dismissal of Radix is not suppressed while submitting (an in-flight action still
+  resolves and closes idempotently).
+- In confirm mode without `onConfirm` (acknowledge-only `alertdialog`), the confirm button is
+  omitted and a single "Close" button is shown.
 
 ---
 
@@ -797,8 +843,10 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
 
 **Files added**
 
-- `src/components/ui/Popover/Popover.tsx` — `Popover` (root), `PopoverTrigger`, `PopoverAnchor`, `PopoverClose`, `PopoverContent`
-- `src/components/ui/Popover/Popover.module.css` — token-based content panel + arrow, `--z-popover` layering, opacity-only entrance (transform is owned by Radix's collision positioning)
+- `src/components/ui/Popover/Popover.tsx` — `Popover` (root), `PopoverTrigger`, `PopoverAnchor`,
+  `PopoverClose`, `PopoverContent`
+- `src/components/ui/Popover/Popover.module.css` — token-based content panel + arrow, `--z-popover`
+  layering, opacity-only entrance (transform is owned by Radix's collision positioning)
 - `src/components/ui/Popover/index.ts` — public exports
 - `src/components/ui/Popover/popover.test.tsx` — 8 unit tests
 
@@ -806,9 +854,11 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
 
 - `src/components/ui/index.ts` — exports the Popover pieces
 - `src/components/a11y.test.tsx` — axe scan for an open Popover
-- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (Button trigger via `asChild`, close button)
+- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (Button trigger via
+  `asChild`, close button)
 - `src/styles/tokens.css` — added `--z-popover: 350` (between drawer and dialog)
-- `src/tests/setup.ts` — polyfilled `ResizeObserver` (Radix Popper measures content with it; jsdom lacks it)
+- `src/tests/setup.ts` — polyfilled `ResizeObserver` (Radix Popper measures content with it; jsdom
+  lacks it)
 - `package.json` / `package-lock.json` — added `@radix-ui/react-popover`
 
 **Dependencies**
@@ -823,8 +873,8 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
   pickers, comboboxes and command palettes build on top. Root is uncontrolled by default
   (`defaultOpen`) or controlled (`open`/`onOpenChange`); non-modal by default.
 - `PopoverContent` sets `sideOffset = 8` and renders an arrow by default (`showArrow` to opt out);
-  content has no accessible name by default, so consumers pass `aria-label`/`aria-labelledby`
-  (axe requires named dialogs).
+  content has no accessible name by default, so consumers pass `aria-label`/`aria-labelledby` (axe
+  requires named dialogs).
 - Styling: `--z-popover` z-index (above drawer, below dialog), surface/border/shadow tokens,
   opacity-only entrance animation gated on `prefers-reduced-motion` (animating `transform` would
   fight Radix's inline positioning transform).
@@ -845,8 +895,8 @@ two roles: confirmation (`role="alertdialog"`) and generic modal (`role="dialog"
 
 - The content relies on the consumer supplying an accessible name (`aria-label`) — the component
   does not auto-label from the trigger.
-- jsdom does not run ResizeObserver callbacks, so layout-sensitive assertions (collision shifts)
-  are covered by Radix's own tests, not the unit suite.
+- jsdom does not run ResizeObserver callbacks, so layout-sensitive assertions (collision shifts) are
+  covered by Radix's own tests, not the unit suite.
 
 ---
 
@@ -859,20 +909,23 @@ primitive.
 
 - `src/components/ui/Combobox/Combobox.tsx` — the combobox (input with `role="combobox"`, list with
   `role="listbox"`/`role="option"`, `aria-activedescendant` wiring)
-- `src/components/ui/Combobox/Combobox.module.css` — token-based input (mirrors FieldControl),
-  tags, listbox panel (width matched to the input via `--radix-popover-trigger-width`)
-- `src/components/ui/Combobox/index.ts` — public exports (`Combobox`, `ComboboxOption`, `ComboboxProps`)
+- `src/components/ui/Combobox/Combobox.module.css` — token-based input (mirrors FieldControl), tags,
+  listbox panel (width matched to the input via `--radix-popover-trigger-width`)
+- `src/components/ui/Combobox/index.ts` — public exports (`Combobox`, `ComboboxOption`,
+  `ComboboxProps`)
 - `src/components/ui/Combobox/combobox.test.tsx` — 18 unit tests
 
 **Files modified**
 
 - `src/components/ui/index.ts` — exports the Combobox
 - `src/components/a11y.test.tsx` — axe scan for an open Combobox
-- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (assignee picker, clearable)
+- `examples/showcase/pages/ComponentsPage.tsx` — demo in the Overlays row (assignee picker,
+  clearable)
 
 **Dependencies**
 
-- `@radix-ui/react-popover` (already present) — open state, positioning, outside-click/focus dismissal.
+- `@radix-ui/react-popover` (already present) — open state, positioning, outside-click/focus
+  dismissal.
 
 **Important design decisions**
 
@@ -889,8 +942,8 @@ primitive.
 - **Radix dismissal gotchas (all encoded in the tests):** (1) a pointerdown on the anchor dismisses
   the popover right after it opens → suppress `onPointerDownOutside` when the target is inside the
   anchor; (2) returning focus to the input after an option click fires `onFocusOutside` → suppress
-  when the target is inside the anchor; (3) focus() on an already-focused input is a no-op, but after
-  an option click the input has blurred, so refocusing re-fires onFocus.
+  when the target is inside the anchor; (3) focus() on an already-focused input is a no-op, but
+  after an option click the input has blurred, so refocusing re-fires onFocus.
 - The listbox width tracks the input width with `--radix-popover-trigger-width` (Radix sets it to
   the anchor width).
 
@@ -909,6 +962,88 @@ primitive.
 - axe scan (`expectNoAxeViolations`) on an open Combobox
 
 **Validation:** Typecheck PASS · Lint PASS · Unit tests PASS · Build PASS · e2e a11y PASS
+
+---
+
+## 5. DataTable — ✅ Complete
+
+**Component:** `DataTable` (`src/components/ui/DataTable`) — an accessible, presentational data
+table (no Radix, no new dependencies) built on the existing `Pagination` and `Popover` primitives.
+
+**Files added**
+
+- `src/components/ui/DataTable/DataTable.tsx` — the table (native `<table>` + `<caption>` +
+  `<th scope>`, sortable headers with `aria-sort`, tri-state selection, bulk bar, column-visibility
+  menu, loading/empty/error states, router-agnostic URL state)
+- `src/components/ui/DataTable/DataTable.module.css` — tokens-based table, toolbar, bulk bar and
+  columns-menu styles (horizontal scroll on overflow)
+- `src/components/ui/DataTable/index.ts` — public exports
+- `src/components/ui/DataTable/data-table.test.tsx` — 16 unit tests
+
+**Files modified**
+
+- `src/components/ui/index.ts` — exports the DataTable + types
+- `src/components/a11y.test.tsx` — axe scan of a fully-featured DataTable with the Columns menu open
+- `examples/showcase/pages/ComponentsPage.tsx` — live demo (client-side sorting, pagination,
+  selection + bulk "Archive" action, column visibility)
+
+**Dependencies**
+
+- None added. Reuses the repo's `Pagination` (pager + page-size selector) and `Popover` (the Columns
+  visibility menu). The table markup is plain HTML.
+
+**Important design decisions**
+
+- **Presentational + client conveniences:** `sort`, `page`, `pageSize`, `selectedRowIds` and
+  `columnVisibility` are managed internally but overridable (controlled). Client-side sorting is
+  applied when the active column exposes an accessor; `totalPages` switches to server-side mode
+  where `data` is expected to be the current page only. Filtering stays with the consumer.
+- **Strongly typed columns:** `Column<T>` with `id`, `header`, `accessorFn`/`accessorKey`, `render`,
+  `sortable`, `align`, `width`, `hideable`. `Data<T extends DataTableRow>` has a stable `id`
+  (`getRowId` to override); `rowLabel` supplies friendly selection labels.
+- **Selection:** header checkbox with `aria-checked="mixed"` tri-state; select-all covers the
+  visible page only; a bulk bar (`role="status"` count + consumer `bulkActions`) appears when rows
+  are selected.
+- **URL state without importing the router:** accepts `params` + `onParamsChange`. Initial
+  `page`/`pageSize`/`sort` (`id:dir`)/hidden columns (`col`) are read from the params and every
+  change is written back preserving unrelated params. A ref tracks the latest params so sequential
+  writes compose even before the consumer feeds the updated value back down.
+- **Keyboard:** native table tab order; sorting/selection operate through real buttons/checkboxes.
+  `aria-sort` on `<th>` conveys direction; headers announce via the visible text.
+- **States:** loading renders skeleton rows under `role="status"` + `aria-label` and sets
+  `aria-busy` on the table; error renders `ErrorState` (`role="alert"`, `onRetry`); empty renders
+  `EmptyState`.
+- Styling follows repo conventions: CSS modules + semantic tokens, `overflow-x: auto` wrapper for
+  responsive behavior, no virtualized rows (not needed at these dataset sizes).
+
+**Tests performed**
+
+- Rendering (caption, `th scope="col"`, headers/cells)
+- Client-side sorting asc → desc → cleared, with `aria-sort` updates; numeric/string compare
+- Keyboard operation of the sort header (Enter)
+- Client-side pagination (slicing + `onPageChange`); server-side `totalPages` mode without slicing
+- Row selection: tri-state header checkbox, bulk bar count + actions, select-all limited to the
+  visible page
+- Column-visibility toggle through the Columns menu; non-hideable columns omitted
+- Loading (skeleton + `aria-busy`), error (+ retry), empty states
+- No pagination when disabled
+- URL state: initial values read from params (`page`, `pageSize`, `sort`, `col`); changes written
+  back preserving unrelated params
+- Custom cell renderers, `getRowId` and `rowLabel`
+- axe scan (`expectNoAxeViolations`) on a fully-featured table with the Columns menu open
+
+**Validation:** Typecheck PASS · Lint PASS · Unit tests PASS (358) · Build PASS · e2e a11y PASS
+
+**Known limitations**
+
+- The table applies client-side sorting/pagination internally; for server-side data the consumer
+  sorts/filters/paginates and passes the current page via `totalPages` (the table is then
+  presentational).
+- URL state is one-way after mount for `params`-provided values (external changes to the params are
+  picked up again on remount); consumers needing full two-way sync should drive the controlled
+  props.
+- jsdom does not run ResizeObserver/Pointer events the way a browser does, so Popover positioning is
+  covered by Radix's own tests rather than this suite.
 
 ---
 

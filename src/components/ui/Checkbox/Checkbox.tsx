@@ -2,7 +2,7 @@ import type { ComponentPropsWithoutRef, Ref } from 'react';
 
 import { cn } from '@/utils/cn';
 
-import styles from './ChoiceControl.module.css';
+import styles from '../shared/ChoiceControl.module.css';
 
 export interface CheckboxProps extends ComponentPropsWithoutRef<'input'> {
   invalid?: boolean;

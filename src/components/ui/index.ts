@@ -3,6 +3,14 @@ export { Badge, type BadgeVariant } from './Badge';
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from './Button';
 export { Checkbox } from './Checkbox';
 export { Combobox, type ComboboxOption, type ComboboxProps } from './Combobox';
+export {
+  DataTable,
+  type DataTableColumn,
+  type DataTableProps,
+  type DataTableRow,
+  type DataTableSort,
+  type DataTableSortDirection,
+} from './DataTable';
 export { Dialog, type DialogProps, type DialogVariant } from './Dialog';
 export { Drawer, type DrawerProps } from './Drawer';
 export { DropdownMenu, type DropdownMenuItem } from './DropdownMenu';
